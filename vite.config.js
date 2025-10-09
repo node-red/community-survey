@@ -2,9 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     plugins: [react()],
-    base: "/community-survey/",
+    base: command === 'build' ? "/community-survey/" : "/",
 
     // WASM-specific optimizations
     optimizeDeps: {
@@ -39,4 +39,4 @@ export default defineConfig({
             "Cross-Origin-Opener-Policy": "same-origin",
         },
     },
-});
+}));

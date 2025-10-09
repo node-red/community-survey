@@ -151,7 +151,10 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                   <h3 className={compact ? "text-sm font-medium text-nodered-gray-700" : "text-lg font-semibold text-nodered-gray-700"}>
                     {questionTitle ? (
                       <>
-                        {questionTitle.replace(/\s*\(1-[57]\)\s*\??$/, '')}?{' '}
+                        {(() => {
+                          const cleaned = questionTitle.replace(/\s*\(1-[57]\)\s*\??$/, '');
+                          return cleaned.endsWith('?') ? cleaned : cleaned + '?';
+                        })()}{' '}
                         <span className="text-gray-600 font-bold">
                           {calculateAverageRating(data)}/{ratingScale}
                         </span>

@@ -102,7 +102,7 @@ class DuckDBWasmService {
       // Use local DuckDB WASM files served by Vite instead of CDN
       // Build proper URLs that work both locally and through Tailscale
       const baseUrl = window.location.origin;
-      const basePath = import.meta.env.DEV ? '' : '/community-survey';
+      const basePath = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
       const MANUAL_BUNDLES = {
         mvp: {
           mainModule: `${baseUrl}${basePath}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm`,
