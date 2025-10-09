@@ -68,7 +68,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
             return {
               Resource: cleanAnswer,
               resource: cleanAnswer,
-              [columnName]: item.percentage ? `${Math.round(item.percentage)}%` : '0%',
+              [columnName]: item.percentage ? (Math.round(item.percentage) === 0 && item.count > 0 ? '<1%' : `${Math.round(item.percentage)}%`) : '0%',
               count: item.count
             };
           });

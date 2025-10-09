@@ -166,7 +166,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                         event.stopPropagation();
 
                         if (device.count > 0) {
-                          setTooltipContent(`${device.count} respondents (${Math.round(device.percentage)}%)`);
+                          setTooltipContent(`${device.count} respondents (${Math.round(device.percentage) === 0 && device.count > 0 ? '<1%' : `${Math.round(device.percentage)}%`})`);
 
                           const screenY = event.clientY;
                           const screenX = event.clientX;
@@ -242,7 +242,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                         >
                           {device.percentage > 0 && (
                             <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
-                              {Math.round(device.percentage)}%
+                              {Math.round(device.percentage) === 0 && device.count > 0 ? '<1%' : `${Math.round(device.percentage)}%`}
                             </span>
                           )}
                         </div>
@@ -321,7 +321,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             event.stopPropagation();
 
                             if (device.count > 0) {
-                              setTooltipContent(`${Math.round(device.percentage)}%`);
+                              setTooltipContent(`${Math.round(device.percentage) === 0 && device.count > 0 ? '<1%' : `${Math.round(device.percentage)}%`}`);
 
                               const screenY = event.clientY;
                               const screenX = event.clientX;
@@ -397,7 +397,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             >
                               {device.percentage > 0 && (
                                 <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
-                                  {Math.round(device.percentage)}%
+                                  {Math.round(device.percentage) === 0 && device.count > 0 ? '<1%' : `${Math.round(device.percentage)}%`}
                                 </span>
                               )}
                             </div>
