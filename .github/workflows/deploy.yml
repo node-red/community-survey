@@ -34,6 +34,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Copy DuckDB WASM files
+        run: |
+          mkdir -p ./dist/node_modules/@duckdb/duckdb-wasm/dist
+          cp node_modules/@duckdb/duckdb-wasm/dist/*.wasm ./dist/node_modules/@duckdb/duckdb-wasm/dist/
+          cp node_modules/@duckdb/duckdb-wasm/dist/*.worker.js ./dist/node_modules/@duckdb/duckdb-wasm/dist/
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

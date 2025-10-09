@@ -11,6 +11,7 @@ export default defineConfig({
         exclude: ["@duckdb/duckdb-wasm"],
     },
 
+
     build: {
         target: "esnext",
         minify: "terser",
