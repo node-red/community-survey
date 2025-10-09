@@ -102,14 +102,15 @@ class DuckDBWasmService {
       // Use local DuckDB WASM files served by Vite instead of CDN
       // Build proper URLs that work both locally and through Tailscale
       const baseUrl = window.location.origin;
+      const basePath = import.meta.env.DEV ? '' : '/community-survey';
       const MANUAL_BUNDLES = {
         mvp: {
-          mainModule: `${baseUrl}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm`,
-          mainWorker: `${baseUrl}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js`,
+          mainModule: `${baseUrl}${basePath}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm`,
+          mainWorker: `${baseUrl}${basePath}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js`,
         },
         eh: {
-          mainModule: `${baseUrl}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-eh.wasm`,
-          mainWorker: `${baseUrl}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js`,
+          mainModule: `${baseUrl}${basePath}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-eh.wasm`,
+          mainWorker: `${baseUrl}${basePath}/node_modules/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js`,
         },
       };
 
@@ -176,7 +177,7 @@ class DuckDBWasmService {
 
       // Load database file
       if (import.meta.env.DEV) console.log('📁 Fetching database file...');
-      const response = await fetch('/node_red_survey.duckdb');
+      const response = await fetch(`${basePath}/node_red_survey.duckdb`);
       if (!response.ok) {
         throw new Error(`Failed to fetch database file: ${response.status} ${response.statusText}`);
       }

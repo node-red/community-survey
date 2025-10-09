@@ -661,7 +661,7 @@ function App() {
                         {/* Background Wave Image at Bottom */}
                         <div className="absolute bottom-0 left-0 right-0 w-full">
                             <img
-                                src="/title-wave.png"
+                                src="./title-wave.png"
                                 alt=""
                                 className="w-full h-auto object-cover object-bottom"
                             />
