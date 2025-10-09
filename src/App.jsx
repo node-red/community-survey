@@ -3098,7 +3098,7 @@ function App() {
                                                 rel="noopener noreferrer"
                                             >
                                                 <img
-                                                    src="/openjs-foundation-logo.svg"
+                                                    src="./openjs-foundation-logo.svg"
                                                     alt="OpenJS Foundation"
                                                     className="h-16 opacity-60 hover:opacity-100 transition-opacity"
                                                 />

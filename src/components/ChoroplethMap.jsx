@@ -17,7 +17,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
 
   // Fetch country boundaries TopoJSON and convert to GeoJSON
   useEffect(() => {
-    fetch('/countries-110m.json')
+    fetch('./countries-110m.json')
       .then(response => response.json())
       .then(topology => {
         // Convert TopoJSON to GeoJSON features
