@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+@import './charts.css';
+
+/* Node-RED inspired CSS variables - Essential custom properties only */
+:root {
+  /* Node-RED specific colors not in Tailwind config */
+  --nr-red: #c22e2e;
+  --nr-red-hover: #b91c1c;
+  --nr-node-blue: #3FADB5;
+  --nr-node-orange: #FDD0A2;
+  --nr-node-green: #7FC242;
+  --nr-node-purple: #C0A0C0;
+  
+  /* Node-RED spacing (4px base) - used in charts.css and inline styles */
+  --nr-space-1: 4px;
+  --nr-space-2: 8px;
+  --nr-space-3: 12px;
+  --nr-space-4: 16px;
+  --nr-space-6: 24px;
+  
+  /* Node-RED specific borders and shadows - used in charts.css */
+  --nr-radius: 3px;
+  --nr-radius-lg: 5px;
+  --nr-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --nr-shadow-lg: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --nr-shadow-xl: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  
+  /* Node-RED typography - used in charts.css */
+  --nr-font-size-xs: 11px;
+  --nr-font-size-sm: 12px;
+  --nr-font-size-base: 13px;
+  --nr-font-size-lg: 14px;
+  --nr-line-height-xs: 14px;
+  --nr-line-height-sm: 16px;
+  --nr-line-height-base: 18px;
+  --nr-line-height-lg: 20px;
+  
+  /* Node-RED grays - used in charts.css and inline styles */
+  --nr-gray-200: #e5e7eb;
+  --nr-gray-500: #6b7280;
+  --nr-gray-600: #4b5563;
+  --nr-gray-700: #374151;
+}
+
+/* Node-RED Grid Background - Cannot be replicated with Tailwind */
+.nr-editor-grid {
+  background-color: #ffffff;
+  background-image: 
+    linear-gradient(#eeeeee 1px, transparent 1px),
+    linear-gradient(90deg, #eeeeee 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-attachment: local;
+}
+
+/* Node-RED style scrollbar approach - minimal customization */
+/* Let browser handle main scrollbars, only hide in specific UI elements */
+.filter-container::-webkit-scrollbar,
+.chart-tabs::-webkit-scrollbar {
+  display: none; /* Hide scrollbars in UI chrome elements like Node-RED does */
+}
+
+/* For Firefox - hide scrollbars in specific containers */
+.filter-container,
+.chart-tabs {
+  scrollbar-width: none;
+}
+
+/* Main content areas use native browser scrollbars */
+body {
+  scrollbar-width: auto;
+  scrollbar-color: auto;
+}

@@ -1,0 +1,37 @@
+/* Essential Chart Styles - Minimal CSS for features not covered by Tailwind */
+
+/* Complex gradient fills that require multiple color stops */
+.chart-bar-fill {
+  background: linear-gradient(90deg, var(--nr-node-blue), var(--nr-node-purple));
+  transition: width 0.3s ease;
+}
+
+/* NPS chart specific gradient backgrounds - using warm earth tones */
+.nps-promoter {
+  background: linear-gradient(to top, #87a96b, #a5b99c); /* sage tones */
+}
+
+.nps-passive {
+  background: linear-gradient(to top, #d89333, #c2b280); /* bronze to sand */
+}
+
+.nps-detractor {
+  background: linear-gradient(to top, #b85450, #d46b47); /* rust to terracotta */
+}
+
+/* Chart value positioning that requires transform calculations */
+.chart-value {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Left-side ellipsis for mirrored chart labels */
+.chart-label-ellipsis-left {
+  direction: rtl;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

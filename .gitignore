@@ -1,0 +1,89 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Claude Code and temporary files
+temp/
+experiments/
+*.bak
+*.tmp
+*.temp
+*~
+.claude/
+
+# Test coverage and reports
+coverage/
+test-results/
+playwright-report/
+vitest-report/
+.vitest/
+tests/
+__tests__/
+*.test.js
+*.test.jsx
+*.spec.js
+screenshots/
+*.png
+!public/title-wave.png
+*.jpg
+*.jpeg
+
+# Duplicate and backup files
+*.duckdb.backup*
+*.duplicate
+*-copy.*
+*_backup.*
+*_old.*
+dashboard_segments_backup/
+deps/
+old_*/
+backup_*/
+_archive/
+
+# Documentation drafts
+DRAFT-*.md
+TODO-*.md
+NOTES-*.md
+scratch-*.md
+temp-*.md
+
+# Analysis and output files
+analysis-output/
+*.analysis.json
+*.output.txt
+debug-*.json
+debug-*.mjs
+investigate*.mjs
+*.sql
+
+# Build and dependency artifacts
+package-lock.json.backup
+yarn.lock.backup
+.npm/
+.pnpm-store/
+.playwright/
+.playwright-mcp/
+
+# Project instructions (keep local only)
+CLAUDE.md
