@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FILTER_MAPPINGS } from '../utils/filter-utils';
 import { getChartColor } from '../utils/colorPalette';
-import { sortByOrdinalOrder, ORDINAL_ORDERS } from '../utils/ordinalOrdering';
+import { sortByOrdinalOrder, ORDINAL_ORDERS, applyBaselineOrder } from '../utils/ordinalOrdering';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -17,7 +17,7 @@ const FILTER_QUESTION_TITLES = {
   '476OJ5': 'Run Environment'
 };
 
-const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {}, color, wasmService }) => {
+const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {}, color, wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -85,8 +85,23 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
             });
           }
 
-          // Apply ordinal sorting if applicable
-          chartData = sortByOrdinalOrder(chartData, actualQuestionId);
+          // Apply ordinal sorting if applicable, otherwise use baseline order
+          if (ORDINAL_ORDERS[actualQuestionId]) {
+            // Use predefined ordinal ordering
+            chartData = sortByOrdinalOrder(chartData, actualQuestionId);
+          } else if (baselineOrder) {
+            // Use baseline ordering - need to convert format for applyBaselineOrder
+            const dataWithAnswerText = chartData.map(item => ({
+              ...item,
+              answer_text: item.category
+            }));
+            const sortedData = applyBaselineOrder(dataWithAnswerText, baselineOrder);
+            chartData = sortedData.map(item => {
+              // eslint-disable-next-line no-unused-vars
+              const { answer_text, ...rest } = item;
+              return rest;
+            });
+          }
           
           setData(chartData);
           setRespondentInfo({
@@ -105,7 +120,8 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
     };
 
     fetchData();
-  }, [actualQuestionId, filterType, filters, wasmService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actualQuestionId, filterType, filters, wasmService, baselineOrder]);
 
   if (loading) {
     return (

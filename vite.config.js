@@ -25,7 +25,7 @@ export default defineConfig(({ command }) => ({
 
     // Development server configuration
     server: {
-        host: "0.0.0.0", // Explicitly bind to all IPv4 interfaces
+        host: "127.0.0.1", // Bind to localhost only (not accessible on local network)
         port: 5173,
         strictPort: true, // CRITICAL: Exit with error if port 5173 is not available
         fs: {

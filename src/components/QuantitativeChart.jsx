@@ -2,6 +2,7 @@ import { useState, useEffect, memo } from 'react';
 import BarChart from './BarChart';
 import { FILTER_MAPPINGS } from '../utils/filter-utils';
 import { getChartColor, defaultChartColor } from '../utils/colorPalette';
+import { applyBaselineOrder } from '../utils/ordinalOrdering';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -23,7 +24,7 @@ const FILTER_QUESTION_TITLES = {
 
 
 
-const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}, color = defaultChartColor, wasmService }) => {
+const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}, color = defaultChartColor, wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,8 +51,10 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
           const totalResponses = result.total_respondents || 0;
           const filteredResponses = result.filtered_respondents || totalResponses;
 
-          // Database returns pre-consolidated values, so just sort by count descending
-          const processedData = [...result.data].sort((a, b) => b.count - a.count);
+          // Apply baseline ordering if available, otherwise sort by count descending
+          const processedData = baselineOrder
+            ? applyBaselineOrder(result.data, baselineOrder)
+            : [...result.data].sort((a, b) => b.count - a.count);
 
           const chartData = processedData.map(item => {
             // Clean up the answer text
@@ -91,7 +94,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actualQuestionId, filterType, JSON.stringify(filters), wasmService]);
+  }, [actualQuestionId, filterType, JSON.stringify(filters), wasmService, baselineOrder]);
 
   if (loading) {
     return (

@@ -92,27 +92,69 @@ export const ORDINAL_ORDERS = {
  */
 export function sortByOrdinalOrder(data, questionId) {
   const order = ORDINAL_ORDERS[questionId];
-  
+
   if (!order) {
     // No custom order defined, return as-is
     return data;
   }
-  
+
   // Create a map for quick lookup of order indices
   const orderMap = new Map(order.map((item, index) => [item, index]));
-  
+
   // Sort data according to the predefined order
   return [...data].sort((a, b) => {
     const aIndex = orderMap.get(a.category);
     const bIndex = orderMap.get(b.category);
-    
+
     // Handle items not in the predefined order (put them at the end)
     if (aIndex === undefined && bIndex === undefined) {
       return 0; // Keep original order for undefined items
     }
     if (aIndex === undefined) return 1;
     if (bIndex === undefined) return -1;
-    
+
     return aIndex - bIndex;
   });
+}
+
+/**
+ * Apply baseline ordering to data (for charts that sort by count DESC)
+ * Items in baseline order appear first, new items appear at end sorted by count
+ * @param {Array} data - Array of objects with 'answer_text' and 'count' fields
+ * @param {Array} baselineOrder - Array of answer_text values in baseline order
+ * @returns {Array} Sorted array
+ */
+export function applyBaselineOrder(data, baselineOrder) {
+  if (!baselineOrder || baselineOrder.length === 0) {
+    // No baseline, return data sorted by count DESC
+    return [...data].sort((a, b) => b.count - a.count);
+  }
+
+  // Create a map for quick lookup of baseline order indices
+  const baselineMap = new Map(baselineOrder.map((item, index) => [item, index]));
+
+  // Separate items into baseline and new items
+  const baselineItems = [];
+  const newItems = [];
+
+  data.forEach(item => {
+    if (baselineMap.has(item.answer_text)) {
+      baselineItems.push(item);
+    } else {
+      newItems.push(item);
+    }
+  });
+
+  // Sort baseline items according to baseline order
+  baselineItems.sort((a, b) => {
+    const aIndex = baselineMap.get(a.answer_text);
+    const bIndex = baselineMap.get(b.answer_text);
+    return aIndex - bIndex;
+  });
+
+  // Sort new items by count DESC
+  newItems.sort((a, b) => b.count - a.count);
+
+  // Return baseline items first, then new items
+  return [...baselineItems, ...newItems];
 }

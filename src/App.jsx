@@ -43,6 +43,7 @@ function App() {
     const [filters, setFilters] = useState(createEmptyFilters());
     const [activePreset, setActivePreset] = useState(null);
     const [filteredUserCount, setFilteredUserCount] = useState(0);
+    const [baselineOrders, setBaselineOrders] = useState({});
     const [sectionCounts, setSectionCounts] = useState({
         section1: { filtered: 466, total: 466 },
         section2: { filtered: 432, total: 432 },
@@ -190,6 +191,36 @@ function App() {
                 if (import.meta.env.DEV)
                     console.log("Section counts received:", sectionCounts);
                 setSectionCounts(sectionCounts);
+
+                // Fetch baseline orders for all quantitative charts (without filters)
+                // Exclude questions with predefined ordinal ordering
+                const ordinalQuestions = ['ElR6d2', 'joRz61', 'P9xr1x', 'xDqzMk', 'qGrzbg', 'ZO7eJB', 'kG2v5Z', 'ZO7eO5'];
+                const allQuestionIds = [
+                    'VPeNQ6', '2AWoaM', 'rO4YaX', '476OJ5', 'ZO7ede',
+                    'kGozGZ', 'erJzEk', '089kZ6', '8LBr6x', 'Dp8ax5',
+                    'Ma4BjA', 'NXjP0j'
+                ];
+                const questionsNeedingBaseline = allQuestionIds.filter(id => !ordinalQuestions.includes(id));
+
+                if (import.meta.env.DEV)
+                    console.log("Fetching baseline orders for questions:", questionsNeedingBaseline);
+
+                const baselineOrdersMap = {};
+                await Promise.all(
+                    questionsNeedingBaseline.map(async (questionId) => {
+                        try {
+                            const result = await wasmService.getQuantitativeData(questionId, null);
+                            if (result && result.data) {
+                                baselineOrdersMap[questionId] = result.data.map(item => item.answer_text);
+                                if (import.meta.env.DEV)
+                                    console.log(`Baseline order for ${questionId}:`, baselineOrdersMap[questionId]);
+                            }
+                        } catch (error) {
+                            console.error(`Failed to fetch baseline for ${questionId}:`, error);
+                        }
+                    })
+                );
+                setBaselineOrders(baselineOrdersMap);
 
                 // Restore scroll position when data is loaded
                 if (savedScrollPosition > 0 || focusedChartId) {
@@ -1676,6 +1707,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["VPeNQ6"]}
                                                     />
                                                     <VerticalBarChart
                                                         questionId="joRz61"
@@ -1698,6 +1730,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["2AWoaM"]}
                                                     />
                                                     <VerticalBarChart
                                                         questionId="P9xr1x"
@@ -1720,6 +1753,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["rO4YaX"]}
                                                     />
                                                     <QuantitativeChart
                                                         questionId="476OJ5"
@@ -1731,6 +1765,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["476OJ5"]}
                                                     />
                                                     <VerticalBarChart
                                                         questionId="xDqzMk"
@@ -1808,6 +1843,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["ZO7ede"]}
                                                     />
                                                     <HorizontalRatingsChart
                                                         questionId="qGrzbg"
@@ -2590,6 +2626,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["kGozGZ"]}
                                                     />
                                                 </div>
                                                 <div className="space-y-12">
@@ -2647,6 +2684,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["erJzEk"]}
                                                     />
                                                 </div>
                                                 <div className="space-y-12">
@@ -2707,6 +2745,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["089kZ6"]}
                                                     />
                                                     <QuantitativeChart
                                                         questionId="8LBr6x"
@@ -2718,6 +2757,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["8LBr6x"]}
                                                     />
                                                 </div>
                                                 <div className="space-y-12">
@@ -2744,6 +2784,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["Dp8ax5"]}
                                                     />
                                                     <QuantitativeChart
                                                         questionId="Ma4BjA"
@@ -2755,6 +2796,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["Ma4BjA"]}
                                                     />
                                                     <QuantitativeChart
                                                         questionId="NXjP0j"
@@ -2766,6 +2808,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["NXjP0j"]}
                                                     />
                                                 </div>
                                             </div>
