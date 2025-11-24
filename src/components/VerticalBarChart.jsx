@@ -306,7 +306,8 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                     <div
                       className="absolute left-0 right-0 flex flex-col items-start p-2 overflow-hidden"
                       style={{
-                        bottom: `${barHeightPercent}%`
+                        bottom: `${barHeightPercent}%`,
+                        transition: 'bottom 0.3s ease-in-out'
                       }}
                     >
                       <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
@@ -324,7 +325,8 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                     style={{
                       height: `${barHeightPercent}%`,
                       backgroundColor: actualColor,
-                      minHeight: item.hasData ? '4px' : '0px' // Smaller min height since text can be outside
+                      minHeight: item.hasData ? '4px' : '0px', // Smaller min height since text can be outside
+                      transition: 'height 0.3s ease-in-out'
                     }}
                   >
                     {/* Text inside the bar - positioned at top (only when it fits) */}
