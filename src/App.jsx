@@ -287,6 +287,22 @@ function App() {
           ),
         ]);
 
+        // Add baseline orders for dashboard charts (sorted by value descending)
+        if (dashboardData?.data) {
+          // Quality Ranking baseline: sorted by Quality % descending
+          baselineOrdersMap["qualityRanking"] = [...dashboardData.data]
+            .sort((a, b) => parseInt(b["Quality %"]?.replace('%', '') || 0) - parseInt(a["Quality %"]?.replace('%', '') || 0))
+            .map(item => item.Resource);
+          // Reach Gap Opportunities baseline: sorted by Reach Gap Opp descending
+          baselineOrdersMap["reachGapOpp"] = [...dashboardData.data]
+            .sort((a, b) => parseInt(b["Reach Gap Opp"]?.replace('%', '') || 0) - parseInt(a["Reach Gap Opp"]?.replace('%', '') || 0))
+            .map(item => item.Resource);
+          // Reach Ranking baseline: sorted by Reach % descending
+          baselineOrdersMap["reachRanking"] = [...dashboardData.data]
+            .sort((a, b) => parseInt(b["Reach %"]?.replace('%', '') || 0) - parseInt(a["Reach %"]?.replace('%', '') || 0))
+            .map(item => item.Resource);
+        }
+
         // Set baseline orders BEFORE initialLoading is set to false
         setBaselineOrders(baselineOrdersMap);
 
@@ -2051,7 +2067,13 @@ function App() {
                                               </h3>
                                               <div className="min-h-[300px]">
                                                 <BarChart
-                                                  data={queryResult.data}
+                                                  data={baselineOrders["qualityRanking"]
+                                                    ? [...queryResult.data].sort((a, b) => {
+                                                        const orderA = baselineOrders["qualityRanking"].indexOf(a.Resource);
+                                                        const orderB = baselineOrders["qualityRanking"].indexOf(b.Resource);
+                                                        return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+                                                      })
+                                                    : queryResult.data}
                                                   title="Quality Ranking"
                                                   subtitle="Ratt of channel depicted in percentage"
                                                   valueColumn="Quality %"
@@ -2106,7 +2128,13 @@ function App() {
                                               </h3>
                                               <div className="min-h-[300px]">
                                                 <BarChart
-                                                  data={queryResult.data}
+                                                  data={baselineOrders["reachGapOpp"]
+                                                    ? [...queryResult.data].sort((a, b) => {
+                                                        const orderA = baselineOrders["reachGapOpp"].indexOf(a.Resource);
+                                                        const orderB = baselineOrders["reachGapOpp"].indexOf(b.Resource);
+                                                        return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+                                                      })
+                                                    : queryResult.data}
                                                   title="Reach Gap Opportunities"
                                                   subtitle="Where would a reach increase create the most value because of already existing quality"
                                                   valueColumn="Reach Gap Opp"
@@ -2162,7 +2190,13 @@ function App() {
                                               </h3>
                                               <div className="min-h-[300px]">
                                                 <BarChart
-                                                  data={queryResult.data}
+                                                  data={baselineOrders["reachRanking"]
+                                                    ? [...queryResult.data].sort((a, b) => {
+                                                        const orderA = baselineOrders["reachRanking"].indexOf(a.Resource);
+                                                        const orderB = baselineOrders["reachRanking"].indexOf(b.Resource);
+                                                        return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
+                                                      })
+                                                    : queryResult.data}
                                                   title="Reach Ranking"
                                                   subtitle="Percentage of people that have stated that the channel is helpful to them"
                                                   valueColumn="Reach %"
