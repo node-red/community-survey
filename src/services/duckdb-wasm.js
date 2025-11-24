@@ -1347,7 +1347,10 @@ class DuckDBWasmService {
 
       let sql;
 
-      if (filters) {
+      // Treat empty filters object the same as null (no filters)
+      const hasFilters = filters && Object.keys(filters).length > 0;
+
+      if (hasFilters) {
         const whereClause = await this.buildFilterWhereClause(filters);
 
         let filterCondition = '';
