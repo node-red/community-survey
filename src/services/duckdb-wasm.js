@@ -1141,23 +1141,7 @@ class DuckDBWasmService {
       // Country data (GpGjoO) is now stored as numeric codes directly in the database
       // No special handling needed - use standard query logic
       if (filters) {
-        // Remove self-filters to prevent charts from filtering themselves
-        // This allows charts to show all their data while other filters still apply
         const modifiedFilters = { ...filters };
-
-        // Remove experience filter for experience question (ElR6d2)
-        if (questionId === 'ElR6d2' && modifiedFilters['experience']) {
-          if (import.meta.env.DEV) console.log(`Excluding experience self-filter for experience chart`);
-          delete modifiedFilters['experience'];
-        }
-
-        // Remove continent filter for country/map question (GpGjoO)
-        // The continent filter uses country codes (GpGjoO), so when displaying the map
-        // we need to exclude the continent filter to prevent self-filtering
-        if (questionId === 'GpGjoO' && modifiedFilters['continent']) {
-          if (import.meta.env.DEV) console.log(`Excluding continent self-filter for country map`);
-          delete modifiedFilters['continent'];
-        }
 
         const whereClause = await this.buildFilterWhereClause(modifiedFilters);
 
