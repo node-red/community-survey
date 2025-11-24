@@ -70,3 +70,11 @@ body {
   scrollbar-width: auto;
   scrollbar-color: auto;
 }
+
+/* Mobile viewport scaling for dashboard section */
+@media (max-width: 767px) {
+  .dashboard-mobile-scale {
+    zoom: 0.7;
+  }
+}
+

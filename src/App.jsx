@@ -1437,7 +1437,7 @@ function App() {
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-3xl lg:max-w-5xl mx-auto px-10 py-12">
+                <div className="w-full max-w-3xl lg:max-w-5xl mx-auto px-6 md:px-10 py-12 dashboard-mobile-scale">
                   {/* SQL Query Card */}
                   {showQuery && queryResult?.query && (
                     <div className={cn(card.base, "mb-6 max-w-4xl")}>
