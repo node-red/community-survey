@@ -15,6 +15,12 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
   const chartContainerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(800);
 
+  // Helper function to truncate long labels
+  const truncateLabel = (label, maxLength = 35) => {
+    if (!label || label.length <= maxLength) return label;
+    return label.substring(0, maxLength - 3) + '...';
+  };
+
   // Memoize filters to prevent infinite re-renders from object reference changes
   const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
 
@@ -384,7 +390,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
   }
 
   return (
-    <div className="relative">
+    <div className="relative overflow-x-hidden">
       <div 
         className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm" 
         data-chart-id={questionId}
@@ -440,7 +446,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
 
         {/* Staircase/Waterfall Bars */}
         <div className="p-4">
-          <div ref={chartContainerRef} className="relative w-full" style={{ height: `${data.length * 24 + 10}px` }}>
+          <div ref={chartContainerRef} className="relative w-full overflow-x-hidden" style={{ height: `${data.length * 24 + 10}px` }}>
             {data.map((item, index) => {
               // Calculate cumulative percentage for positioning
               const cumulativePercentage = data
@@ -510,46 +516,48 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
                   {/* Label positioning - always show descriptors next to bars */}
                   {isSmallBar ? (
                     // For small bars, show label and percentage on the side of the bar
-                    <div 
-                      className="absolute flex items-center gap-1"
+                    <div
+                      className="absolute flex items-center gap-1 max-w-full overflow-hidden"
                       style={{
                         // Check if there's enough space on the left (need at least 20% for text)
                         // Also check if this bar itself is wide enough to avoid overlap
                         left: (cumulativePercentage > 20 && barWidth < 15) ? `${cumulativePercentage - 1}%` : `${cumulativePercentage + barWidth + 1}%`,
                         top: '0px',
                         height: '24px',
-                        transform: (cumulativePercentage > 20 && barWidth < 15) ? 'translateX(-100%)' : 'none'
+                        transform: (cumulativePercentage > 20 && barWidth < 15) ? 'translateX(-100%)' : 'none',
+                        maxWidth: (cumulativePercentage > 20 && barWidth < 15) ? `${cumulativePercentage - 2}%` : `${100 - cumulativePercentage - barWidth - 2}%`
                       }}
                     >
                       {/* Show percentage closest to bar, then descriptor */}
                       {!percentageFitsInside && (
-                        <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
+                        <span className="text-gray-900 text-xs font-bold whitespace-nowrap flex-shrink-0">
                           {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                         </span>
                       )}
-                      <span className="text-gray-700 text-xs font-semibold uppercase whitespace-nowrap">
+                      <span className="text-gray-700 text-xs font-semibold uppercase truncate">
                         {item.label}
                       </span>
                     </div>
                   ) : (
                     // For normal bars, show descriptor next to the bar (left side if space, otherwise right)
-                    <div 
-                      className="absolute flex items-center gap-1"
+                    <div
+                      className="absolute flex items-center gap-1 max-w-full overflow-hidden"
                       style={{
                         // For larger bars, prefer left side if there's enough space (20%)
                         left: cumulativePercentage > 20 ? `${cumulativePercentage - 1}%` : `${cumulativePercentage + barWidth + 1}%`,
                         top: '0px',
                         height: '24px',
-                        transform: cumulativePercentage > 20 ? 'translateX(-100%)' : 'none'
+                        transform: cumulativePercentage > 20 ? 'translateX(-100%)' : 'none',
+                        maxWidth: cumulativePercentage > 20 ? `${cumulativePercentage - 2}%` : `${100 - cumulativePercentage - barWidth - 2}%`
                       }}
                     >
                       {/* Show percentage closest to bar if it doesn't fit inside, then descriptor */}
                       {!percentageFitsInside && (
-                        <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
+                        <span className="text-gray-900 text-xs font-bold whitespace-nowrap flex-shrink-0">
                           {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                         </span>
                       )}
-                      <span className="text-gray-700 text-xs font-semibold uppercase whitespace-nowrap">
+                      <span className="text-gray-700 text-xs font-semibold uppercase truncate">
                         {item.label}
                       </span>
                     </div>
