@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
+import RespondentIcon from './RespondentIcon';
 
 const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorScheme = "blue", ratingScale = 7, compact = false, wasmService }) => {
   const [data, setData] = useState(null);
@@ -170,9 +171,10 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                     <span className="text-gray-600 font-bold">
                       {respondentInfo.filtered}
                     </span>
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 hidden sm:inline">
                       {' '}respondents
                     </span>
+                    <RespondentIcon />
                   </div>
                 )}
               </div>

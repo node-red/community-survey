@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
+import RespondentIcon from './RespondentIcon';
 
 const QUALITY_COMPARISON_QUESTIONS = [
   { id: 'RoNjbJ', name: 'Ease of use/Ease to learn' },
@@ -174,7 +175,9 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
                       {question.name}
                     </h4>
                     <span className="text-xs text-gray-500">
-                      {data.respondentCount} respondents
+                      {data.respondentCount}{' '}
+                      <span className="hidden sm:inline">respondents</span>
+                      <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
                     </span>
                   </div>
                   

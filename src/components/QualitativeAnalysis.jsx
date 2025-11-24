@@ -1,4 +1,5 @@
 import { useState, useEffect, memo } from 'react';
+import RespondentIcon from './RespondentIcon';
 
 const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '#64748b', wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
@@ -290,9 +291,10 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                         <span className="text-gray-600 font-bold">
                           {filteredData.respondentCount.filtered}
                         </span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-500 hidden sm:inline">
                           {' '}respondents
                         </span>
+                        <RespondentIcon />
                       </>
                     )}
                   </div>

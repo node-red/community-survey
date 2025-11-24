@@ -22,6 +22,7 @@ import QualityComparisonRatingsGrid from "./components/QualityComparisonRatingsG
 import UnderstandingRatingsGrid from "./components/UnderstandingRatingsGrid";
 import DeviceSatisfactionGrid from "./components/DeviceSatisfactionGrid";
 import TableOfContents from "./components/TableOfContents";
+import RespondentIcon from "./components/RespondentIcon";
 import {
   header,
   sidebar,
@@ -1024,6 +1025,7 @@ function App() {
                   <span className="text-gray-300 hidden sm:inline">
                     respondents
                   </span>
+                  <RespondentIcon className="w-4 h-4 text-gray-300 sm:hidden" />
                 </>
               )}
               {getActiveFilterCount() > 0 && (
@@ -1792,9 +1794,7 @@ function App() {
                                             <span className="text-gray-500 hidden sm:inline">
                                               respondents
                                             </span>
-                                            <span className="text-gray-500 sm:hidden">
-                                              /{sectionCounts.section1.total}
-                                            </span>
+                                            <RespondentIcon className="w-4 h-4 text-gray-500 sm:hidden" />
                                           </div>
                                         )}
                                       </div>

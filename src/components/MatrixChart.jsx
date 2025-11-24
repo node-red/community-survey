@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import RespondentIcon from './RespondentIcon';
 
 const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   const [data, setData] = useState([]);
@@ -115,9 +116,10 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                     <span className="text-gray-600 font-bold">
                       {data[0].total_respondents}
                     </span>
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 hidden sm:inline">
                       {' '}respondents
                     </span>
+                    <RespondentIcon />
                   </div>
                 )}
               </div>
@@ -150,9 +152,15 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                   <h4 className="text-sm font-semibold text-gray-700">
                     {subQ.label}
                   </h4>
-                  <span className="text-xs text-gray-500">
-                    {totalRespondents} respondents
-                  </span>
+                  <div className="flex items-center gap-1 text-xs flex-shrink-0">
+                    <span className="text-gray-600 font-bold">
+                      {totalRespondents}
+                    </span>
+                    <span className="text-gray-500 hidden sm:inline">
+                      {' '}respondents
+                    </span>
+                    <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
+                  </div>
                 </div>
                 
                 {/* Horizontal segmented bar like RatingsChart */}

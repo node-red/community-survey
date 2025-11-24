@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FILTER_MAPPINGS } from '../utils/filter-utils';
 import { getChartColor } from '../utils/colorPalette';
 import { sortByOrdinalOrder, ORDINAL_ORDERS, applyBaselineOrder } from '../utils/ordinalOrdering';
+import RespondentIcon from './RespondentIcon';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -215,9 +216,10 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                     <span className="text-gray-600 font-bold">
                       {respondentInfo.filtered}
                     </span>
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 hidden sm:inline">
                       {' '}respondents
                     </span>
+                    <RespondentIcon />
                   </div>
                 )}
               </div>

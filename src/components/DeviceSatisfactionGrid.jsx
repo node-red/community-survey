@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
+import RespondentIcon from './RespondentIcon';
 
 const DEVICE_QUESTIONS = [
   { id: 'bepze7', name: 'Desktop/Laptop', colorScheme: 'yellow' },
@@ -179,7 +180,9 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                       {averageRating}/7
                     </span>
                     <span className="text-xs text-gray-500">
-                      {data.respondentCount} respondents
+                      {data.respondentCount}{' '}
+                      <span className="hidden sm:inline">respondents</span>
+                      <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
                     </span>
                   </div>
 

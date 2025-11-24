@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
 import { ORDINAL_ORDERS } from '../utils/ordinalOrdering';
+import RespondentIcon from './RespondentIcon';
 
 const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showRatingScale = false, ratingScale = 7, wasmService }) => {
   const [data, setData] = useState(null);
@@ -428,9 +429,10 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
                     <span className="text-gray-600 font-bold">
                       {respondentInfo.filtered}
                     </span>
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 hidden sm:inline">
                       {' '}respondents
                     </span>
+                    <RespondentIcon />
                   </div>
                 )}
               </div>

@@ -3,6 +3,7 @@ import BarChart from './BarChart';
 import { FILTER_MAPPINGS } from '../utils/filter-utils';
 import { getChartColor, defaultChartColor } from '../utils/colorPalette';
 import { applyBaselineOrder } from '../utils/ordinalOrdering';
+import RespondentIcon from './RespondentIcon';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -179,9 +180,10 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
                     <span className="text-gray-600 font-bold">
                       {respondentInfo.filtered}
                     </span>
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 hidden sm:inline">
                       {' '}respondents
                     </span>
+                    <RespondentIcon />
                   </div>
                 )}
               </div>

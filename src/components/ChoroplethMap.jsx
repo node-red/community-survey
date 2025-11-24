@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { geoPath, geoMercator } from 'd3-geo';
 import { feature } from 'topojson-client';
+import RespondentIcon from './RespondentIcon';
 
 const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   if (import.meta.env.DEV) console.log('=== ChoroplethMap RENDER ===', { questionId, hasWasmService: !!wasmService });
@@ -306,8 +307,12 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
                   <span className="text-gray-600 font-bold">
                     {totalResponses}
                   </span>
+                  <span className="text-gray-500 hidden sm:inline">
+                    {' '}respondents
+                  </span>
+                  <RespondentIcon />
                   <span className="text-gray-500">
-                    {' '}respondents from <span className="font-bold text-gray-600">{data.length}</span> countries
+                    {' '}from <span className="font-bold text-gray-600">{data.length}</span> countries
                   </span>
                 </div>
               </div>

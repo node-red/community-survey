@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
+import RespondentIcon from './RespondentIcon';
 
 const DESIGN_CHANGE_QUESTIONS = [
   { id: '089k8A', name: 'Node-RED branding (logo, website, forum)' },
@@ -183,7 +184,9 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                       {question.name}
                     </h4>
                     <span className="text-xs text-gray-500">
-                      {data.respondentCount} respondents
+                      {data.respondentCount}{' '}
+                      <span className="hidden sm:inline">respondents</span>
+                      <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
                     </span>
                   </div>
                   
