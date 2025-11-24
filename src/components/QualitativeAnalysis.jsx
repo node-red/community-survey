@@ -192,7 +192,9 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
     }
   };
 
-  if (loading) {
+  // Only show skeleton during initial load (no data yet)
+  // Once we have data, keep showing it while loading new filtered data
+  if (loading && !data) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="animate-pulse">
@@ -390,7 +392,8 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                     className="absolute inset-y-0 right-0 opacity-80"
                     style={{
                       width: `max(${percentValue}%, 46px)`,
-                      backgroundColor: color
+                      backgroundColor: color,
+                      transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   />
 

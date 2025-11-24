@@ -109,7 +109,9 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actualQuestionId, filterType, JSON.stringify(filters), wasmService, baselineOrder]);
 
-  if (loading) {
+  // Only show skeleton during initial load (no data yet)
+  // Once we have data, keep showing it while loading new filtered data
+  if (loading && !data) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="animate-pulse">

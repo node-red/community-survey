@@ -107,7 +107,9 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
     return totalResponses > 0 ? Math.round(totalScore / totalResponses) : 0;
   };
 
-  if (loading) {
+  // Only show skeleton during initial load (no data yet)
+  // Once we have data, keep showing it while loading new filtered data
+  if (loading && Object.keys(questionData).length === 0) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="animate-pulse">
