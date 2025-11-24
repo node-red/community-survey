@@ -324,7 +324,8 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                     style={{
                       height: `${barHeightPercent}%`,
                       backgroundColor: actualColor,
-                      minHeight: item.hasData ? '4px' : '0px', // Smaller min height since text can be outside
+                      minHeight: '4px', // Always show minimum bar height
+                      opacity: item.hasData ? 1 : 0.6, // Reduce opacity for no-data bars
                       transition: 'height 0.3s ease-in-out'
                     }}
                   >
