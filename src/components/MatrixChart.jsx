@@ -226,7 +226,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             width: device.percentage > 0 ? `${device.percentage}%` : `${100 / deviceData.length}%`,
                             backgroundColor: device.color,
                             minWidth: '35px',
-                            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            transition: 'width 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                           }}
                           onMouseEnter={(e) => {
                             const currentWidth = e.currentTarget.offsetWidth;
@@ -268,7 +268,8 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                         className={`flex flex-col ${itemsClass} justify-start min-w-0`}
                         style={{
                           width: device.percentage > 0 ? `${device.percentage}%` : `${100 / deviceData.length}%`,
-                          minWidth: '35px'
+                          minWidth: '35px',
+                          transition: 'width 0.3s ease-in-out'
                         }}
                       >
                         <div className={`text-xs text-gray-500 ${textClass} font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full`}>
@@ -377,7 +378,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                                 width: device.percentage > 0 ? `${device.percentage}%` : `${100 / averages.length}%`,
                                 backgroundColor: device.color,
                                 minWidth: '35px',
-                                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                                transition: 'width 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                               }}
                               onMouseEnter={(e) => {
                                 const currentWidth = e.currentTarget.offsetWidth;
@@ -418,7 +419,8 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             className={`flex flex-col ${itemsClass} justify-start min-w-0`}
                             style={{
                               width: device.percentage > 0 ? `${device.percentage}%` : `${100 / averages.length}%`,
-                              minWidth: '35px'
+                              minWidth: '35px',
+                              transition: 'width 0.3s ease-in-out'
                             }}
                           >
                             <div className={`text-xs text-gray-500 ${textClass} font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full`}>
@@ -465,7 +467,8 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             className="relative flex items-center justify-center transition-all duration-300 border-r border-white/30 last:border-r-0"
                             style={{
                               width: `${device.percentage}%`,
-                              backgroundColor: device.color
+                              backgroundColor: device.color,
+                              transition: 'width 0.3s ease-in-out'
                             }}
                             title={`${device.label}: ${device.count} (${device.percentage}%)`}
                           >

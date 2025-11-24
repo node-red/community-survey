@@ -482,7 +482,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
                       width: `${barWidth}%`,
                       height: '24px',
                       backgroundColor: item.color,
-                      transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      transition: 'width 0.3s ease-in-out, left 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                     onMouseEnter={(e) => {
                       const currentWidth = e.currentTarget.offsetWidth;

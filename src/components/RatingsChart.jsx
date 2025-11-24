@@ -249,7 +249,8 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                     style={{
                       width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
                       backgroundColor: item.color,
-                      minWidth: '35px' // Always show minimum width for visibility
+                      minWidth: '35px', // Always show minimum width for visibility
+                      transition: 'width 0.3s ease-in-out'
                     }}
                     onMouseEnter={(e) => {
                       const currentWidth = e.currentTarget.offsetWidth;
@@ -284,7 +285,8 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                   className="flex flex-col items-center justify-start"
                   style={{
                     width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                    minWidth: '35px' // Match the bar minimum width
+                    minWidth: '35px', // Match the bar minimum width
+                    transition: 'width 0.3s ease-in-out'
                   }}
                 >
                   <div className="text-xs text-gray-500 text-center font-semibold">
@@ -308,7 +310,8 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                     style={{
                       width: `${item.percentage}%`,
                       backgroundColor: item.color,
-                      minWidth: item.percentage > 0 ? '30px' : '0'
+                      minWidth: item.percentage > 0 ? '30px' : '0',
+                      transition: 'width 0.3s ease-in-out'
                     }}
                   >
                     {item.percentage >= 5 && (item.count === 0 ? 'No data' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`))}

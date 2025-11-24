@@ -201,7 +201,8 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                           style={{
                             width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
                             backgroundColor: item.color,
-                            minWidth: '28px'
+                            minWidth: '28px',
+                            transition: 'width 0.3s ease-in-out'
                           }}
                           onMouseEnter={(e) => {
                             // Clear any pending hide timeout
@@ -285,7 +286,8 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                         className="flex flex-col items-center justify-start"
                         style={{
                           width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                          minWidth: '28px'
+                          minWidth: '28px',
+                          transition: 'width 0.3s ease-in-out'
                         }}
                       >
                         <div className="text-[10px] text-gray-500 text-center font-semibold">
