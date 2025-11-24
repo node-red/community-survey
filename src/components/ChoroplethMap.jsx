@@ -69,7 +69,10 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
   const dataMap = useMemo(() => {
     const map = {};
     data.forEach(item => {
-      map[item.answer_text] = item;
+      // Normalize country codes to 3-digit format to match TopoJSON IDs
+      // Database returns codes like "36", TopoJSON uses "036"
+      const paddedCode = String(item.answer_text).padStart(3, '0');
+      map[paddedCode] = item;
     });
     if (import.meta.env.DEV) {
       console.log('ChoroplethMap dataMap:', map);
@@ -197,9 +200,9 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
       setHideTooltipTimeout(null);
     }
 
-    // geo.id is the numeric country code from TopoJSON, which now matches our data
-    const numericCountryCode = String(geo.id);
-    const countryData = dataMap[numericCountryCode];
+    // geo.id is the ISO 3166-1 numeric country code from TopoJSON (3-digit string)
+    const countryCode = String(geo.id);
+    const countryData = dataMap[countryCode];
     const countryName = geo.properties.name;
 
     if (countryData) {
@@ -327,21 +330,22 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
               }}
             >
               {geographies.map((geo, i) => {
-                // geo.id is the numeric country code from TopoJSON, which now matches our data
-                const numericCountryCode = String(geo.id);
-                const countryData = dataMap[numericCountryCode];
+                // geo.id is the ISO 3166-1 numeric country code from TopoJSON
+                // It's already a 3-digit string (e.g., "036" for Australia)
+                const countryCode = String(geo.id);
+                const countryData = dataMap[countryCode];
                 const pathData = pathGenerator(geo);
 
                 // Debug first few countries
                 if (import.meta.env.DEV && i < 3) {
-                  console.log(`Country ${i}: geo.id=${geo.id}, stringified=${numericCountryCode}, hasData=${!!countryData}, name=${geo.properties?.name}`);
+                  console.log(`Country ${i}: geo.id=${geo.id}, countryCode=${countryCode}, hasData=${!!countryData}, name=${geo.properties?.name}`);
                 }
 
                 return (
                   <path
                     key={`country-${i}`}
                     d={pathData || ''}
-                    fill={getCountryColor(numericCountryCode)}
+                    fill={getCountryColor(countryCode)}
                     stroke="#EAEAEC"
                     strokeWidth={0.5}
                     style={{

@@ -1,9 +1,11 @@
 // Centralized filter utilities to maintain DRY principle - UPDATED
 import { FILTER_DEFINITIONS } from './filter-definitions.js';
-import { buildSafeExistsClause, validateSQLClause } from './sql-escape-utils.js';
+import { buildSafeExistsClause, buildSafeExistsClauseNumeric, validateSQLClause } from './sql-escape-utils.js';
+import { getCountryCodesForContinents } from './continent-mapping.js';
 
 // Single source of truth for filter to question ID mappings
 export const FILTER_MAPPINGS = {
+  continent: 'GpGjoO', // Special filter - uses country codes via continent mapping
   experience: 'ElR6d2',
   purpose: 'VPeNQ6',
   orgSize: 'joRz61',
@@ -46,7 +48,7 @@ export const createEmptyFilters = () => {
 // Build SQL WHERE clause from filters
 export const buildFilterWhereClause = async (filters) => {
   const conditions = [];
-  
+
   for (const [filterType, questionId] of Object.entries(FILTER_MAPPINGS)) {
     if (filters[filterType] && filters[filterType].length > 0) {
       if (import.meta.env.DEV) console.log(`Building WHERE clause for ${filterType} (${questionId}):`, filters[filterType]);
@@ -63,6 +65,24 @@ export const buildFilterWhereClause = async (filters) => {
       if (validFilterValues.length === 0) {
         if (import.meta.env.DEV) console.log(`  Skipping ${filterType} - no valid values after filtering nulls`);
         continue;
+      }
+
+      // Special handling for continent filter - convert continent names to country codes
+      if (filterType === 'continent') {
+        const countryCodes = getCountryCodesForContinents(validFilterValues);
+        if (import.meta.env.DEV) console.log(`🌍 CONTINENT FILTER - Converting continents ${validFilterValues} to ${countryCodes.length} country codes`);
+
+        if (countryCodes.length > 0) {
+          // Build SQL condition matching any of the country codes
+          // Country codes are stored as plain JSON numbers (not strings in arrays) in question GpGjoO
+          // Use the numeric version which generates: answer_text::varchar = '840' OR answer_text::varchar = '124'
+          const sqlCondition = buildSafeExistsClauseNumeric(questionId, countryCodes, 'survey.');
+          if (sqlCondition) {
+            if (import.meta.env.DEV) console.log(`  Generated continent SQL:`, sqlCondition.substring(0, 150) + '...');
+            conditions.push(sqlCondition);
+          }
+        }
+        continue; // Skip normal processing for continent
       }
 
       // Special handling for multi-select questions

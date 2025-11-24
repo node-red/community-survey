@@ -97,6 +97,55 @@ export function buildSafeExistsClause(questionId, values, isMultiSelect = false,
 }
 
 /**
+ * Build a safe EXISTS clause for numeric filter values (e.g., country codes)
+ * Used for questions where values are stored as plain numbers without quotes or array wrappers
+ * @param {string} questionId - The question ID
+ * @param {Array} values - Array of numeric filter values (as strings)
+ * @param {string} schemaPrefix - Schema prefix (e.g., 'survey.')
+ * @returns {string} - Safe SQL EXISTS clause
+ */
+export function buildSafeExistsClauseNumeric(questionId, values, schemaPrefix = '') {
+  if (!Array.isArray(values) || values.length === 0) {
+    return '';
+  }
+
+  // Validate questionId to prevent injection - should only contain alphanumeric characters
+  if (!/^[A-Za-z0-9]+$/.test(questionId)) {
+    console.error('Invalid questionId format:', questionId);
+    return '';
+  }
+
+  // Build OR conditions for numeric values
+  // Values are stored as plain JSON numbers like 840, not as ["840"]
+  // So we need to cast to varchar and do exact matching
+  const orConditions = values.map(value => {
+    // Validate that value is numeric (or a numeric string)
+    const numericValue = String(value).replace(/[^0-9]/g, '');
+    if (!numericValue) {
+      console.error('Invalid numeric value:', value);
+      return null;
+    }
+    // Cast answer_text to varchar and do exact match
+    // No quotes needed because database stores raw numbers
+    return `answer_text::varchar = '${numericValue}'`;
+  }).filter(Boolean); // Remove any null values from validation failures
+
+  if (orConditions.length === 0) {
+    return '';
+  }
+
+  // Use schema prefix if provided (e.g., 'survey.' for attached databases)
+  const tableName = schemaPrefix ? `${schemaPrefix}responses` : 'responses';
+
+  return `EXISTS (
+      SELECT 1 FROM ${tableName}
+      WHERE respondent_id = r.respondent_id
+      AND question_id = '${questionId}'
+      AND (${orConditions.join(' OR ')})
+    )`;
+}
+
+/**
  * Validate that a SQL clause is safe (basic validation)
  * @param {string} sql - SQL clause to validate
  * @returns {object} - Validation result with isValid and issues
@@ -151,5 +200,6 @@ export default {
   escapeSQLLikeValue,
   buildSafeLikeOrCondition,
   buildSafeExistsClause,
+  buildSafeExistsClauseNumeric,
   validateSQLClause
 };

@@ -673,7 +673,7 @@ function App() {
     }
 
     if (!filterSearchTerm.trim()) {
-      const result = Object.entries(filterOptions).map(
+      const entries = Object.entries(filterOptions).map(
         ([filterKey, category]) => [
           filterKey,
           {
@@ -684,6 +684,14 @@ function App() {
           },
         ],
       );
+
+      // Ensure continent filter appears first
+      const result = entries.sort((a, b) => {
+        if (a[0] === 'continent') return -1;
+        if (b[0] === 'continent') return 1;
+        return 0;
+      });
+
       if (import.meta.env.DEV)
         console.log("Returning", result.length, "filter categories");
       return result;
@@ -719,7 +727,12 @@ function App() {
       }
     });
 
-    return filteredEntries;
+    // Ensure continent filter appears first in filtered results too
+    return filteredEntries.sort((a, b) => {
+      if (a[0] === 'continent') return -1;
+      if (b[0] === 'continent') return 1;
+      return 0;
+    });
   };
   // NOTE: Removed useEffect that was extracting count from query results
   // This was causing a bug where it would overwrite the correct filtered count

@@ -1,7 +1,18 @@
 // Filter definitions for the Node-RED survey analysis dashboard
 // Maps survey questions to filter categories and options
 
+import { CONTINENT_OPTIONS } from './continent-mapping.js';
+
 export const FILTER_DEFINITIONS = {
+  // Continent filter (special filter - maps to country question GpGjoO via continent mapping)
+  continent: {
+    questionId: 'GpGjoO', // Uses country question, filtered by continent mapping
+    name: 'Continent',
+    description: 'Geographic region',
+    options: CONTINENT_OPTIONS,
+    isSpecialFilter: true // Marks this as needing special SQL handling
+  },
+
   // Experience Level (ElR6d2)
   experience: {
     questionId: 'ElR6d2',

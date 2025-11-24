@@ -2,6 +2,7 @@ import * as duckdb from '@duckdb/duckdb-wasm';
 import { createEmptyFilters, buildFilterWhereClause, getQuestionMetadata, FILTER_MAPPINGS, QUESTION_TO_FILTER } from '../utils/filter-utils.js';
 import { FILTER_DEFINITIONS } from '../utils/filter-definitions.js';
 import { getDashboardQuery, getSegmentQuery } from '../queries/dashboard-queries.js';
+import { CONTINENT_OPTIONS } from '../utils/continent-mapping.js';
 
 class DuckDBWasmService {
   constructor() {
@@ -450,20 +451,32 @@ class DuckDBWasmService {
     // Use the QUESTION_TO_FILTER mapping from filter-utils.js
     // This ensures consistency with the filter definitions
     const transformed = {};
-    
+
+    // First, inject the continent filter (static options, not database-driven)
+    // This ensures continent appears first in the filter list
+    transformed['continent'] = {
+      questionId: 'GpGjoO',
+      name: 'Continent',
+      options: CONTINENT_OPTIONS.map(opt => ({
+        value: opt.value,
+        label: opt.label,
+        count: null // Continent counts would require complex aggregation
+      }))
+    };
+
     for (const [questionId, data] of Object.entries(rawOptions)) {
       const filterKey = QUESTION_TO_FILTER[questionId];
-      if (filterKey) {
+      if (filterKey && filterKey !== 'continent') { // Skip continent as we already added it
         transformed[filterKey] = {
           questionId: questionId,
           name: data.name,
           options: data.options || []
         };
-      } else {
+      } else if (!filterKey) {
         if (import.meta.env.DEV) console.warn(`No filter mapping found for question ID: ${questionId}`);
       }
     }
-    
+
     if (import.meta.env.DEV) console.log('Transformed filter options:', Object.keys(transformed).length, 'categories');
     return transformed;
   }
@@ -1128,15 +1141,24 @@ class DuckDBWasmService {
       // Country data (GpGjoO) is now stored as numeric codes directly in the database
       // No special handling needed - use standard query logic
       if (filters) {
-        // Remove only experience self-filter to prevent experience chart from filtering itself
-        // This allows experience chart to show all levels while other filters still apply
+        // Remove self-filters to prevent charts from filtering themselves
+        // This allows charts to show all their data while other filters still apply
         const modifiedFilters = { ...filters };
-        // Only remove experience filter for experience question (ElR6d2)
+
+        // Remove experience filter for experience question (ElR6d2)
         if (questionId === 'ElR6d2' && modifiedFilters['experience']) {
           if (import.meta.env.DEV) console.log(`Excluding experience self-filter for experience chart`);
           delete modifiedFilters['experience'];
         }
-        
+
+        // Remove continent filter for country/map question (GpGjoO)
+        // The continent filter uses country codes (GpGjoO), so when displaying the map
+        // we need to exclude the continent filter to prevent self-filtering
+        if (questionId === 'GpGjoO' && modifiedFilters['continent']) {
+          if (import.meta.env.DEV) console.log(`Excluding continent self-filter for country map`);
+          delete modifiedFilters['continent'];
+        }
+
         const whereClause = await this.buildFilterWhereClause(modifiedFilters);
 
         if (questionTypes.isMultiSelect) {
