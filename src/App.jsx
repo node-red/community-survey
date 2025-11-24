@@ -820,7 +820,7 @@ function App() {
                 </p>
 
                 {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 mb-12">
                   <button
                     onClick={scrollToDashboard}
                     className="px-8 py-4 bg-white text-[#8f0000] rounded-lg font-semibold text-lg hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
@@ -946,7 +946,7 @@ function App() {
                 </div>
 
                 {/* Right Column - Key Points */}
-                <div className="space-y-6">
+                <div className="space-y-6 mb-12">
                   <div>
                     <h3 className="text-xl font-semibold text-nodered-red-500 mb-3">
                       What We Found
