@@ -139,7 +139,6 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actualQuestionId, filterType, filters, wasmService, baselineOrder]);
 
   // Only show skeleton during initial load (no data yet)
