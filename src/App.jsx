@@ -200,7 +200,11 @@ function App() {
                     'kGozGZ', 'erJzEk', '089kZ6', '8LBr6x', 'Dp8ax5',
                     'Ma4BjA', 'NXjP0j'
                 ];
-                const qualitativeQuestionIds = ['gqlzqJ']; // Qualitative analysis questions
+                const qualitativeQuestionIds = [
+                    'gqlzqJ', '476O9O', '6KlPdY', 'ElR6ZN', 'JlPolX', 'OX26KK',
+                    'P9xrbb', 'RoNAMl', 'XoaQoz', 'a4LqQX', 'joRj6E', 'oRPZqP',
+                    'oRPqY1', 'xDqAMo', 'xDqzdv', 'y4Q14d'
+                ]; // All Qualitative analysis questions
                 const questionsNeedingBaseline = quantitativeQuestionIds.filter(id => !ordinalQuestions.includes(id));
 
                 if (import.meta.env.DEV)
@@ -2699,6 +2703,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["6KlPdY"]}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-12">
@@ -2726,6 +2731,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["joRj6E"]}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-12">
@@ -2749,6 +2755,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["xDqAMo"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="RoNAMl"
@@ -2760,6 +2767,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["RoNAMl"]}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-12">
@@ -2799,6 +2807,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["oRPqY1"]}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-12">
@@ -2854,6 +2863,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["P9xrbb"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="oRPZqP"
@@ -2865,6 +2875,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["oRPZqP"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="XoaQoz"
@@ -2876,6 +2887,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["XoaQoz"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="JlPolX"
@@ -2887,6 +2899,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["JlPolX"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="y4Q14d"
@@ -2898,6 +2911,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["y4Q14d"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="OX26KK"
@@ -2909,6 +2923,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["OX26KK"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="xDqzdv"
@@ -2920,6 +2935,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["xDqzdv"]}
                                                     />
                                                     <QualitativeAnalysis
                                                         questionId="a4LqQX"
@@ -2931,6 +2947,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["a4LqQX"]}
                                                     />
                                                 </div>
                                                 <div className="space-y-12">
@@ -2944,6 +2961,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["ElR6ZN"]}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-12">
@@ -2967,6 +2985,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["476O9O"]}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-12">
