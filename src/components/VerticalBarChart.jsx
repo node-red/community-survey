@@ -69,7 +69,7 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
             // - otherwise → actual percentage with %
             let displayPercentage;
             if (count === 0) {
-              displayPercentage = 'N/A';
+              displayPercentage = '-';
             } else if (percentage === 0) {
               displayPercentage = '<1%';
             } else {
@@ -96,7 +96,7 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                 chartData.push({
                   category: category,
                   percentage: 0,
-                  displayPercentage: 'N/A',
+                  displayPercentage: '-',
                   count: 0,
                   hasData: false
                 });

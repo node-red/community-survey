@@ -456,7 +456,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
 
               // Determine if percentage text fits inside bar with padding
               // Calculate approximate text width: each char ~7px, padding pl-2 pr-2 = 16px total
-              const percentageText = item.count === 0 ? 'N/A' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`);
+              const percentageText = item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`);
               const textWidth = percentageText.length * 7; // approximate char width for text-xs font-bold
               const paddingWidth = 16; // pl-2 (8px) + pr-2 (8px)
               const minRequiredWidth = textWidth + paddingWidth;
@@ -501,7 +501,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
                     {/* Percentage inside the bar on the left (only if it fits) */}
                     {percentageFitsInside && (
                       <span className="text-white text-xs font-bold pl-2 pr-2">
-                        {item.count === 0 ? 'N/A' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                        {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                       </span>
                     )}
                   </div>
@@ -523,7 +523,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
                       {/* Show percentage closest to bar, then descriptor */}
                       {!percentageFitsInside && (
                         <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
-                          {item.count === 0 ? 'N/A' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                          {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                         </span>
                       )}
                       <span className="text-gray-700 text-xs font-semibold uppercase whitespace-nowrap">
@@ -545,7 +545,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
                       {/* Show percentage closest to bar if it doesn't fit inside, then descriptor */}
                       {!percentageFitsInside && (
                         <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
-                          {item.count === 0 ? 'N/A' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                          {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                         </span>
                       )}
                       <span className="text-gray-700 text-xs font-semibold uppercase whitespace-nowrap">
