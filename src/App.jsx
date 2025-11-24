@@ -77,6 +77,7 @@ function App() {
   const [tocCollapsed, setTocCollapsed] = useState(true);
   const [heroAnimated, setHeroAnimated] = useState(false);
   const [isTocResizing, setIsTocResizing] = useState(false);
+  const [isDashboardInView, setIsDashboardInView] = useState(false);
   const footerSectionRef = useRef(null);
   const mainContentRef = useRef(null);
   const dashboardRef = useRef(null);
@@ -105,6 +106,30 @@ function App() {
       setHeroAnimated(true);
     }, 100);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Track if dashboard section is in view (for mobile fixed sidebars)
+  useEffect(() => {
+    if (!dashboardRef.current) return;
+
+    const handleScroll = () => {
+      const dashboard = dashboardRef.current;
+      if (!dashboard) return;
+
+      const rect = dashboard.getBoundingClientRect();
+      const headerHeight = 48;
+      const viewportHeight = window.innerHeight;
+
+      // Dashboard is "fully in view" when:
+      // - its top is at or above the header (scrolled into dashboard)
+      // - its bottom is at or below the viewport bottom (not scrolled past it)
+      const isFullyInView = rect.top <= headerHeight && rect.bottom >= viewportHeight;
+      setIsDashboardInView(isFullyInView);
+    };
+
+    handleScroll(); // Initial check
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Effect to handle responsive layout
@@ -1010,12 +1035,27 @@ function App() {
           </header>
           {/* Dashboard Container with Sidebars */}
           <div className="relative flex">
+            {/* Mobile Backdrop Overlay */}
+            {isMobile && isDashboardInView && (!sidebarCollapsed || !tocCollapsed) && (
+              <div
+                className="fixed inset-0 bg-black/50 z-10 transition-opacity duration-300"
+                style={{ top: "48px" }}
+                onClick={() => {
+                  setSidebarCollapsed(true);
+                  setTocCollapsed(true);
+                }}
+              />
+            )}
             {/* Left Sidebar - Node-RED Palette Style */}
             <aside
-              className="bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] transition-all duration-300 ease-in-out sticky self-start z-20"
+              className={cn(
+                "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] transition-all duration-300 ease-in-out z-20",
+                isMobile ? "fixed left-0" : "sticky self-start",
+                isMobile && !isDashboardInView && "opacity-0 pointer-events-none"
+              )}
               style={{
                 width: sidebarCollapsed ? "7px" : `${sidebarWidth}px`,
-                height: "100vh",
+                height: isMobile ? "calc(100vh - 48px)" : "100vh",
                 maxHeight: "calc(100vh - 48px)",
                 top: "48px",
               }}
@@ -2456,6 +2496,7 @@ function App() {
               onItemMouseEnter={handleTocItemMouseEnter}
               onItemMouseLeave={handleTocItemMouseLeave}
               isMobile={isMobile}
+              isDashboardInView={isDashboardInView}
             />
 
             {/* TOC Resize Handle */}
