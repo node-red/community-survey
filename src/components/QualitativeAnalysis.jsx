@@ -322,7 +322,8 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                   percentage: 0,
                   frequency: 0,
                   count: 0,
-                  representative_quotes: null
+                  representative_quotes: null,
+                  description: 'No data'
                 };
               }
             });
@@ -407,7 +408,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                 
                 {/* Description Below */}
                 <p className="mt-1 text-[10px] text-nodered-gray-500 font-normal leading-tight px-2">
-                  {theme.description}
+                  {theme.description || (count === 0 ? 'No data' : '')}
                 </p>
               </div>
             );
