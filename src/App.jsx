@@ -77,7 +77,6 @@ function App() {
   const [tocCollapsed, setTocCollapsed] = useState(true);
   const [heroAnimated, setHeroAnimated] = useState(false);
   const [isTocResizing, setIsTocResizing] = useState(false);
-  const [isDashboardInView, setIsDashboardInView] = useState(false);
   const footerSectionRef = useRef(null);
   const mainContentRef = useRef(null);
   const dashboardRef = useRef(null);
@@ -106,30 +105,6 @@ function App() {
       setHeroAnimated(true);
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
-
-  // Track if dashboard section is in view (for mobile fixed sidebars)
-  useEffect(() => {
-    if (!dashboardRef.current) return;
-
-    const handleScroll = () => {
-      const dashboard = dashboardRef.current;
-      if (!dashboard) return;
-
-      const rect = dashboard.getBoundingClientRect();
-      const headerHeight = 48;
-      const viewportHeight = window.innerHeight;
-
-      // Dashboard is "fully in view" when:
-      // - its top is at or above the header (scrolled into dashboard)
-      // - its bottom is at or below the viewport bottom (not scrolled past it)
-      const isFullyInView = rect.top <= headerHeight && rect.bottom >= viewportHeight;
-      setIsDashboardInView(isFullyInView);
-    };
-
-    handleScroll(); // Initial check
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Effect to handle responsive layout
@@ -781,7 +756,7 @@ function App() {
       <div className="min-h-screen bg-nodered-gray-100 font-sans">
         {/* Landing Page Hero Section */}
         {showHeroSection && (
-          <section className="min-h-screen flex items-start pt-24 relative bg-[#8f0000] overflow-hidden">
+          <section className="min-h-screen flex items-start pt-24 relative bg-[#8f0000] overflow-hidden z-30">
             {/* Background Wave Image at Bottom */}
             <div className="absolute bottom-0 left-0 right-0 w-full">
               <img
@@ -871,7 +846,7 @@ function App() {
         {showIntroductionSection && (
           <section
             id="introduction-section"
-            className="min-h-screen flex items-center bg-white border-b border-nodered-gray-200 relative"
+            className="min-h-screen flex items-center bg-white border-b border-nodered-gray-200 relative z-30"
           >
             <div className="max-w-5xl mx-auto px-6">
               {/* Section Title */}
@@ -1036,7 +1011,7 @@ function App() {
           {/* Dashboard Container with Sidebars */}
           <div className="relative flex">
             {/* Mobile Backdrop Overlay */}
-            {isMobile && isDashboardInView && (!sidebarCollapsed || !tocCollapsed) && (
+            {isMobile && (!sidebarCollapsed || !tocCollapsed) && (
               <div
                 className="fixed inset-0 bg-black/50 z-10 transition-opacity duration-300"
                 style={{ top: "48px" }}
@@ -1049,9 +1024,8 @@ function App() {
             {/* Left Sidebar - Node-RED Palette Style */}
             <aside
               className={cn(
-                "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] transition-all duration-300 ease-in-out z-20",
-                isMobile ? "fixed left-0" : "sticky self-start",
-                isMobile && !isDashboardInView && "opacity-0 pointer-events-none"
+                "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] z-20 transition-all duration-300 ease-in-out",
+                isMobile ? "fixed left-0" : "sticky self-start"
               )}
               style={{
                 width: sidebarCollapsed ? "7px" : `${sidebarWidth}px`,
@@ -2496,7 +2470,6 @@ function App() {
               onItemMouseEnter={handleTocItemMouseEnter}
               onItemMouseLeave={handleTocItemMouseLeave}
               isMobile={isMobile}
-              isDashboardInView={isDashboardInView}
             />
 
             {/* TOC Resize Handle */}
@@ -2558,7 +2531,7 @@ function App() {
         {showFooterSection && (
           <section
             ref={footerSectionRef}
-            className="min-h-screen flex items-center bg-white border-t"
+            className="min-h-screen flex items-center bg-white border-t relative z-30"
             style={{ borderTopColor: "#bbbbbb" }}
           >
             <div className="max-w-5xl mx-auto px-6 py-12">

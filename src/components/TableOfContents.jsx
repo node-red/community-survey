@@ -3,7 +3,7 @@ import { cn } from '../styles/classNames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
 
-const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, isMobile, isDashboardInView }) => {
+const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, isMobile }) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -208,12 +208,11 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       className={cn(
         "bg-[#f3f3f3]",
         "z-20",
-        isMobile ? "fixed right-0" : "sticky top-12 right-0 self-start",
-        isMobile && !isDashboardInView && "opacity-0 pointer-events-none"
+        isMobile ? "fixed right-0" : "sticky top-12 right-0 self-start"
       )}
       style={{
         width: collapsed ? "8px" : `${width}px`,
-        transition: "width 300ms ease-in-out, opacity 300ms ease-in-out",
+        transition: "width 300ms ease-in-out",
         borderLeft: "1px solid #bbbbbb",
         height: isMobile ? "calc(100vh - 48px)" : "100vh",
         maxHeight: "calc(100vh - 48px)",
