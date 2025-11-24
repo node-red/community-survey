@@ -50,6 +50,9 @@ function App() {
   });
   const [filterSearchTerm, setFilterSearchTerm] = useState("");
   const [isSingleColumn, setIsSingleColumn] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
   const sidebarWidth = 180; // Static width, no longer resizable
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 1024 : false,
@@ -110,6 +113,7 @@ function App() {
       const isNarrow = window.innerWidth < 1024; // lg breakpoint
       const isMobileViewport = window.innerWidth < 768; // Mobile breakpoint
       setIsSingleColumn(isNarrow);
+      setIsMobile(isMobileViewport);
 
       // Auto-collapse both sidebars on any resize while in mobile viewport
       if (isMobileViewport) {
@@ -1339,11 +1343,11 @@ function App() {
                 <div className="relative group">
                   <button
                     className={`absolute w-6 h-12 flex items-center justify-center transition-transform duration-200 ${
-                      showSidebarToggle || sidebarCollapsed
+                      showSidebarToggle || sidebarCollapsed || isMobile
                         ? "opacity-100"
                         : "opacity-0 pointer-events-none"
                     } ${
-                      showSidebarToggle
+                      showSidebarToggle || isMobile
                         ? "bg-white hover:bg-gray-50 border border-gray-300 shadow-sm"
                         : "bg-transparent border border-transparent"
                     }`}
@@ -1354,7 +1358,7 @@ function App() {
                       borderRadius: "0 4px 4px 0",
                       position: "relative",
                       transform:
-                        showSidebarToggle || sidebarCollapsed
+                        showSidebarToggle || sidebarCollapsed || isMobile
                           ? "translateX(0)"
                           : "translateX(-10px)",
                     }}
@@ -1437,7 +1441,7 @@ function App() {
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-3xl lg:max-w-5xl mx-auto px-6 md:px-10 py-12 dashboard-mobile-scale">
+                <div className="w-full max-w-3xl lg:max-w-5xl mx-auto px-10 py-12 dashboard-mobile-scale">
                   {/* SQL Query Card */}
                   {showQuery && queryResult?.query && (
                     <div className={cn(card.base, "mb-6 max-w-4xl")}>
@@ -2451,6 +2455,7 @@ function App() {
               onToggle={() => setTocCollapsed(!tocCollapsed)}
               onItemMouseEnter={handleTocItemMouseEnter}
               onItemMouseLeave={handleTocItemMouseLeave}
+              isMobile={isMobile}
             />
 
             {/* TOC Resize Handle */}

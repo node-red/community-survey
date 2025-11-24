@@ -3,7 +3,7 @@ import { cn } from '../styles/classNames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
 
-const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave }) => {
+const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, isMobile }) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -345,11 +345,11 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
         <div className="relative group">
           <button
             className={`absolute w-6 h-12 flex items-center justify-center transition-transform duration-200 ${
-              showSidebarToggle || collapsed
+              showSidebarToggle || collapsed || isMobile
                 ? "opacity-100"
                 : "opacity-0 pointer-events-none"
             } ${
-              showSidebarToggle
+              showSidebarToggle || isMobile
                 ? "bg-white hover:bg-gray-50 border border-gray-300 shadow-sm"
                 : "bg-transparent border border-transparent"
             }`}
@@ -360,7 +360,7 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
               borderRadius: "3px 0 0 3px",
               borderRight: showSidebarToggle ? "none" : undefined,
               position: "relative",
-              transform: (showSidebarToggle || collapsed) ? "translateX(0)" : "translateX(10px)",
+              transform: (showSidebarToggle || collapsed || isMobile) ? "translateX(0)" : "translateX(10px)",
             }}
           >
             <svg
