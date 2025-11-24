@@ -341,7 +341,20 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
             const percentValue = typeof theme.percentage === 'string' ?
               parseFloat(theme.percentage.replace('%', '')) :
               parseFloat(theme.percentage) || 0;
-            const displayPercentage = `${Math.round(percentValue)}%`;
+            const count = theme.frequency || theme.count || 0;
+
+            // Format display percentage:
+            // - count === 0 → "No data"
+            // - count > 0 but rounds to 0% → "<1%"
+            // - otherwise → actual percentage
+            let displayPercentage;
+            if (count === 0) {
+              displayPercentage = 'No data';
+            } else if (Math.round(percentValue) === 0) {
+              displayPercentage = '<1%';
+            } else {
+              displayPercentage = `${Math.round(percentValue)}%`;
+            }
 
             return (
               <div key={theme.theme_name}>

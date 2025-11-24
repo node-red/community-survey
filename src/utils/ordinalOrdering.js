@@ -119,10 +119,11 @@ export function sortByOrdinalOrder(data, questionId) {
 
 /**
  * Apply baseline ordering to data (for charts that sort by count DESC)
- * Items in baseline order appear first, new items appear at end sorted by count
+ * Items in baseline order appear first (including missing items with count: 0),
+ * new items appear at end sorted by count
  * @param {Array} data - Array of objects with 'answer_text' and 'count' fields
  * @param {Array} baselineOrder - Array of answer_text values in baseline order
- * @returns {Array} Sorted array
+ * @returns {Array} Sorted array with all baseline items present
  */
 export function applyBaselineOrder(data, baselineOrder) {
   if (!baselineOrder || baselineOrder.length === 0) {
@@ -130,27 +131,26 @@ export function applyBaselineOrder(data, baselineOrder) {
     return [...data].sort((a, b) => b.count - a.count);
   }
 
-  // Create a map for quick lookup of baseline order indices
-  const baselineMap = new Map(baselineOrder.map((item, index) => [item, index]));
+  // Create a map of existing data items by answer_text
+  const dataMap = new Map(data.map(item => [item.answer_text, item]));
 
-  // Separate items into baseline and new items
-  const baselineItems = [];
-  const newItems = [];
-
-  data.forEach(item => {
-    if (baselineMap.has(item.answer_text)) {
-      baselineItems.push(item);
+  // Build result array with all baseline items in order
+  const baselineItems = baselineOrder.map(answerText => {
+    if (dataMap.has(answerText)) {
+      // Item exists in filtered data
+      return dataMap.get(answerText);
     } else {
-      newItems.push(item);
+      // Item missing from filtered data - add with count: 0
+      return {
+        answer_text: answerText,
+        count: 0,
+        percentage: 0
+      };
     }
   });
 
-  // Sort baseline items according to baseline order
-  baselineItems.sort((a, b) => {
-    const aIndex = baselineMap.get(a.answer_text);
-    const bIndex = baselineMap.get(b.answer_text);
-    return aIndex - bIndex;
-  });
+  // Find new items not in baseline
+  const newItems = data.filter(item => !baselineOrder.includes(item.answer_text));
 
   // Sort new items by count DESC
   newItems.sort((a, b) => b.count - a.count);

@@ -68,10 +68,23 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
             // Use appropriate column name based on usage type
             const columnName = filterType ? `${filterType}_pct` : `${actualQuestionId}_pct`;
 
+            // Format percentage display:
+            // - count === 0 → "No data"
+            // - count > 0 but rounds to 0% → "<1%"
+            // - otherwise → actual percentage
+            let displayPercentage;
+            if (!item.count || item.count === 0) {
+              displayPercentage = 'No data';
+            } else if (Math.round(item.percentage) === 0) {
+              displayPercentage = '<1%';
+            } else {
+              displayPercentage = `${Math.round(item.percentage)}%`;
+            }
+
             return {
               Resource: cleanAnswer,
               resource: cleanAnswer,
-              [columnName]: item.percentage ? (Math.round(item.percentage) === 0 && item.count > 0 ? '<1%' : `${Math.round(item.percentage)}%`) : '0%',
+              [columnName]: displayPercentage,
               count: item.count
             };
           });

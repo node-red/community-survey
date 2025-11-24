@@ -59,12 +59,29 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
             }
 
             // Calculate percentage from count data
-            const percentage = totalCount > 0 ? (item.count || 0) / totalCount * 100 : 0;
+            const count = item.count || 0;
+            const rawPercentage = totalCount > 0 ? count / totalCount * 100 : 0;
+            const percentage = Math.round(rawPercentage);
+
+            // Format display percentage:
+            // - count === 0 → "No data"
+            // - count > 0 but rounds to 0% → "<1%"
+            // - otherwise → actual percentage with %
+            let displayPercentage;
+            if (count === 0) {
+              displayPercentage = 'No data';
+            } else if (percentage === 0) {
+              displayPercentage = '<1%';
+            } else {
+              displayPercentage = `${percentage}%`;
+            }
 
             return {
               category: cleanAnswer,
-              percentage: Math.round(percentage), // Round to integer
-              count: item.count || 0
+              percentage: percentage,
+              displayPercentage: displayPercentage,
+              count: count,
+              hasData: count > 0
             };
           });
 
@@ -79,7 +96,9 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                 chartData.push({
                   category: category,
                   percentage: 0,
-                  count: 0
+                  displayPercentage: 'No data',
+                  count: 0,
+                  hasData: false
                 });
               }
             });
@@ -289,28 +308,28 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                       }}
                     >
                       <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
-                        {item.percentage}%
+                        {item.displayPercentage}
                       </span>
                       <span className="text-gray-700 text-xs leading-tight mt-1 uppercase break-words max-w-full">
                         {item.category}
                       </span>
                     </div>
                   )}
-                  
+
                   {/* Bar that grows from bottom up based on percentage */}
-                  <div 
+                  <div
                     className="relative w-full flex flex-col justify-between"
-                    style={{ 
+                    style={{
                       height: `${barHeightPercent}%`,
                       backgroundColor: actualColor,
-                      minHeight: item.percentage > 0 ? '4px' : '0px' // Smaller min height since text can be outside
+                      minHeight: item.hasData ? '4px' : '0px' // Smaller min height since text can be outside
                     }}
                   >
                     {/* Text inside the bar - positioned at top (only when it fits) */}
-                    {item.percentage > 0 && textFitsInside && (
+                    {item.hasData && textFitsInside && (
                       <div className="absolute inset-x-0 top-0 flex flex-col items-start p-2 overflow-hidden">
                         <span className="text-white text-xs font-bold whitespace-nowrap">
-                          {item.percentage}%
+                          {item.displayPercentage}
                         </span>
                         <span className="text-white text-xs leading-tight mt-1 uppercase break-words max-w-full">
                           {item.category}
@@ -319,11 +338,11 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                     )}
                   </div>
                   
-                  {/* Show label for 0% bars with consistent styling */}
+                  {/* Show label for 0%/<1%/No data bars with consistent styling */}
                   {item.percentage === 0 && (
                     <div className="absolute left-0 right-0 flex flex-col items-start p-2 bottom-0 overflow-hidden">
                       <span className="text-gray-900 text-xs font-bold whitespace-nowrap">
-                        0%
+                        {item.displayPercentage}
                       </span>
                       <span className="text-gray-700 text-xs leading-tight mt-1 uppercase break-words max-w-full">
                         {item.category}

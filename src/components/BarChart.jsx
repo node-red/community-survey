@@ -116,6 +116,7 @@ const BarChart = ({
   };
 
   // Process data - ensure data is an array
+  // Note: Data order is preserved from parent component (baseline ordering applied upstream)
   const chartData = (Array.isArray(data) ? data : [])
     .map(row => ({
       resource: row.Resource || row.resource || '',
@@ -123,12 +124,7 @@ const BarChart = ({
       displayValue: !row[valueColumn] || row[valueColumn] === '-' || row[valueColumn] === 'No data' ? 'No data' : row[valueColumn],
       hasData: row[valueColumn] && row[valueColumn] !== '-' && row[valueColumn] !== 'No data' && parseInt(row[valueColumn].replace('%', ''), 10) >= 0,
       count: row.count // Preserve count for tooltips
-    }))
-    .sort((a, b) => {
-      if (a.hasData && !b.hasData) return -1;
-      if (!a.hasData && b.hasData) return 1;
-      return b.value - a.value;
-    });
+    }));
 
   const maxValue = Math.max(...chartData.filter(d => d.hasData).map(d => d.value));
 

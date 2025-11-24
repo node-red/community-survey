@@ -266,7 +266,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                             onMouseMove={handleBarMouseMove}
                           >
                             <span className="text-white font-semibold text-xs px-1">
-                              {Math.round(item.percentage) === 0 && item.count > 0 ? '<1%' : `${Math.round(item.percentage)}%`}
+                              {item.count === 0 ? 'No data' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                             </span>
                           </div>
                         );
