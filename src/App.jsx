@@ -192,20 +192,23 @@ function App() {
                     console.log("Section counts received:", sectionCounts);
                 setSectionCounts(sectionCounts);
 
-                // Fetch baseline orders for all quantitative charts (without filters)
+                // Fetch baseline orders for all charts (without filters)
                 // Exclude questions with predefined ordinal ordering
                 const ordinalQuestions = ['ElR6d2', 'joRz61', 'P9xr1x', 'xDqzMk', 'qGrzbg', 'ZO7eJB', 'kG2v5Z', 'ZO7eO5'];
-                const allQuestionIds = [
+                const quantitativeQuestionIds = [
                     'VPeNQ6', '2AWoaM', 'rO4YaX', '476OJ5', 'ZO7ede',
                     'kGozGZ', 'erJzEk', '089kZ6', '8LBr6x', 'Dp8ax5',
                     'Ma4BjA', 'NXjP0j'
                 ];
-                const questionsNeedingBaseline = allQuestionIds.filter(id => !ordinalQuestions.includes(id));
+                const qualitativeQuestionIds = ['gqlzqJ']; // Qualitative analysis questions
+                const questionsNeedingBaseline = quantitativeQuestionIds.filter(id => !ordinalQuestions.includes(id));
 
                 if (import.meta.env.DEV)
-                    console.log("Fetching baseline orders for questions:", questionsNeedingBaseline);
+                    console.log("Fetching baseline orders for questions:", questionsNeedingBaseline, qualitativeQuestionIds);
 
                 const baselineOrdersMap = {};
+
+                // Fetch quantitative baselines
                 await Promise.all(
                     questionsNeedingBaseline.map(async (questionId) => {
                         try {
@@ -220,6 +223,30 @@ function App() {
                         }
                     })
                 );
+
+                // Fetch qualitative baselines (uses getQualitativeData)
+                await Promise.all(
+                    qualitativeQuestionIds.map(async (questionId) => {
+                        try {
+                            const result = await wasmService.getQualitativeData(questionId);
+                            const themes = result?.themes || result || [];
+                            if (Array.isArray(themes) && themes.length > 0) {
+                                // Sort by percentage descending to get baseline order
+                                const sorted = [...themes].sort((a, b) => {
+                                    const percentA = typeof a.percentage === 'string' ? parseFloat(a.percentage.replace('%', '')) : parseFloat(a.percentage) || 0;
+                                    const percentB = typeof b.percentage === 'string' ? parseFloat(b.percentage.replace('%', '')) : parseFloat(b.percentage) || 0;
+                                    return percentB - percentA;
+                                });
+                                baselineOrdersMap[questionId] = sorted.map(item => item.theme_name);
+                                if (import.meta.env.DEV)
+                                    console.log(`Baseline order for qualitative ${questionId}:`, baselineOrdersMap[questionId]);
+                            }
+                        } catch (error) {
+                            console.error(`Failed to fetch qualitative baseline for ${questionId}:`, error);
+                        }
+                    })
+                );
+
                 setBaselineOrders(baselineOrdersMap);
 
                 // Restore scroll position when data is loaded
@@ -2640,6 +2667,7 @@ function App() {
                                                         wasmService={
                                                             wasmService
                                                         }
+                                                        baselineOrder={baselineOrders["gqlzqJ"]}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-1 gap-6">

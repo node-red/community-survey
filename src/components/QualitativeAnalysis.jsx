@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 
-const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '#64748b', wasmService }) => {
+const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '#64748b', wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
   const [filteredData, setFilteredData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -305,14 +305,38 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
           className="flex-1 p-4 space-y-3"
           onMouseMove={handleMouseMove}
         >
-        {getDisplayThemes()
-          .sort((a, b) => {
-            // Extract numeric percentage values and sort descending
-            // Handle both string and numeric percentage values
-            const percentA = typeof a.percentage === 'string' ? parseFloat(a.percentage.replace('%', '')) : parseFloat(a.percentage) || 0;
-            const percentB = typeof b.percentage === 'string' ? parseFloat(b.percentage.replace('%', '')) : parseFloat(b.percentage) || 0;
-            return percentB - percentA;
-          })
+        {(() => {
+          const themes = getDisplayThemes();
+          // Apply baseline ordering if available, otherwise sort by percentage descending
+          if (baselineOrder && baselineOrder.length > 0) {
+            const baselineMap = new Map(baselineOrder.map((name, index) => [name, index]));
+            const baselineThemes = [];
+            const newThemes = [];
+            themes.forEach(theme => {
+              if (baselineMap.has(theme.theme_name)) {
+                baselineThemes.push(theme);
+              } else {
+                newThemes.push(theme);
+              }
+            });
+            // Sort baseline themes by their baseline order
+            baselineThemes.sort((a, b) => baselineMap.get(a.theme_name) - baselineMap.get(b.theme_name));
+            // Sort new themes by percentage descending
+            newThemes.sort((a, b) => {
+              const percentA = typeof a.percentage === 'string' ? parseFloat(a.percentage.replace('%', '')) : parseFloat(a.percentage) || 0;
+              const percentB = typeof b.percentage === 'string' ? parseFloat(b.percentage.replace('%', '')) : parseFloat(b.percentage) || 0;
+              return percentB - percentA;
+            });
+            return [...baselineThemes, ...newThemes];
+          } else {
+            // No baseline, sort by percentage descending
+            return [...themes].sort((a, b) => {
+              const percentA = typeof a.percentage === 'string' ? parseFloat(a.percentage.replace('%', '')) : parseFloat(a.percentage) || 0;
+              const percentB = typeof b.percentage === 'string' ? parseFloat(b.percentage.replace('%', '')) : parseFloat(b.percentage) || 0;
+              return percentB - percentA;
+            });
+          }
+        })()
           .map((theme, _index) => {
             const percentValue = typeof theme.percentage === 'string' ?
               parseFloat(theme.percentage.replace('%', '')) :
