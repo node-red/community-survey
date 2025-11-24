@@ -221,9 +221,9 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                           key={device.label}
                           className={`relative flex items-center ${justifyClass} border-r border-white/20 last:border-r-0 cursor-pointer`}
                           style={{
-                            width: device.percentage > 0 ? `${device.percentage}%` : 'auto',
+                            width: device.percentage > 0 ? `${device.percentage}%` : `${100 / deviceData.length}%`,
                             backgroundColor: device.color,
-                            minWidth: device.percentage > 0 ? '35px' : '0',
+                            minWidth: '35px',
                             transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                           }}
                           onMouseEnter={(e) => {
@@ -240,11 +240,9 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                           }}
                           onMouseMove={handleBarMouseMove}
                         >
-                          {device.percentage > 0 && (
-                            <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
-                              {device.count === 0 ? 'No data' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}
-                            </span>
-                          )}
+                          <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
+                            {device.count === 0 ? 'No data' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}
+                          </span>
                         </div>
                       );
                     })}
@@ -267,15 +265,13 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                         key={device.label}
                         className={`flex flex-col ${itemsClass} justify-start min-w-0`}
                         style={{
-                          width: device.percentage > 0 ? `${device.percentage}%` : 'auto',
-                          minWidth: device.percentage > 0 ? '35px' : '0'
+                          width: device.percentage > 0 ? `${device.percentage}%` : `${100 / deviceData.length}%`,
+                          minWidth: '35px'
                         }}
                       >
-                        {device.percentage > 0 && (
-                          <div className={`text-xs text-gray-500 ${textClass} font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full`}>
-                            {device.label.toUpperCase()}
-                          </div>
-                        )}
+                        <div className={`text-xs text-gray-500 ${textClass} font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full`}>
+                          {device.label.toUpperCase()}
+                        </div>
                       </div>
                     );
                   })}
@@ -376,9 +372,9 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                               key={device.label}
                               className={`relative flex items-center ${justifyClass} border-r border-white/20 last:border-r-0 cursor-pointer`}
                               style={{
-                                width: device.percentage > 0 ? `${device.percentage}%` : 'auto',
+                                width: device.percentage > 0 ? `${device.percentage}%` : `${100 / averages.length}%`,
                                 backgroundColor: device.color,
-                                minWidth: device.percentage > 0 ? '35px' : '0',
+                                minWidth: '35px',
                                 transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                               }}
                               onMouseEnter={(e) => {
@@ -395,11 +391,9 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                               }}
                               onMouseMove={handleBarMouseMove}
                             >
-                              {device.percentage > 0 && (
-                                <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
-                                  {device.count === 0 ? 'No data' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}
-                                </span>
-                              )}
+                              <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
+                                {device.count === 0 ? 'No data' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}
+                              </span>
                             </div>
                           );
                         })}
@@ -421,15 +415,13 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             key={device.label}
                             className={`flex flex-col ${itemsClass} justify-start min-w-0`}
                             style={{
-                              width: device.percentage > 0 ? `${device.percentage}%` : 'auto',
-                              minWidth: device.percentage > 0 ? '35px' : '0'
+                              width: device.percentage > 0 ? `${device.percentage}%` : `${100 / averages.length}%`,
+                              minWidth: '35px'
                             }}
                           >
-                            {device.percentage > 0 && (
-                              <div className={`text-xs text-gray-500 ${textClass} font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full`}>
-                                {device.label.toUpperCase()}
-                              </div>
-                            )}
+                            <div className={`text-xs text-gray-500 ${textClass} font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full`}>
+                              {device.label.toUpperCase()}
+                            </div>
                           </div>
                         );
                       })}
