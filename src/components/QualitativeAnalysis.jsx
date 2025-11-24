@@ -325,7 +325,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                   frequency: 0,
                   count: 0,
                   representative_quotes: null,
-                  description: 'No data'
+                  description: 'N/A'
                 };
               }
             });
@@ -360,7 +360,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
             // - otherwise → actual percentage
             let displayPercentage;
             if (count === 0) {
-              displayPercentage = 'No data';
+              displayPercentage = 'N/A';
             } else if (Math.round(percentValue) === 0) {
               displayPercentage = '<1%';
             } else {
@@ -411,7 +411,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                 
                 {/* Description Below */}
                 <p className="mt-1 text-[10px] text-nodered-gray-500 font-normal leading-tight px-2">
-                  {theme.description || (count === 0 ? 'No data' : '')}
+                  {theme.description || (count === 0 ? 'N/A' : '')}
                 </p>
               </div>
             );

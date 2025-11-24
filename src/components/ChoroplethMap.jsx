@@ -204,7 +204,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
 
     if (countryData) {
       const percentage = (countryData.count / totalResponses) * 100;
-      const displayPercentage = countryData.count === 0 ? 'No data' : (Math.round(percentage) === 0 ? '<1%' : `${Math.round(percentage)}%`);
+      const displayPercentage = countryData.count === 0 ? 'N/A' : (Math.round(percentage) === 0 ? '<1%' : `${Math.round(percentage)}%`);
       setTooltipContent(
         `${countryName}\n${countryData.count} respondents (${displayPercentage})`
       );

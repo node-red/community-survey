@@ -120,9 +120,9 @@ const BarChart = ({
   const chartData = (Array.isArray(data) ? data : [])
     .map(row => ({
       resource: row.Resource || row.resource || '',
-      value: !row[valueColumn] || row[valueColumn] === '-' || row[valueColumn] === 'No data' ? 0 : parseInt(row[valueColumn].replace('%', ''), 10),
-      displayValue: !row[valueColumn] || row[valueColumn] === '-' || row[valueColumn] === 'No data' ? 'No data' : row[valueColumn],
-      hasData: row[valueColumn] && row[valueColumn] !== '-' && row[valueColumn] !== 'No data' && parseInt(row[valueColumn].replace('%', ''), 10) >= 0,
+      value: !row[valueColumn] || row[valueColumn] === '-' || row[valueColumn] === 'N/A' ? 0 : parseInt(row[valueColumn].replace('%', ''), 10),
+      displayValue: !row[valueColumn] || row[valueColumn] === '-' || row[valueColumn] === 'N/A' ? 'N/A' : row[valueColumn],
+      hasData: row[valueColumn] && row[valueColumn] !== '-' && row[valueColumn] !== 'N/A' && parseInt(row[valueColumn].replace('%', ''), 10) >= 0,
       count: row.count // Preserve count for tooltips
     }));
 
@@ -145,7 +145,7 @@ const BarChart = ({
       <div className={chart.bars}>
         {chartData.map((item, index) => {
           const barWidth = item.hasData && maxValue > 0 ? (item.value / maxValue) * 100 : 0;
-          const displayText = item.hasData ? item.displayValue : 'No data';
+          const displayText = item.hasData ? item.displayValue : 'N/A';
           const textPos = getTextPositioning(item.resource, displayText, barWidth, !item.hasData);
           
           const barClass = isMirrored ? chart.barMirrored : chart.bar;

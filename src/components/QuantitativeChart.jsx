@@ -74,7 +74,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
             // - otherwise → actual percentage
             let displayPercentage;
             if (!item.count || item.count === 0) {
-              displayPercentage = 'No data';
+              displayPercentage = 'N/A';
             } else if (Math.round(item.percentage) === 0) {
               displayPercentage = '<1%';
             } else {

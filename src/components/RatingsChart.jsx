@@ -268,7 +268,7 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                   >
                     {/* Percentage text inside bar - always show */}
                     <span className="text-white font-semibold text-xs px-1">
-                      {item.count === 0 ? 'No data' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                      {item.count === 0 ? 'N/A' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                     </span>
                   </div>
                 );
@@ -314,7 +314,7 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                       transition: 'width 0.3s ease-in-out'
                     }}
                   >
-                    {item.percentage >= 5 && (item.count === 0 ? 'No data' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`))}
+                    {item.percentage >= 5 && (item.count === 0 ? 'N/A' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`))}
                   </div>
                 </div>
                 <div className="text-xs text-gray-500 w-12 text-right">
