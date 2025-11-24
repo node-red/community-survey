@@ -2497,7 +2497,7 @@ function App() {
                           <div className="grid grid-cols-1 gap-12">
                             <RatingsChart
                               questionId="a4RvP9"
-                              questionTitle="How would you rate this survey (1-5)?"
+                              questionTitle="How would you rate this survey?"
                               filters={filters}
                               ratingScale={5}
                               wasmService={wasmService}

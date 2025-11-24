@@ -158,7 +158,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <h3 className="text-lg font-semibold text-nodered-gray-700">
-              Satisfaction ratings by device type? (1-7)
+              Satisfaction ratings by device type?
             </h3>
           </div>
 

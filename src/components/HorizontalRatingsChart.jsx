@@ -418,9 +418,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-nodered-gray-700">
-                    {questionTitle ? (
-                      showRatingScale && !questionTitle.includes('(1-5)') ? `${questionTitle} (1-${ratingScale})` : questionTitle
-                    ) : 'Rating Analysis'}
+                    {questionTitle ? questionTitle : 'Rating Analysis'}
                   </h3>
                 </div>
                 {/* Respondent Count Badge */}

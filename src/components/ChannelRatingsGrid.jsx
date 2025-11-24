@@ -165,7 +165,7 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <h3 className={compact ? "text-sm font-medium text-nodered-gray-700" : "text-lg font-semibold text-nodered-gray-700"}>
-              Channel Ratings Overview (1-7)
+              Channel Ratings Overview
             </h3>
           </div>
 

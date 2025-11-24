@@ -158,7 +158,7 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <h3 className="text-lg font-semibold text-nodered-gray-700">
-              Compared to alternatives, Node-RED's quality is ... (1-7)
+              Compared to alternatives, Node-RED's quality is ...
             </h3>
           </div>
 

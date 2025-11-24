@@ -47,7 +47,7 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
           'Quality Ranking',
           'Reach Gap Opportunities',
           'Reach Ranking',
-          'Channel Ratings Overview (1-7)',
+          'Channel Ratings Overview',
           'User Count by Learning Resource'
         ];
         if (unwantedTitles.includes(text)) return;

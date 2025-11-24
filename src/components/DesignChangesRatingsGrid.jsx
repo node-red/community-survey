@@ -167,7 +167,7 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <h3 className="text-lg font-semibold text-nodered-gray-700">
-              How would you feel about potential changes to? (1-7)
+              How would you feel about potential changes to?
             </h3>
           </div>
 
