@@ -1348,7 +1348,8 @@ class DuckDBWasmService {
       let sql;
 
       // Treat empty filters object the same as null (no filters)
-      const hasFilters = filters && Object.keys(filters).length > 0;
+      // Check if any filter arrays actually have values, not just if the object has keys
+      const hasFilters = filters && Object.values(filters).some(arr => Array.isArray(arr) && arr.length > 0);
 
       if (hasFilters) {
         const whereClause = await this.buildFilterWhereClause(filters);
