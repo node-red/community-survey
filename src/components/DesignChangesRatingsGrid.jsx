@@ -189,10 +189,29 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                       <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
                     </span>
                   </div>
-                  
+
+                  {/* Labels above bars */}
+                  <div className="flex mb-0.5">
+                    {data.data.map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex flex-col items-center justify-start"
+                        style={{
+                          width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
+                          minWidth: '28px',
+                          transition: 'width 0.3s ease-in-out'
+                        }}
+                      >
+                        <div className="text-[10px] text-gray-500 text-center font-semibold">
+                          {item.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
                   {/* Horizontal Percentage Bar */}
                   <div className="mb-1">
-                    <div 
+                    <div
                       className="flex h-6 overflow-hidden shadow-sm transform-gpu transition-transform duration-200"
                       onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.01)'}
                       onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -281,23 +300,10 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                     </div>
                   </div>
 
-                  {/* Labels below bars */}
-                  <div className="flex">
-                    {data.data.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex flex-col items-center justify-start"
-                        style={{
-                          width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                          minWidth: '28px',
-                          transition: 'width 0.3s ease-in-out'
-                        }}
-                      >
-                        <div className="text-[10px] text-gray-500 text-center font-semibold">
-                          {item.label}
-                        </div>
-                      </div>
-                    ))}
+                  {/* Scale direction indicator */}
+                  <div className="flex justify-between mt-0.5 px-1">
+                    <span className="text-[10px] text-gray-400 italic">Worst</span>
+                    <span className="text-[10px] text-gray-400 italic">Best</span>
                   </div>
                 </div>
               );

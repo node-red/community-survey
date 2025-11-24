@@ -181,6 +181,27 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
 
         {/* Horizontal Percentage Bars */}
         <div className="p-4">
+          {/* Labels above bars */}
+          <div className="flex mb-0.5">
+            {data.map((item, _index) => {
+              return (
+                <div
+                  key={item.label}
+                  className="flex flex-col items-center justify-start"
+                  style={{
+                    width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
+                    minWidth: '35px',
+                    transition: 'width 0.3s ease-in-out'
+                  }}
+                >
+                  <div className="text-xs text-gray-500 text-center font-semibold">
+                    {item.label}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
           {/* Bar Container */}
           <div className="mb-2">
             <div className="flex h-6 shadow-sm">
@@ -275,25 +296,10 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
             </div>
           </div>
 
-          {/* Labels below bars */}
-          <div className="flex">
-            {data.map((item, _index) => {
-              return (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-center justify-start"
-                  style={{
-                    width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                    minWidth: '35px', // Match the bar minimum width
-                    transition: 'width 0.3s ease-in-out'
-                  }}
-                >
-                  <div className="text-xs text-gray-500 text-center font-semibold">
-                    {item.label}
-                  </div>
-                </div>
-              );
-            })}
+          {/* Scale direction indicator */}
+          <div className="flex justify-between mt-0.5 px-1">
+            <span className="text-[10px] text-gray-400 italic">Worst</span>
+            <span className="text-[10px] text-gray-400 italic">Best</span>
           </div>
 
           {/* Alternative: Stacked view for mobile */}

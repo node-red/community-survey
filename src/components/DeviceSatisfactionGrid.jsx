@@ -280,23 +280,10 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                     </div>
                   </div>
 
-                  {/* Labels below bars */}
-                  <div className="flex">
-                    {data.data.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex flex-col items-center justify-start"
-                        style={{
-                          width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                          minWidth: '28px',
-                          transition: 'width 0.3s ease-in-out'
-                        }}
-                      >
-                        <div className="text-xs text-gray-500 text-center font-semibold">
-                          {item.label}
-                        </div>
-                      </div>
-                    ))}
+                  {/* Scale direction indicator */}
+                  <div className="flex justify-between mt-0.5 px-1">
+                    <span className="text-[10px] text-gray-400 italic">Worst</span>
+                    <span className="text-[10px] text-gray-400 italic">Best</span>
                   </div>
                 </div>
               );
