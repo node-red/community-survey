@@ -88,7 +88,7 @@ export const sidebar = {
   },
   item: "px-[7px] py-[2px] text-[11px] text-[#666] hover:bg-[#f3f3f3] last:border-b-0",
   preset: {
-    wrapper: "px-4 py-2 bg-white",
+    wrapper: "px-4 py-2 bg-white sticky top-0 z-10 border-b border-[#ddd]",
     button:
       "w-full px-[7px] py-[3px] border border-[#999] rounded-[3px] bg-white text-[#333] text-[11px] cursor-pointer transition-all duration-150 hover:bg-[#f0f0f0] hover:border-[#6baed6]",
     buttonActive: "!bg-[#6baed6] !text-white !border-[#5ba0c5] hover:!bg-[#5ba0c5]",
