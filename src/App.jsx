@@ -1365,7 +1365,10 @@ function App() {
                         ? "bg-white hover:bg-gray-50 border border-gray-300 shadow-sm"
                         : "bg-transparent border border-transparent"
                     }`}
-                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    onClick={() => {
+                      if (isMobile && sidebarCollapsed) setTocCollapsed(true);
+                      setSidebarCollapsed(!sidebarCollapsed);
+                    }}
                     style={{
                       left: "7px",
                       top: "16px",
@@ -2466,7 +2469,10 @@ function App() {
               containerRef={mainContentRef}
               width={tocWidth}
               collapsed={tocCollapsed}
-              onToggle={() => setTocCollapsed(!tocCollapsed)}
+              onToggle={() => {
+                if (isMobile && tocCollapsed) setSidebarCollapsed(true);
+                setTocCollapsed(!tocCollapsed);
+              }}
               onItemMouseEnter={handleTocItemMouseEnter}
               onItemMouseLeave={handleTocItemMouseLeave}
               isMobile={isMobile}
