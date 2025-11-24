@@ -11,9 +11,9 @@ const DESIGN_CHANGE_QUESTIONS = [
 ];
 
 const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
-  const [tooltipData, setTooltipData] = useState(null);
+  const [tooltipContent, setTooltipContent] = useState('');
+  const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [hideTooltipTimeout, setHideTooltipTimeout] = useState(null);
 
   const [questionData, setQuestionData] = useState({});
   const [loading, setLoading] = useState(true);
@@ -64,15 +64,6 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
 
     fetchAllQuestionData();
   }, [filters, wasmService]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (hideTooltipTimeout) {
-        clearTimeout(hideTooltipTimeout);
-      }
-    };
-  }, [hideTooltipTimeout]);
 
   const processRatingData = (rawData, scale = 7, questionId) => {
     const colors = getRatingScheme(questionId).slice(0, scale);
@@ -194,92 +185,93 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
 
                   {/* Horizontal Percentage Bar */}
                   <div className="mb-1">
-                    <div
-                      className="flex h-6 overflow-hidden shadow-sm transform-gpu transition-transform duration-200"
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.01)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                      {data.data.map((item) => (
-                        <div
-                          key={item.label}
-                          className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer transition-opacity hover:opacity-90"
-                          style={{
-                            width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                            backgroundColor: item.color,
-                            minWidth: '28px',
-                            transition: 'width 0.3s ease-in-out'
-                          }}
-                          onMouseEnter={(e) => {
-                            // Clear any pending hide timeout
-                            if (hideTooltipTimeout) {
-                              clearTimeout(hideTooltipTimeout);
-                              setHideTooltipTimeout(null);
-                            }
-                            
-                            // Always show 10px above cursor - use screen coordinates
-                            const screenY = e.clientY; // Screen Y position
-                            const screenX = e.clientX; // Screen X position
+                    <div className="flex h-6 shadow-sm">
+                      {data.data.map((item) => {
+                        const handleBarMouseEnter = (event) => {
+                          event.stopPropagation();
+
+                          const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
+                          const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
+
+                          setTooltipContent(`Rating ${item.label}\n${item.count} respondents (${percentage}%)`);
+
+                          const screenY = event.clientY;
+                          const screenX = event.clientX;
+                          const tooltipWidth = 200;
+                          const tooltipHeight = 60;
+
+                          let adjustedX = screenX + 15;
+                          let adjustedY = screenY - tooltipHeight - 10;
+
+                          if (adjustedY < 0) {
+                            adjustedY = screenY + 15;
+                          }
+                          if (adjustedX + tooltipWidth > window.innerWidth) {
+                            adjustedX = screenX - tooltipWidth - 15;
+                          }
+
+                          setTooltipPosition({ x: adjustedX, y: adjustedY });
+                          setShowTooltip(true);
+                        };
+
+                        const handleBarMouseLeave = (event) => {
+                          event.stopPropagation();
+                          setShowTooltip(false);
+                        };
+
+                        const handleBarMouseMove = (event) => {
+                          if (showTooltip) {
+                            event.stopPropagation();
+
+                            const screenY = event.clientY;
+                            const screenX = event.clientX;
                             const tooltipWidth = 200;
-                            const tooltipHeight = 80; // Approximate height
-                            
-                            let adjustedX = screenX + 15; // 15px to the right of cursor
-                            let adjustedY = screenY - tooltipHeight - 10; // Bottom of tooltip 10px above cursor
-                            
-                            // Only adjust if not enough screen space
+                            const tooltipHeight = 60;
+
+                            let adjustedX = screenX + 15;
+                            let adjustedY = screenY - tooltipHeight - 10;
+
                             if (adjustedY < 0) {
-                              adjustedY = screenY + 15; // Switch to below cursor
+                              adjustedY = screenY + 15;
                             }
                             if (adjustedX + tooltipWidth > window.innerWidth) {
-                              adjustedX = screenX - tooltipWidth - 15; // Switch to left side
+                              adjustedX = screenX - tooltipWidth - 15;
                             }
-                            
-                            const averageRating = calculateAverageRating(data.data);
-                            const totalResponses = data.data.reduce((sum, item) => sum + item.count, 0);
-                            
-                            setTooltipData({
-                              averageRating: averageRating,
-                              totalResponses: totalResponses,
-                              question: question.name
-                            });
+
                             setTooltipPosition({ x: adjustedX, y: adjustedY });
-                          }}
-                          onMouseMove={(e) => {
-                            if (tooltipData) {
-                              // Always show 10px above cursor - use screen coordinates
-                              const screenY = e.clientY; // Screen Y position
-                              const screenX = e.clientX; // Screen X position
-                              const tooltipWidth = 200;
-                              const tooltipHeight = 80; // Approximate height
-                              
-                              let adjustedX = screenX + 15; // 15px to the right of cursor
-                              let adjustedY = screenY - tooltipHeight - 10; // Bottom of tooltip 10px above cursor
-                              
-                              // Only adjust if not enough screen space
-                              if (adjustedY < 0) {
-                                adjustedY = screenY + 15; // Switch to below cursor
-                              }
-                              if (adjustedX + tooltipWidth > window.innerWidth) {
-                                adjustedX = screenX - tooltipWidth - 15; // Switch to left side
-                              }
-                              
-                              setTooltipPosition({ x: adjustedX, y: adjustedY });
-                            }
-                          }}
-                          onMouseLeave={() => {
-                            // Add a delay before hiding the tooltip
-                            const timeout = setTimeout(() => {
-                              setTooltipData(null);
-                              setHideTooltipTimeout(null);
-                            }, 300); // 300ms delay
-                            
-                            setHideTooltipTimeout(timeout);
-                          }}
-                        >
-                          <span className="text-white font-semibold text-[10px] px-1">
-                            {item.label}
-                          </span>
-                        </div>
-                      ))}
+                          }
+                        };
+
+                        return (
+                          <div
+                            key={item.label}
+                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer"
+                            style={{
+                              width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
+                              backgroundColor: item.color,
+                              minWidth: '28px',
+                              transition: 'width 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}
+                            onMouseEnter={(e) => {
+                              const currentWidth = e.currentTarget.offsetWidth;
+                              const scaleX = (currentWidth + 10) / currentWidth;
+                              e.currentTarget.style.transform = `scaleY(1.1) scaleX(${scaleX})`;
+                              e.currentTarget.style.zIndex = '10';
+                              handleBarMouseEnter(e);
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.zIndex = '0';
+                              handleBarMouseLeave(e);
+                            }}
+                            onMouseMove={handleBarMouseMove}
+                          >
+                            <span className="text-white font-semibold text-[10px] px-1">
+                              {item.label}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -297,9 +289,9 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
           </div>
         </div>
       </div>
-      
+
       {/* Tooltip */}
-      {tooltipData && (
+      {showTooltip && (
         <div
           className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm whitespace-pre-line border border-gray-600"
           style={{
@@ -308,9 +300,7 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
             maxWidth: '200px'
           }}
         >
-          <div className="font-semibold">{tooltipData.question}</div>
-          <div>Average Rating: {tooltipData.averageRating}/7</div>
-          <div>Total Responses: {tooltipData.totalResponses}</div>
+          {tooltipContent}
         </div>
       )}
     </div>
