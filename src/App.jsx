@@ -876,7 +876,7 @@ function App() {
             <div className="max-w-5xl mx-auto px-6">
               {/* Section Title */}
               <div className="text-left mb-12">
-                <h2 className="text-3xl font-bold text-nodered-gray-800 mb-4">
+                <h2 className="text-3xl font-bold text-nodered-gray-800 mb-4 mt-12 md:mt-0">
                   Introduction
                 </h2>
                 <p className="text-lg text-nodered-gray-600 max-w-3xl">
