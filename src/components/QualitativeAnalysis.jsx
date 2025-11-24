@@ -309,18 +309,26 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
           const themes = getDisplayThemes();
           // Apply baseline ordering if available, otherwise sort by percentage descending
           if (baselineOrder && baselineOrder.length > 0) {
-            const baselineMap = new Map(baselineOrder.map((name, index) => [name, index]));
-            const baselineThemes = [];
-            const newThemes = [];
-            themes.forEach(theme => {
-              if (baselineMap.has(theme.theme_name)) {
-                baselineThemes.push(theme);
+            const themeMap = new Map(themes.map(theme => [theme.theme_name, theme]));
+
+            // Create ordered list from baseline, including missing items with count: 0
+            const baselineThemes = baselineOrder.map(themeName => {
+              if (themeMap.has(themeName)) {
+                return themeMap.get(themeName);
               } else {
-                newThemes.push(theme);
+                // Create placeholder for missing baseline item
+                return {
+                  theme_name: themeName,
+                  percentage: 0,
+                  frequency: 0,
+                  count: 0,
+                  representative_quotes: null
+                };
               }
             });
-            // Sort baseline themes by their baseline order
-            baselineThemes.sort((a, b) => baselineMap.get(a.theme_name) - baselineMap.get(b.theme_name));
+
+            // Find any new themes not in baseline
+            const newThemes = themes.filter(theme => !baselineOrder.includes(theme.theme_name));
             // Sort new themes by percentage descending
             newThemes.sort((a, b) => {
               const percentA = typeof a.percentage === 'string' ? parseFloat(a.percentage.replace('%', '')) : parseFloat(a.percentage) || 0;
