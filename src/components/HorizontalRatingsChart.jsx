@@ -214,7 +214,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
     const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
 
     setTooltipContent(
-      `${item.label}\n${item.count} respondents (${percentage}%)`
+      `${/^\d+$/.test(item.label) ? 'Rating ' : ''}${item.label}\n${item.count} respondents (${percentage}%)`
     );
     
     // Position tooltip near cursor

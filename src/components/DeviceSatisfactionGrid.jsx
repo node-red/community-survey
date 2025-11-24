@@ -198,7 +198,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                           const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
                           const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
 
-                          setTooltipContent(`${item.count} respondents (${percentage}%)`);
+                          setTooltipContent(`Rating ${item.label}\n${item.count} respondents (${percentage}%)`);
 
                           const screenY = event.clientY;
                           const screenX = event.clientX;

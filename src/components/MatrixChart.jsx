@@ -176,7 +176,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                         event.stopPropagation();
 
                         if (device.count > 0) {
-                          setTooltipContent(`${device.count} respondents (${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)})`);
+                          setTooltipContent(`${device.label}\n${device.count} respondents (${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)})`);
 
                           const screenY = event.clientY;
                           const screenX = event.clientX;
@@ -328,7 +328,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             event.stopPropagation();
 
                             if (device.count > 0) {
-                              setTooltipContent(`${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}`);
+                              setTooltipContent(`${device.label}\n${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}`);
 
                               const screenY = event.clientY;
                               const screenX = event.clientX;
