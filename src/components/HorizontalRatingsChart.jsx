@@ -192,11 +192,11 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
 
   // Calculate average rating (for numeric rating data)
   const calculateAverageRating = (data) => {
-    if (!data || data.length === 0) return 0;
-    
+    if (!data || data.length === 0) return '0.00';
+
     let totalScore = 0;
     let totalResponses = 0;
-    
+
     data.forEach(item => {
       const rating = parseInt(item.label);
       if (!isNaN(rating)) {
@@ -204,8 +204,8 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
         totalResponses += item.count;
       }
     });
-    
-    return totalResponses > 0 ? Math.round(totalScore / totalResponses) : 0;
+
+    return totalResponses > 0 ? (totalScore / totalResponses).toFixed(2) : '0.00';
   };
 
   // Handle mouse events for individual bar tooltip
@@ -285,7 +285,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
     
     if (isNumericRating) {
       setTooltipContent(
-        `Average Rating: ${averageRating} / ${ratingScale}\nTotal Responses: ${totalResponses}`
+        `avg ${averageRating}\nTotal Responses: ${totalResponses}`
       );
     } else {
       setTooltipContent(

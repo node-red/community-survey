@@ -2272,7 +2272,7 @@ function App() {
                               baselineOrder={baselineOrders["gqlzqJ"]}
                             />
                           </div>
-                          <div className="grid grid-cols-1 gap-6">
+                          <div className="grid grid-cols-1 gap-12">
                             <DesignChangesRatingsGrid
                               filters={filters}
                               wasmService={wasmService}

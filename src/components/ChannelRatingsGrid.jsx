@@ -101,7 +101,7 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
 
   // Calculate average rating for a channel
   const calculateAverageRating = (data) => {
-    if (!data || data.length === 0) return 0;
+    if (!data || data.length === 0) return '0.00';
 
     let totalScore = 0;
     let totalResponses = 0;
@@ -112,7 +112,7 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
       totalResponses += item.count;
     });
 
-    return totalResponses > 0 ? Math.round(totalScore / totalResponses) : 0;
+    return totalResponses > 0 ? (totalScore / totalResponses).toFixed(2) : '0.00';
   };
 
   // Only show skeleton during initial load (no data yet)
@@ -179,37 +179,15 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
 
               return (
                 <div key={channel.id} className="px-4 py-3">
-                  <div className="relative flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-2">
                     <h4 className="text-xs font-medium text-gray-700">
                       {channel.name}
                     </h4>
-                    <span className="absolute left-1/2 -translate-x-1/2 text-xs font-bold text-gray-500">
-                      {averageRating}/7
-                    </span>
                     <span className="text-xs text-gray-500">
                       {data.respondentCount}{' '}
                       <span className="hidden sm:inline">respondents</span>
                       <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
                     </span>
-                  </div>
-
-                  {/* Labels above bars */}
-                  <div className="flex mb-0.5">
-                    {data.data.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex flex-col items-center justify-start"
-                        style={{
-                          width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                          minWidth: '28px',
-                          transition: 'width 0.3s ease-in-out'
-                        }}
-                      >
-                        <div className="text-[10px] text-gray-500 text-center font-semibold">
-                          {item.label}
-                        </div>
-                      </div>
-                    ))}
                   </div>
 
                   {/* Horizontal Percentage Bar */}
@@ -296,7 +274,7 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
                             onMouseMove={handleBarMouseMove}
                           >
                             <span className="text-white font-semibold text-xs px-1">
-                              {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                              {item.label}
                             </span>
                           </div>
                         );
@@ -304,9 +282,12 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
                     </div>
                   </div>
 
-                  {/* Scale direction indicator */}
-                  <div className="flex justify-between mt-0.5 px-1">
+                  {/* Scale direction indicator with average */}
+                  <div className="relative flex justify-between mt-0.5 px-1">
                     <span className="text-[10px] text-gray-400 italic">Worst</span>
+                    <span className="absolute left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600">
+                      avg {averageRating}
+                    </span>
                     <span className="text-[10px] text-gray-400 italic">Best</span>
                   </div>
                 </div>

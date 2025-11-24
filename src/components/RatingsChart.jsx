@@ -73,18 +73,18 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
 
   // Calculate average rating
   const calculateAverageRating = (data) => {
-    if (!data || data.length === 0) return 0;
-    
+    if (!data || data.length === 0) return '0.00';
+
     let totalScore = 0;
     let totalResponses = 0;
-    
+
     data.forEach(item => {
       const rating = parseInt(item.label);
       totalScore += rating * item.count;
       totalResponses += item.count;
     });
-    
-    return totalResponses > 0 ? Math.round(totalScore / totalResponses) : 0;
+
+    return totalResponses > 0 ? (totalScore / totalResponses).toFixed(2) : '0.00';
   };
 
   // Only show skeleton during initial load (no data yet)
@@ -147,61 +147,29 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-200 bg-white">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className={compact ? "text-sm font-medium text-nodered-gray-700" : "text-lg font-semibold text-nodered-gray-700"}>
-                    {questionTitle ? (
-                      <>
-                        {questionTitle.endsWith('?') ? questionTitle : questionTitle + '?'}{' '}
-                        <span className="text-gray-600 font-bold">
-                          {calculateAverageRating(data)}/{ratingScale}
-                        </span>
-                      </>
-                    ) : 'Rating Analysis'}
-                  </h3>
-                </div>
-                {/* Respondent Count Badge */}
-                {respondentInfo && (
-                  <div className="flex items-center gap-1 text-sm flex-shrink-0">
-                    <span className="text-gray-600 font-bold">
-                      {respondentInfo.filtered}
-                    </span>
-                    <span className="text-gray-500 hidden sm:inline">
-                      {' '}respondents
-                    </span>
-                    <RespondentIcon />
-                  </div>
-                )}
-              </div>
-            </div>
+          <h3 className={compact ? "text-sm font-medium text-nodered-gray-700" : "text-lg font-semibold text-nodered-gray-700"}>
+            {questionTitle ? (questionTitle.endsWith('?') ? questionTitle : questionTitle + '?') : 'Rating Analysis'}
+          </h3>
+        </div>
+
+        {/* Average and Respondent Count */}
+        <div className="px-4 pt-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-gray-600">
+              avg {calculateAverageRating(data)}
+            </span>
+            {respondentInfo && (
+              <span className="text-xs text-gray-500">
+                {respondentInfo.filtered}{' '}
+                <span className="hidden sm:inline">respondents</span>
+                <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
+              </span>
+            )}
           </div>
         </div>
 
         {/* Horizontal Percentage Bars */}
-        <div className="p-4">
-          {/* Labels above bars */}
-          <div className="flex mb-0.5">
-            {data.map((item, _index) => {
-              return (
-                <div
-                  key={item.label}
-                  className="flex flex-col items-center justify-start"
-                  style={{
-                    width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                    minWidth: '35px',
-                    transition: 'width 0.3s ease-in-out'
-                  }}
-                >
-                  <div className="text-xs text-gray-500 text-center font-semibold">
-                    {item.label}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
+        <div className="px-4 pb-4">
           {/* Bar Container */}
           <div className="mb-2">
             <div className="flex h-6 shadow-sm">
@@ -286,9 +254,9 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                     }}
                     onMouseMove={handleBarMouseMove}
                   >
-                    {/* Percentage text inside bar - always show */}
+                    {/* Rating scale number inside bar */}
                     <span className="text-white font-semibold text-xs px-1">
-                      {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                      {item.label}
                     </span>
                   </div>
                 );

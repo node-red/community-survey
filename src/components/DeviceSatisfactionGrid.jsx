@@ -94,18 +94,18 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
 
   // Calculate average rating for a question
   const calculateAverageRating = (data) => {
-    if (!data || data.length === 0) return 0;
-    
+    if (!data || data.length === 0) return '0.00';
+
     let totalScore = 0;
     let totalResponses = 0;
-    
+
     data.forEach(item => {
       const rating = parseInt(item.label);
       totalScore += rating * item.count;
       totalResponses += item.count;
     });
-    
-    return totalResponses > 0 ? Math.round(totalScore / totalResponses) : 0;
+
+    return totalResponses > 0 ? (totalScore / totalResponses).toFixed(2) : '0.00';
   };
 
   // Only show skeleton during initial load (no data yet)
@@ -177,7 +177,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                       {question.name}
                     </h4>
                     <span className="absolute left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600">
-                      {averageRating}/7
+                      avg {averageRating}
                     </span>
                     <span className="text-xs text-gray-500">
                       {data.respondentCount}{' '}
@@ -272,7 +272,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                             onMouseMove={handleBarMouseMove}
                           >
                             <span className="text-white font-semibold text-xs px-1">
-                              {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                              {item.label}
                             </span>
                           </div>
                         );

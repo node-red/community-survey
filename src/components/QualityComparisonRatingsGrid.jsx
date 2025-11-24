@@ -94,18 +94,18 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
 
   // Calculate average rating for a question
   const calculateAverageRating = (data) => {
-    if (!data || data.length === 0) return 0;
-    
+    if (!data || data.length === 0) return '0.00';
+
     let totalScore = 0;
     let totalResponses = 0;
-    
+
     data.forEach(item => {
       const rating = parseInt(item.label);
       totalScore += rating * item.count;
       totalResponses += item.count;
     });
-    
-    return totalResponses > 0 ? Math.round(totalScore / totalResponses) : 0;
+
+    return totalResponses > 0 ? (totalScore / totalResponses).toFixed(2) : '0.00';
   };
 
   // Only show skeleton during initial load (no data yet)
@@ -168,6 +168,8 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
               const data = questionData[question.id];
               if (!data || !data.data || data.data.length === 0) return null;
 
+              const averageRating = calculateAverageRating(data.data);
+
               return (
                 <div key={question.id} className="px-4 py-3">
                   <div className="flex items-center justify-between mb-2">
@@ -179,25 +181,6 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
                       <span className="hidden sm:inline">respondents</span>
                       <RespondentIcon className="w-3 h-3 text-gray-500 sm:hidden" />
                     </span>
-                  </div>
-
-                  {/* Labels above bars */}
-                  <div className="flex mb-0.5">
-                    {data.data.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex flex-col items-center justify-start"
-                        style={{
-                          width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
-                          minWidth: '28px',
-                          transition: 'width 0.3s ease-in-out'
-                        }}
-                      >
-                        <div className="text-[10px] text-gray-500 text-center font-semibold">
-                          {item.label}
-                        </div>
-                      </div>
-                    ))}
                   </div>
 
                   {/* Horizontal Percentage Bar */}
@@ -284,16 +267,19 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
                           }}
                         >
                           <span className="text-white font-semibold text-xs px-1">
-                            {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
+                            {item.label}
                           </span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Scale direction indicator */}
-                  <div className="flex justify-between mt-0.5 px-1">
+                  {/* Scale direction indicator with average */}
+                  <div className="relative flex justify-between mt-0.5 px-1">
                     <span className="text-[10px] text-gray-400 italic">Worst</span>
+                    <span className="absolute left-1/2 -translate-x-1/2 text-xs font-bold text-gray-600">
+                      avg {averageRating}
+                    </span>
                     <span className="text-[10px] text-gray-400 italic">Best</span>
                   </div>
                 </div>
@@ -314,7 +300,7 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
           }}
         >
           <div className="font-semibold">{tooltipData.question}</div>
-          <div>Average Rating: {tooltipData.averageRating}/7</div>
+          <div>avg {tooltipData.averageRating}</div>
           <div>Total Responses: {tooltipData.totalResponses}</div>
         </div>
       )}
