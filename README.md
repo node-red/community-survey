@@ -1,4 +1,4 @@
-![logo](https://github.com/user-attachments/assets/b0c8ce6b-1d9e-4e15-a15f-bc3babd5ec84)
+![banner](https://github.com/user-attachments/assets/ce536637-93b1-4607-ac1d-bdece611ad39)
 
 [Live Node-RED Modernization Results Website](https://nodered.org/community-survey/)
 
