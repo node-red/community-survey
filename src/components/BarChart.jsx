@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { chart, cn } from '../styles/classNames';
 import { defaultChartColor } from '../utils/colorPalette';
+import { getTooltipPosition } from '../utils/tooltip-utils';
 
 const BarChart = ({
   data,
@@ -192,23 +193,7 @@ const BarChart = ({
               }
 
               setTooltipContent(tooltipText);
-
-              const screenY = event.clientY;
-              const screenX = event.clientX;
-              const tooltipWidth = 200;
-              const tooltipHeight = 80;
-
-              let adjustedX = screenX + 15;
-              let adjustedY = screenY - tooltipHeight - 10;
-
-              if (adjustedY < 0) {
-                adjustedY = screenY + 15;
-              }
-              if (adjustedX + tooltipWidth > window.innerWidth) {
-                adjustedX = screenX - tooltipWidth - 15;
-              }
-
-              setTooltipPosition({ x: adjustedX, y: adjustedY });
+              setTooltipPosition(getTooltipPosition(event, 200, 80));
               setShowTooltip(true);
             }
           };
@@ -220,22 +205,7 @@ const BarChart = ({
 
           const handleMouseMove = (event) => {
             if (showTooltip) {
-              const screenY = event.clientY;
-              const screenX = event.clientX;
-              const tooltipWidth = 200;
-              const tooltipHeight = 80;
-
-              let adjustedX = screenX + 15;
-              let adjustedY = screenY - tooltipHeight - 10;
-
-              if (adjustedY < 0) {
-                adjustedY = screenY + 15;
-              }
-              if (adjustedX + tooltipWidth > window.innerWidth) {
-                adjustedX = screenX - tooltipWidth - 15;
-              }
-
-              setTooltipPosition({ x: adjustedX, y: adjustedY });
+              setTooltipPosition(getTooltipPosition(event, 200, 80));
             }
           };
 

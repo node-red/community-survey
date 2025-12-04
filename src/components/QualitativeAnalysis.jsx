@@ -1,5 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 import RespondentIcon from './RespondentIcon';
+import { getTooltipPosition } from '../utils/tooltip-utils';
 
 const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '#64748b', wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
@@ -131,28 +132,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
       setTooltipContent(
         `${count} respondents (${percentage})\n\n${formattedQuotes}`
       );
-      
-      // Always show 10px above cursor - use screen coordinates
-      const screenY = event.clientY; // Screen Y position
-      const screenX = event.clientX; // Screen X position
-      const tooltipWidth = 300;
-      const tooltipHeight = 80; // Approximate height
-      
-      let adjustedX = screenX + 15; // 15px to the right of cursor
-      let adjustedY = screenY - tooltipHeight - 10; // Bottom of tooltip 10px above cursor
-      
-      // Only adjust if not enough screen space
-      if (adjustedY < 0) {
-        adjustedY = screenY + 15; // Switch to below cursor
-      }
-      if (adjustedX + tooltipWidth > window.innerWidth) {
-        adjustedX = screenX - tooltipWidth - 15; // Switch to left side
-      }
-      
-      setTooltipPosition({ 
-        x: adjustedX, 
-        y: adjustedY 
-      });
+      setTooltipPosition(getTooltipPosition(event, 300, 80));
       setShowTooltip(true);
     }
   };
@@ -163,33 +143,13 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
       setShowTooltip(false);
       setHideTooltipTimeout(null);
     }, 300); // 300ms delay
-    
+
     setHideTooltipTimeout(timeout);
   };
 
   const handleMouseMove = (event) => {
     if (showTooltip) {
-      // Always show 10px above cursor - use screen coordinates
-      const screenY = event.clientY; // Screen Y position
-      const screenX = event.clientX; // Screen X position
-      const tooltipWidth = 300;
-      const tooltipHeight = 80; // Approximate height
-      
-      let adjustedX = screenX + 15; // 15px to the right of cursor
-      let adjustedY = screenY - tooltipHeight - 10; // Bottom of tooltip 10px above cursor
-      
-      // Only adjust if not enough screen space
-      if (adjustedY < 0) {
-        adjustedY = screenY + 15; // Switch to below cursor
-      }
-      if (adjustedX + tooltipWidth > window.innerWidth) {
-        adjustedX = screenX - tooltipWidth - 15; // Switch to left side
-      }
-      
-      setTooltipPosition({ 
-        x: adjustedX, 
-        y: adjustedY 
-      });
+      setTooltipPosition(getTooltipPosition(event, 300, 80));
     }
   };
 

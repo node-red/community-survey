@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import RespondentIcon from './RespondentIcon';
+import { getTooltipPosition } from '../utils/tooltip-utils';
 
 const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   const [data, setData] = useState([]);
@@ -177,23 +178,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
                         if (device.count > 0) {
                           setTooltipContent(`${device.label}\n${device.count} respondents (${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)})`);
-
-                          const screenY = event.clientY;
-                          const screenX = event.clientX;
-                          const tooltipWidth = 200;
-                          const tooltipHeight = 60;
-
-                          let adjustedX = screenX + 15;
-                          let adjustedY = screenY - tooltipHeight - 10;
-
-                          if (adjustedY < 0) {
-                            adjustedY = screenY + 15;
-                          }
-                          if (adjustedX + tooltipWidth > window.innerWidth) {
-                            adjustedX = screenX - tooltipWidth - 15;
-                          }
-
-                          setTooltipPosition({ x: adjustedX, y: adjustedY });
+                          setTooltipPosition(getTooltipPosition(event, 200, 60));
                           setShowTooltip(true);
                         }
                       };
@@ -206,23 +191,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                       const handleBarMouseMove = (event) => {
                         if (showTooltip) {
                           event.stopPropagation();
-
-                          const screenY = event.clientY;
-                          const screenX = event.clientX;
-                          const tooltipWidth = 200;
-                          const tooltipHeight = 60;
-
-                          let adjustedX = screenX + 15;
-                          let adjustedY = screenY - tooltipHeight - 10;
-
-                          if (adjustedY < 0) {
-                            adjustedY = screenY + 15;
-                          }
-                          if (adjustedX + tooltipWidth > window.innerWidth) {
-                            adjustedX = screenX - tooltipWidth - 15;
-                          }
-
-                          setTooltipPosition({ x: adjustedX, y: adjustedY });
+                          setTooltipPosition(getTooltipPosition(event, 200, 60));
                         }
                       };
 
@@ -329,23 +298,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
                             if (device.count > 0) {
                               setTooltipContent(`${device.label}\n${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}`);
-
-                              const screenY = event.clientY;
-                              const screenX = event.clientX;
-                              const tooltipWidth = 200;
-                              const tooltipHeight = 60;
-
-                              let adjustedX = screenX + 15;
-                              let adjustedY = screenY - tooltipHeight - 10;
-
-                              if (adjustedY < 0) {
-                                adjustedY = screenY + 15;
-                              }
-                              if (adjustedX + tooltipWidth > window.innerWidth) {
-                                adjustedX = screenX - tooltipWidth - 15;
-                              }
-
-                              setTooltipPosition({ x: adjustedX, y: adjustedY });
+                              setTooltipPosition(getTooltipPosition(event, 200, 60));
                               setShowTooltip(true);
                             }
                           };
@@ -358,23 +311,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                           const handleBarMouseMove = (event) => {
                             if (showTooltip) {
                               event.stopPropagation();
-
-                              const screenY = event.clientY;
-                              const screenX = event.clientX;
-                              const tooltipWidth = 200;
-                              const tooltipHeight = 60;
-
-                              let adjustedX = screenX + 15;
-                              let adjustedY = screenY - tooltipHeight - 10;
-
-                              if (adjustedY < 0) {
-                                adjustedY = screenY + 15;
-                              }
-                              if (adjustedX + tooltipWidth > window.innerWidth) {
-                                adjustedX = screenX - tooltipWidth - 15;
-                              }
-
-                              setTooltipPosition({ x: adjustedX, y: adjustedY });
+                              setTooltipPosition(getTooltipPosition(event, 200, 60));
                             }
                           };
 

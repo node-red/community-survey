@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
 import { ORDINAL_ORDERS } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
+import { getTooltipPosition } from '../utils/tooltip-utils';
 
-const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showRatingScale = false, ratingScale = 7, wasmService }) => {
+const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _showRatingScale = false, _ratingScale = 7, wasmService }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,12 +15,6 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
   const [hoveredBar, setHoveredBar] = useState(null);
   const chartContainerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(800);
-
-  // Helper function to truncate long labels
-  const truncateLabel = (label, maxLength = 35) => {
-    if (!label || label.length <= maxLength) return label;
-    return label.substring(0, maxLength - 3) + '...';
-  };
 
   // Memoize filters to prevent infinite re-renders from object reference changes
   const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
@@ -222,27 +217,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
     setTooltipContent(
       `${/^\d+$/.test(item.label) ? 'Rating ' : ''}${item.label}\n${item.count} respondents (${percentage}%)`
     );
-    
-    // Position tooltip near cursor
-    const screenY = event.clientY;
-    const screenX = event.clientX;
-    const tooltipWidth = 200;
-    const tooltipHeight = 60;
-    
-    let adjustedX = screenX + 15;
-    let adjustedY = screenY - tooltipHeight - 10;
-    
-    if (adjustedY < 0) {
-      adjustedY = screenY + 15;
-    }
-    if (adjustedX + tooltipWidth > window.innerWidth) {
-      adjustedX = screenX - tooltipWidth - 15;
-    }
-    
-    setTooltipPosition({ 
-      x: adjustedX, 
-      y: adjustedY 
-    });
+    setTooltipPosition(getTooltipPosition(event, 200, 60));
     setShowTooltip(true);
     setHoveredBar(item.label);
   };
@@ -254,25 +229,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
 
   const handleBarMouseMove = (event) => {
     if (showTooltip && hoveredBar) {
-      const screenY = event.clientY;
-      const screenX = event.clientX;
-      const tooltipWidth = 200;
-      const tooltipHeight = 60;
-      
-      let adjustedX = screenX + 15;
-      let adjustedY = screenY - tooltipHeight - 10;
-      
-      if (adjustedY < 0) {
-        adjustedY = screenY + 15;
-      }
-      if (adjustedX + tooltipWidth > window.innerWidth) {
-        adjustedX = screenX - tooltipWidth - 15;
-      }
-      
-      setTooltipPosition({ 
-        x: adjustedX, 
-        y: adjustedY 
-      });
+      setTooltipPosition(getTooltipPosition(event, 200, 60));
     }
   };
 
@@ -298,28 +255,8 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
         `Total Responses: ${totalResponses}`
       );
     }
-    
-    // Always show 10px above cursor - use screen coordinates
-    const screenY = event.clientY; // Screen Y position
-    const screenX = event.clientX; // Screen X position
-    const tooltipWidth = 200;
-    const tooltipHeight = 60; // Approximate height
-    
-    let adjustedX = screenX + 15; // 15px to the right of cursor
-    let adjustedY = screenY - tooltipHeight - 10; // Bottom of tooltip 10px above cursor
-    
-    // Only adjust if not enough screen space
-    if (adjustedY < 0) {
-      adjustedY = screenY + 15; // Switch to below cursor
-    }
-    if (adjustedX + tooltipWidth > window.innerWidth) {
-      adjustedX = screenX - tooltipWidth - 15; // Switch to left side
-    }
-    
-    setTooltipPosition({ 
-      x: adjustedX, 
-      y: adjustedY 
-    });
+
+    setTooltipPosition(getTooltipPosition(event, 200, 60));
     setShowTooltip(true);
   };
 
@@ -330,29 +267,9 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, showR
   const handleMouseMove = (event) => {
     // Don't update if bar has its own tooltip handling
     if (hoveredBar) return;
-    
+
     if (showTooltip) {
-      // Always show 10px above cursor - use screen coordinates
-      const screenY = event.clientY; // Screen Y position
-      const screenX = event.clientX; // Screen X position
-      const tooltipWidth = 200;
-      const tooltipHeight = 60; // Approximate height
-      
-      let adjustedX = screenX + 15; // 15px to the right of cursor
-      let adjustedY = screenY - tooltipHeight - 10; // Bottom of tooltip 10px above cursor
-      
-      // Only adjust if not enough screen space
-      if (adjustedY < 0) {
-        adjustedY = screenY + 15; // Switch to below cursor
-      }
-      if (adjustedX + tooltipWidth > window.innerWidth) {
-        adjustedX = screenX - tooltipWidth - 15; // Switch to left side
-      }
-      
-      setTooltipPosition({ 
-        x: adjustedX, 
-        y: adjustedY 
-      });
+      setTooltipPosition(getTooltipPosition(event, 200, 60));
     }
   };
 

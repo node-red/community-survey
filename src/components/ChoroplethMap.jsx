@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { geoPath, geoMercator } from 'd3-geo';
 import { feature } from 'topojson-client';
 import RespondentIcon from './RespondentIcon';
+import { getTooltipPosition } from '../utils/tooltip-utils';
 
 const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   if (import.meta.env.DEV) console.log('=== ChoroplethMap RENDER ===', { questionId, hasWasmService: !!wasmService });
@@ -216,22 +217,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
       setTooltipContent(`${countryName}\nNo responses`);
     }
 
-    const screenY = event.clientY;
-    const screenX = event.clientX;
-    const tooltipWidth = 200;
-    const tooltipHeight = 80;
-
-    let adjustedX = screenX + 15;
-    let adjustedY = screenY - tooltipHeight - 10;
-
-    if (adjustedY < 0) {
-      adjustedY = screenY + 15;
-    }
-    if (adjustedX + tooltipWidth > window.innerWidth) {
-      adjustedX = screenX - tooltipWidth - 15;
-    }
-
-    setTooltipPosition({ x: adjustedX, y: adjustedY });
+    setTooltipPosition(getTooltipPosition(event, 200, 80));
     setShowTooltip(true);
   };
 
@@ -242,22 +228,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
 
   const handleMouseMove = (event) => {
     if (showTooltip) {
-      const screenY = event.clientY;
-      const screenX = event.clientX;
-      const tooltipWidth = 200;
-      const tooltipHeight = 80;
-
-      let adjustedX = screenX + 15;
-      let adjustedY = screenY - tooltipHeight - 10;
-
-      if (adjustedY < 0) {
-        adjustedY = screenY + 15;
-      }
-      if (adjustedX + tooltipWidth > window.innerWidth) {
-        adjustedX = screenX - tooltipWidth - 15;
-      }
-
-      setTooltipPosition({ x: adjustedX, y: adjustedY });
+      setTooltipPosition(getTooltipPosition(event, 200, 80));
     }
   };
 
