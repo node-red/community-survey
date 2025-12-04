@@ -633,20 +633,35 @@ function App() {
   };
 
   // ToC item tooltip handlers
+  const tocTooltipTimeoutRef = useRef(null);
+
   const handleTocItemMouseEnter = (event, text) => {
+    // Clear any existing timeout
+    if (tocTooltipTimeoutRef.current) {
+      clearTimeout(tocTooltipTimeoutRef.current);
+    }
+
     const rect = event.currentTarget.getBoundingClientRect();
-    const tooltipX = rect.left - 40; // Position 40px to the left of the item's left edge
-    const tooltipY = rect.top + rect.height / 2; // Center vertically with item
+    const tooltipRight = window.innerWidth - rect.right + 10; // Distance from right edge of viewport
+    const tooltipY = rect.top - 8; // Position above the item with small gap
 
     setTocItemTooltip({
       show: true,
       content: text,
-      x: tooltipX,
+      x: tooltipRight, // Now storing right offset instead of left
       y: tooltipY,
     });
+
+    // Auto-dismiss after 1 second
+    tocTooltipTimeoutRef.current = setTimeout(() => {
+      setTocItemTooltip({ show: false, content: "", x: 0, y: 0 });
+    }, 1000);
   };
 
   const handleTocItemMouseLeave = () => {
+    if (tocTooltipTimeoutRef.current) {
+      clearTimeout(tocTooltipTimeoutRef.current);
+    }
     setTocItemTooltip({ show: false, content: "", x: 0, y: 0 });
   };
 
@@ -2667,10 +2682,10 @@ function App() {
               <div
                 className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm border border-gray-600"
                 style={{
-                  left: `${tocItemTooltip.x}px`,
+                  right: `${tocItemTooltip.x}px`,
                   top: `${tocItemTooltip.y}px`,
-                  maxWidth: "300px",
-                  transform: "translate(-100%, -50%)",
+                  maxWidth: "450px",
+                  transform: "translateY(-100%)",
                 }}
               >
                 {tocItemTooltip.content}
