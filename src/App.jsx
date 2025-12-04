@@ -2753,17 +2753,26 @@ function App() {
                       Continued reading
                     </h3>
                     <p className="text-nodered-gray-600 leading-relaxed">
-                      If you haven't already, check out the full{" "}
+                      If you haven't already, check out the{" "}
                       <a
                         href="https://nodered.org/blog/2025/12/01/modernization-survey-results"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-nodered-red-500 hover:text-nodered-red-700 underline"
                       >
-                        blog post
+                        survey results blog post
                       </a>{" "}
-                      for an initial take on these results. Join the
-                      conversation on our{" "}
+                      for our initial take on these findings and our{" "}
+                      <a
+                        href="https://nodered.org/blog/2025/12/03/node-red-roadmap-to-5"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-nodered-red-500 hover:text-nodered-red-700 underline"
+                      >
+                        follow-up blog post
+                      </a>{" "}
+                      that talks about what is up next with Node-RED 5.0. Join
+                      the conversation on our{" "}
                       <a
                         href="https://discourse.nodered.org/t/modernization-survey-results-now-available/99830"
                         target="_blank"
