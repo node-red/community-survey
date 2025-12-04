@@ -4,6 +4,7 @@ import { getChartColor } from '../utils/colorPalette';
 import { sortByOrdinalOrder, ORDINAL_ORDERS, applyBaselineOrder } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
+import Tooltip from './Tooltip';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -335,18 +336,11 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
       </div>
 
       {/* Tooltip */}
-      {showTooltip && (
-        <div
-          className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm whitespace-pre-line border border-gray-600"
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-            maxWidth: '300px'
-          }}
-        >
-          {tooltipContent}
-        </div>
-      )}
+      <Tooltip
+        show={showTooltip}
+        position={tooltipPosition}
+        content={tooltipContent}
+      />
     </div>
   );
 };

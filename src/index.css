@@ -72,22 +72,12 @@ body {
 }
 
 /* Mobile viewport scaling for dashboard section */
+/* Using transform: scale() instead of zoom for cross-browser compatibility (iOS Safari doesn't support zoom) */
 @media (max-width: 767px) {
   .dashboard-mobile-scale {
-    zoom: 0.7;
-  }
-}
-
-/* iOS Safari fallback - zoom doesn't work on iOS, use transform: scale() instead */
-/* This @supports query targets Safari/WebKit specifically */
-@supports (hanging-punctuation: first) and (font: -apple-system-body) and (-webkit-appearance: none) {
-  @media (max-width: 767px) {
-    .dashboard-mobile-scale {
-      zoom: 1; /* Reset zoom for iOS */
-      transform: scale(0.7);
-      transform-origin: top left;
-      width: 142.857%; /* 1/0.7 to compensate for scale */
-    }
+    transform: scale(0.7);
+    transform-origin: top left;
+    width: 142.857%; /* 1/0.7 to compensate for scale */
   }
 }
 

@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { chart, cn } from '../styles/classNames';
 import { defaultChartColor } from '../utils/colorPalette';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
+import Tooltip from './Tooltip';
 
 const BarChart = ({
   data,
@@ -326,18 +327,11 @@ const BarChart = ({
       </div>
 
       {/* Tooltip */}
-      {showTooltip && (
-        <div
-          className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm whitespace-pre-line border border-gray-600"
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-            maxWidth: '300px'
-          }}
-        >
-          {tooltipContent}
-        </div>
-      )}
+      <Tooltip
+        show={showTooltip}
+        position={tooltipPosition}
+        content={tooltipContent}
+      />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
+import Tooltip from './Tooltip';
 
 const QUALITY_COMPARISON_QUESTIONS = [
   { id: 'RoNjbJ', name: 'Ease of use/Ease to learn' },
@@ -262,18 +263,12 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
       </div>
 
       {/* Tooltip */}
-      {showTooltip && (
-        <div
-          className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm whitespace-pre-line border border-gray-600"
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-            maxWidth: '200px'
-          }}
-        >
-          {tooltipContent}
-        </div>
-      )}
+      <Tooltip
+        show={showTooltip}
+        position={tooltipPosition}
+        content={tooltipContent}
+        maxWidth="200px"
+      />
     </div>
   );
 };

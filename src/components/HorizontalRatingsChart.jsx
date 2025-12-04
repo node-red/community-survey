@@ -3,6 +3,7 @@ import { getRatingScheme } from '../utils/colorPalette';
 import { ORDINAL_ORDERS } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
+import Tooltip from './Tooltip';
 
 const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _showRatingScale = false, _ratingScale = 7, wasmService }) => {
   const [data, setData] = useState(null);
@@ -490,19 +491,12 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
       </div>
       
       {/* Tooltip */}
-      {showTooltip && (
-        <div
-          data-testid="bar-tooltip"
-          className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm whitespace-pre-line border border-gray-600"
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-            maxWidth: '200px'
-          }}
-        >
-          {tooltipContent}
-        </div>
-      )}
+      <Tooltip
+        show={showTooltip}
+        position={tooltipPosition}
+        content={tooltipContent}
+        maxWidth="200px"
+      />
     </div>
   );
 };

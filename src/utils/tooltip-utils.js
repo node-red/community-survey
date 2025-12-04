@@ -1,37 +1,29 @@
 /**
- * Tooltip positioning utility that accounts for CSS zoom on mobile viewports.
+ * Tooltip positioning utility.
  *
- * On mobile (≤767px), the dashboard applies CSS `zoom: 0.7` which causes
- * mouse event coordinates to not match the visual element positions.
- * This utility compensates for that zoom factor.
+ * Tooltips are rendered via React Portal to document.body, so they are
+ * outside any transform:scale() containers. This means mouse coordinates
+ * (clientX, clientY) can be used directly without compensation.
  */
 
 import { useEffect } from 'react';
 
-const MOBILE_ZOOM = 0.7;
-const MOBILE_BREAKPOINT = 767;
-
 /**
- * Calculate tooltip position adjusted for CSS zoom.
+ * Calculate tooltip position relative to mouse cursor.
  *
  * @param {MouseEvent} event - The mouse event
  * @param {number} tooltipWidth - Expected tooltip width (default: 200)
  * @param {number} tooltipHeight - Expected tooltip height (default: 80)
- * @returns {{ x: number, y: number }} - Adjusted tooltip position
+ * @returns {{ x: number, y: number }} - Tooltip position
  */
 export const getTooltipPosition = (event, tooltipWidth = 200, tooltipHeight = 80) => {
-  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-  const zoom = isMobile ? MOBILE_ZOOM : 1;
-
-  // Adjust coordinates for CSS zoom
-  const screenX = event.clientX / zoom;
-  const screenY = event.clientY / zoom;
+  const screenX = event.clientX;
+  const screenY = event.clientY;
 
   let adjustedX = screenX + 15;
   let adjustedY = screenY - tooltipHeight - 10;
 
-  // Boundary checks (account for zoom in viewport calculations)
-  const viewportWidth = window.innerWidth / zoom;
+  const viewportWidth = window.innerWidth;
 
   if (adjustedY < 0) {
     adjustedY = screenY + 15;

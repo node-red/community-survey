@@ -3,6 +3,7 @@ import { geoPath, geoMercator } from 'd3-geo';
 import { feature } from 'topojson-client';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
+import Tooltip from './Tooltip';
 
 const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   if (import.meta.env.DEV) console.log('=== ChoroplethMap RENDER ===', { questionId, hasWasmService: !!wasmService });
@@ -361,19 +362,12 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
           </div>
 
           {/* Tooltip */}
-          {showTooltip && (
-            <div
-              className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm whitespace-pre-line border border-gray-600"
-              data-testid="choropleth-tooltip"
-              style={{
-                left: tooltipPosition.x,
-                top: tooltipPosition.y,
-                maxWidth: '200px'
-              }}
-            >
-              {tooltipContent}
-            </div>
-          )}
+          <Tooltip
+            show={showTooltip}
+            position={tooltipPosition}
+            content={tooltipContent}
+            maxWidth="200px"
+          />
         </div>
       </div>
     </div>
