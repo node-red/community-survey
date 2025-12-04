@@ -292,16 +292,28 @@ function App() {
         if (dashboardData?.data) {
           // Quality Ranking baseline: sorted by Quality % descending
           baselineOrdersMap["qualityRanking"] = [...dashboardData.data]
-            .sort((a, b) => parseInt(b["Quality %"]?.replace('%', '') || 0) - parseInt(a["Quality %"]?.replace('%', '') || 0))
-            .map(item => item.Resource);
+            .sort(
+              (a, b) =>
+                parseInt(b["Quality %"]?.replace("%", "") || 0) -
+                parseInt(a["Quality %"]?.replace("%", "") || 0),
+            )
+            .map((item) => item.Resource);
           // Reach Gap Opportunities baseline: sorted by Reach Gap Opp descending
           baselineOrdersMap["reachGapOpp"] = [...dashboardData.data]
-            .sort((a, b) => parseInt(b["Reach Gap Opp"]?.replace('%', '') || 0) - parseInt(a["Reach Gap Opp"]?.replace('%', '') || 0))
-            .map(item => item.Resource);
+            .sort(
+              (a, b) =>
+                parseInt(b["Reach Gap Opp"]?.replace("%", "") || 0) -
+                parseInt(a["Reach Gap Opp"]?.replace("%", "") || 0),
+            )
+            .map((item) => item.Resource);
           // Reach Ranking baseline: sorted by Reach % descending
           baselineOrdersMap["reachRanking"] = [...dashboardData.data]
-            .sort((a, b) => parseInt(b["Reach %"]?.replace('%', '') || 0) - parseInt(a["Reach %"]?.replace('%', '') || 0))
-            .map(item => item.Resource);
+            .sort(
+              (a, b) =>
+                parseInt(b["Reach %"]?.replace("%", "") || 0) -
+                parseInt(a["Reach %"]?.replace("%", "") || 0),
+            )
+            .map((item) => item.Resource);
         }
 
         // Set baseline orders BEFORE initialLoading is set to false
@@ -688,8 +700,8 @@ function App() {
 
       // Ensure continent filter appears first
       const result = entries.sort((a, b) => {
-        if (a[0] === 'continent') return -1;
-        if (b[0] === 'continent') return 1;
+        if (a[0] === "continent") return -1;
+        if (b[0] === "continent") return 1;
         return 0;
       });
 
@@ -730,8 +742,8 @@ function App() {
 
     // Ensure continent filter appears first in filtered results too
     return filteredEntries.sort((a, b) => {
-      if (a[0] === 'continent') return -1;
-      if (b[0] === 'continent') return 1;
+      if (a[0] === "continent") return -1;
+      if (b[0] === "continent") return 1;
       return 0;
     });
   };
@@ -931,16 +943,7 @@ function App() {
                       Development tools have changed significantly since 2013
                       when Node-RED started, and we know there are areas we
                       could improve to keep Node-RED relevant and improve it to
-                      the benefit of us all!{" "}
-                      <a
-                        href="#"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-nodered-red-500 hover:text-nodered-red-700 underline"
-                      >
-                        Discuss along
-                      </a>{" "}
-                      at to be part of this conversation.
+                      the benefit of us all!
                     </p>
                   </div>
 
@@ -973,6 +976,34 @@ function App() {
                       a more vibrant community with diverse contributors, making
                       Node-RED easier to work with, more professional, and
                       welcoming to all skill levels.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-semibold text-nodered-red-500 mb-3">
+                      Join the Conversation
+                    </h3>
+                    <p className="text-nodered-gray-600 leading-relaxed">
+                      These survey results are just the beginning. Share your
+                      thoughts and join the discussion on our{" "}
+                      <a
+                        href="https://discourse.nodered.org/t/modernization-survey-results-now-available/99830"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-nodered-red-500 hover:text-nodered-red-700 underline"
+                      >
+                        community forum
+                      </a>{" "}
+                      or read the full{" "}
+                      <a
+                        href="https://nodered.org/blog/2025/12/01/modernization-survey-results"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-nodered-red-500 hover:text-nodered-red-700 underline"
+                      >
+                        blog post
+                      </a>
+                      .
                     </p>
                   </div>
                 </div>
@@ -1056,7 +1087,7 @@ function App() {
             <aside
               className={cn(
                 "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] z-20 transition-all duration-300 ease-in-out",
-                isMobile ? "fixed left-0" : "sticky self-start"
+                isMobile ? "fixed left-0" : "sticky self-start",
               )}
               style={{
                 width: sidebarCollapsed ? "7px" : `${sidebarWidth}px`,
@@ -2080,13 +2111,36 @@ function App() {
                                               </h3>
                                               <div className="min-h-[300px]">
                                                 <BarChart
-                                                  data={baselineOrders["qualityRanking"]
-                                                    ? [...queryResult.data].sort((a, b) => {
-                                                        const orderA = baselineOrders["qualityRanking"].indexOf(a.Resource);
-                                                        const orderB = baselineOrders["qualityRanking"].indexOf(b.Resource);
-                                                        return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
-                                                      })
-                                                    : queryResult.data}
+                                                  data={
+                                                    baselineOrders[
+                                                      "qualityRanking"
+                                                    ]
+                                                      ? [
+                                                          ...queryResult.data,
+                                                        ].sort((a, b) => {
+                                                          const orderA =
+                                                            baselineOrders[
+                                                              "qualityRanking"
+                                                            ].indexOf(
+                                                              a.Resource,
+                                                            );
+                                                          const orderB =
+                                                            baselineOrders[
+                                                              "qualityRanking"
+                                                            ].indexOf(
+                                                              b.Resource,
+                                                            );
+                                                          return (
+                                                            (orderA === -1
+                                                              ? 999
+                                                              : orderA) -
+                                                            (orderB === -1
+                                                              ? 999
+                                                              : orderB)
+                                                          );
+                                                        })
+                                                      : queryResult.data
+                                                  }
                                                   title="Quality Ranking"
                                                   subtitle="Ratt of channel depicted in percentage"
                                                   valueColumn="Quality %"
@@ -2141,13 +2195,36 @@ function App() {
                                               </h3>
                                               <div className="min-h-[300px]">
                                                 <BarChart
-                                                  data={baselineOrders["reachGapOpp"]
-                                                    ? [...queryResult.data].sort((a, b) => {
-                                                        const orderA = baselineOrders["reachGapOpp"].indexOf(a.Resource);
-                                                        const orderB = baselineOrders["reachGapOpp"].indexOf(b.Resource);
-                                                        return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
-                                                      })
-                                                    : queryResult.data}
+                                                  data={
+                                                    baselineOrders[
+                                                      "reachGapOpp"
+                                                    ]
+                                                      ? [
+                                                          ...queryResult.data,
+                                                        ].sort((a, b) => {
+                                                          const orderA =
+                                                            baselineOrders[
+                                                              "reachGapOpp"
+                                                            ].indexOf(
+                                                              a.Resource,
+                                                            );
+                                                          const orderB =
+                                                            baselineOrders[
+                                                              "reachGapOpp"
+                                                            ].indexOf(
+                                                              b.Resource,
+                                                            );
+                                                          return (
+                                                            (orderA === -1
+                                                              ? 999
+                                                              : orderA) -
+                                                            (orderB === -1
+                                                              ? 999
+                                                              : orderB)
+                                                          );
+                                                        })
+                                                      : queryResult.data
+                                                  }
                                                   title="Reach Gap Opportunities"
                                                   subtitle="Where would a reach increase create the most value because of already existing quality"
                                                   valueColumn="Reach Gap Opp"
@@ -2203,13 +2280,36 @@ function App() {
                                               </h3>
                                               <div className="min-h-[300px]">
                                                 <BarChart
-                                                  data={baselineOrders["reachRanking"]
-                                                    ? [...queryResult.data].sort((a, b) => {
-                                                        const orderA = baselineOrders["reachRanking"].indexOf(a.Resource);
-                                                        const orderB = baselineOrders["reachRanking"].indexOf(b.Resource);
-                                                        return (orderA === -1 ? 999 : orderA) - (orderB === -1 ? 999 : orderB);
-                                                      })
-                                                    : queryResult.data}
+                                                  data={
+                                                    baselineOrders[
+                                                      "reachRanking"
+                                                    ]
+                                                      ? [
+                                                          ...queryResult.data,
+                                                        ].sort((a, b) => {
+                                                          const orderA =
+                                                            baselineOrders[
+                                                              "reachRanking"
+                                                            ].indexOf(
+                                                              a.Resource,
+                                                            );
+                                                          const orderB =
+                                                            baselineOrders[
+                                                              "reachRanking"
+                                                            ].indexOf(
+                                                              b.Resource,
+                                                            );
+                                                          return (
+                                                            (orderA === -1
+                                                              ? 999
+                                                              : orderA) -
+                                                            (orderB === -1
+                                                              ? 999
+                                                              : orderB)
+                                                          );
+                                                        })
+                                                      : queryResult.data
+                                                  }
                                                   title="Reach Ranking"
                                                   subtitle="Percentage of people that have stated that the channel is helpful to them"
                                                   valueColumn="Reach %"
@@ -2594,7 +2694,16 @@ function App() {
                 </h2>
                 <p className="text-lg text-nodered-gray-600 max-w-3xl">
                   Thank you for your interest in the Node-RED survey results and
-                  participation with the community of Node-RED.
+                  participation with the community of Node-RED. The source code
+                  can be found in this{" "}
+                  <a
+                    href="https://github.com/node-red/community-survey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-nodered-red-500 hover:text-nodered-red-700 underline"
+                  >
+                    repository
+                  </a>
                 </p>
               </div>
 
@@ -2641,6 +2750,34 @@ function App() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xl font-semibold text-nodered-red-500 mb-3">
+                      Continued reading
+                    </h3>
+                    <p className="text-nodered-gray-600 leading-relaxed">
+                      If you haven't already, check out the full{" "}
+                      <a
+                        href="https://nodered.org/blog/2025/12/01/modernization-survey-results"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-nodered-red-500 hover:text-nodered-red-700 underline"
+                      >
+                        blog post
+                      </a>{" "}
+                      for an initial take on these results. Join the
+                      conversation on our{" "}
+                      <a
+                        href="https://discourse.nodered.org/t/modernization-survey-results-now-available/99830"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-nodered-red-500 hover:text-nodered-red-700 underline"
+                      >
+                        community forum
+                      </a>{" "}
+                      to add your thoughts.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-semibold text-nodered-red-500 mb-3">
                       Get Involved
                     </h3>
                     <p className="text-nodered-gray-600 leading-relaxed">
@@ -2654,8 +2791,8 @@ function App() {
                         className="text-nodered-red-500 hover:text-nodered-red-700 underline"
                       >
                         forum
-                      </a>{" "}
-                      or consider contributing on{" "}
+                      </a>
+                      , or consider contributing on{" "}
                       <a
                         href="https://github.com/node-red"
                         target="_blank"
