@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '../styles/classNames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +10,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
   const [showSidebarToggle, setShowSidebarToggle] = useState(false);
   const [showSidebarTooltip, setShowSidebarTooltip] = useState(false);
   const tooltipTimeoutRef = useRef(null);
+  const [pendingHash, setPendingHash] = useState(() => {
+    return window.location.hash ? window.location.hash.slice(1) : null;
+  });
+  const isScrollingRef = useRef(false);
 
   // Cleanup tooltip timeout on unmount
   useEffect(() => {
@@ -19,6 +23,21 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       }
     };
   }, []);
+
+  // When loading with a hash, immediately scroll past hero/intro to reduce wait time
+  useEffect(() => {
+    if (pendingHash) {
+      // Find the dashboard section start (after intro) and scroll there instantly
+      const dashboardStart = document.getElementById('introduction-section');
+      if (dashboardStart) {
+        // Instant scroll to just past the intro, then smooth scroll to target will happen later
+        window.scrollTo({
+          top: dashboardStart.offsetTop + dashboardStart.offsetHeight,
+          behavior: 'instant'
+        });
+      }
+    }
+  }, []); // Only run once on mount
 
   // Extract headings from chart components and direct h3 headings
   useEffect(() => {
@@ -30,7 +49,6 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       // Use a Map to track unique headings by text content
       const uniqueHeadings = new Map();
       const headingsList = [];
-      let sectionCounter = 0;
 
       // Find ALL h3 elements in document order
       const allHeadings = container.querySelectorAll('h3');
@@ -54,11 +72,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
 
         // Only add if we haven't seen this text before
         if (!uniqueHeadings.has(text)) {
-          // Create a stable ID if it doesn't exist, based on cleaned text
+          // Create a stable ID if it doesn't exist, based on cleaned text (no counter for stable URLs)
           if (!heading.id) {
             const cleanText = text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-            heading.id = `section-${cleanText}-${sectionCounter}`;
-            sectionCounter++;
+            heading.id = `section-${cleanText}`;
           }
 
           const chartContainer = heading.closest('[data-chart-id]');
@@ -97,6 +114,44 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
 
     return () => observer.disconnect();
   }, [containerRef]);
+
+  // Scroll to a section by ID
+  const scrollToSection = useCallback((sectionId, updateHistory = true) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      // Try to find the associated chart container for better scrolling
+      let targetElement = element;
+      const chartContainer = element.closest('[data-chart-id]');
+      if (chartContainer) {
+        targetElement = chartContainer;
+      }
+
+      // Get the element's position relative to the viewport
+      const elementRect = targetElement.getBoundingClientRect();
+
+      // Calculate scroll position (current scroll + element position - offset for sticky header)
+      const headerOffset = 60; // Account for sticky header (48px) + small buffer
+      const targetScrollPosition = window.scrollY + elementRect.top - headerOffset;
+
+      // Mark that we're programmatically scrolling to prevent URL spam
+      isScrollingRef.current = true;
+
+      // Update URL hash (use pushState for clicks so back button works)
+      if (updateHistory) {
+        window.history.pushState(null, '', `#${sectionId}`);
+      }
+
+      window.scrollTo({
+        top: targetScrollPosition,
+        behavior: 'smooth'
+      });
+
+      // Reset scrolling flag after animation completes
+      setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 500);
+    }
+  }, []);
 
   // Simple scroll-based active section tracking
   useEffect(() => {
@@ -143,6 +198,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
           // Clear active section found
           if (activeId !== activeSection) {
             setActiveSection(activeId);
+            // Update URL hash without triggering scroll (only when not programmatically scrolling)
+            if (!isScrollingRef.current) {
+              window.history.replaceState(null, '', `#${activeId}`);
+            }
           }
         } else if (!activeSection && fallbackId) {
           // Only use fallback if we don't have any active section yet (initial load)
@@ -166,29 +225,32 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
     };
   }, [containerRef, sections, activeSection]);
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      // Try to find the associated chart container for better scrolling
-      let targetElement = element;
-      const chartContainer = element.closest('[data-chart-id]');
-      if (chartContainer) {
-        targetElement = chartContainer;
-      }
+  // Handle initial page load with hash - wait for section to be discovered
+  useEffect(() => {
+    if (!pendingHash || sections.length === 0) return;
 
-      // Get the element's position relative to the viewport
-      const elementRect = targetElement.getBoundingClientRect();
-
-      // Calculate scroll position (current scroll + element position - offset for sticky header)
-      const headerOffset = 60; // Account for sticky header (48px) + small buffer
-      const targetScrollPosition = window.scrollY + elementRect.top - headerOffset;
-
-      window.scrollTo({
-        top: targetScrollPosition,
-        behavior: 'smooth'
-      });
+    const targetSection = sections.find(s => s.id === pendingHash);
+    if (targetSection) {
+      // Small delay to ensure layout is stable after charts load
+      setTimeout(() => {
+        scrollToSection(pendingHash, false);
+        setPendingHash(null);
+      }, 100);
     }
-  };
+  }, [sections, pendingHash, scrollToSection]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        scrollToSection(hash, false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [scrollToSection]);
 
   // Filter sections based on search query
   const filteredSections = sections.filter(section =>
