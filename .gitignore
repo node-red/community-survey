@@ -44,7 +44,6 @@ __tests__/
 *.test.jsx
 *.spec.js
 screenshots/
-*.png
 !public/title-wave.png
 *.jpg
 *.jpeg
