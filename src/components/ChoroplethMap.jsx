@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { geoPath, geoMercator } from 'd3-geo';
 import { feature } from 'topojson-client';
 import RespondentIcon from './RespondentIcon';
-import { getTooltipPosition } from '../utils/tooltip-utils';
+import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 
 const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   if (import.meta.env.DEV) console.log('=== ChoroplethMap RENDER ===', { questionId, hasWasmService: !!wasmService });
@@ -16,6 +16,8 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
   const [hideTooltipTimeout, setHideTooltipTimeout] = useState(null);
   const [geographies, setGeographies] = useState([]);
   const svgRef = useRef(null);
+
+  useHideTooltipOnScroll(setShowTooltip);
 
   // Fetch country boundaries TopoJSON and convert to GeoJSON
   useEffect(() => {

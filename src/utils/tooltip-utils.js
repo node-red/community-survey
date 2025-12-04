@@ -6,6 +6,8 @@
  * This utility compensates for that zoom factor.
  */
 
+import { useEffect } from 'react';
+
 const MOBILE_ZOOM = 0.7;
 const MOBILE_BREAKPOINT = 767;
 
@@ -39,4 +41,25 @@ export const getTooltipPosition = (event, tooltipWidth = 200, tooltipHeight = 80
   }
 
   return { x: adjustedX, y: adjustedY };
+};
+
+/**
+ * Hook to automatically hide tooltip when user scrolls.
+ * Useful on mobile where tooltips should dismiss on scroll.
+ *
+ * @param {Function} setShowTooltip - State setter to hide tooltip
+ */
+export const useHideTooltipOnScroll = (setShowTooltip) => {
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowTooltip(false);
+    };
+
+    // Use capture: true to catch scroll events on any scrollable container
+    window.addEventListener('scroll', handleScroll, { passive: true, capture: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, { capture: true });
+    };
+  }, [setShowTooltip]);
 };

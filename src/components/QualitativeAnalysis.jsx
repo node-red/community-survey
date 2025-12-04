@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from 'react';
 import RespondentIcon from './RespondentIcon';
-import { getTooltipPosition } from '../utils/tooltip-utils';
+import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 
 const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '#64748b', wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
@@ -12,6 +12,8 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [hideTooltipTimeout, setHideTooltipTimeout] = useState(null);
+
+  useHideTooltipOnScroll(setShowTooltip);
 
   // Convert hex color to lighter background version
   const getBackgroundColor = (hexColor) => {

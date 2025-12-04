@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
-import { getTooltipPosition } from '../utils/tooltip-utils';
+import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 
 const QUALITY_COMPARISON_QUESTIONS = [
   { id: 'RoNjbJ', name: 'Ease of use/Ease to learn' },
@@ -15,6 +15,8 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  useHideTooltipOnScroll(setShowTooltip);
 
   const [questionData, setQuestionData] = useState({});
   const [loading, setLoading] = useState(true);

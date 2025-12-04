@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
 import { ORDINAL_ORDERS } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
-import { getTooltipPosition } from '../utils/tooltip-utils';
+import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 
 const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _showRatingScale = false, _ratingScale = 7, wasmService }) => {
   const [data, setData] = useState(null);
@@ -15,6 +15,8 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
   const [hoveredBar, setHoveredBar] = useState(null);
   const chartContainerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(800);
+
+  useHideTooltipOnScroll(setShowTooltip);
 
   // Memoize filters to prevent infinite re-renders from object reference changes
   const filterKey = useMemo(() => JSON.stringify(filters), [filters]);

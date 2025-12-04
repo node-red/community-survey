@@ -3,7 +3,7 @@ import { FILTER_MAPPINGS } from '../utils/filter-utils';
 import { getChartColor } from '../utils/colorPalette';
 import { sortByOrdinalOrder, ORDINAL_ORDERS, applyBaselineOrder } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
-import { getTooltipPosition } from '../utils/tooltip-utils';
+import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -27,7 +27,9 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  
+
+  useHideTooltipOnScroll(setShowTooltip);
+
   // Determine the actual questionId and title based on props
   const actualQuestionId = questionId || (filterType ? FILTER_MAPPINGS[filterType] : null);
   const actualQuestionTitle = questionTitle || (filterType ? FILTER_QUESTION_TITLES[actualQuestionId] || filterType : 'Chart');

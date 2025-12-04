@@ -1402,10 +1402,10 @@ function App() {
                   if (sidebarTooltipTimeoutRef.current) {
                     clearTimeout(sidebarTooltipTimeoutRef.current);
                   }
-                  sidebarTooltipTimeoutRef.current = setTimeout(
-                    () => setShowSidebarTooltip(true),
-                    250,
-                  );
+                  sidebarTooltipTimeoutRef.current = setTimeout(() => {
+                    setShowSidebarTooltip(true);
+                    setTimeout(() => setShowSidebarTooltip(false), 1000);
+                  }, 250);
                 }}
                 onMouseLeave={() => {
                   setShowSidebarToggle(false);

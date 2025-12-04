@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
-import { getTooltipPosition } from '../utils/tooltip-utils';
+import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 
 const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorScheme = "blue", ratingScale = 7, compact = false, wasmService }) => {
   const [data, setData] = useState(null);
@@ -11,6 +11,8 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  useHideTooltipOnScroll(setShowTooltip);
 
   // Memoize filters to prevent infinite re-renders from object reference changes
   const filterKey = useMemo(() => JSON.stringify(filters), [filters]);

@@ -333,7 +333,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
           if (tooltipTimeoutRef.current) {
             clearTimeout(tooltipTimeoutRef.current);
           }
-          tooltipTimeoutRef.current = setTimeout(() => setShowSidebarTooltip(true), 250);
+          tooltipTimeoutRef.current = setTimeout(() => {
+            setShowSidebarTooltip(true);
+            setTimeout(() => setShowSidebarTooltip(false), 1000);
+          }, 250);
         }}
         onMouseLeave={() => {
           setShowSidebarToggle(false);
