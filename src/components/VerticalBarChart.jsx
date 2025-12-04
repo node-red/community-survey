@@ -5,6 +5,7 @@ import { sortByOrdinalOrder, ORDINAL_ORDERS, applyBaselineOrder } from '../utils
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -210,9 +211,7 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-nodered-gray-700">
-                    {actualQuestionTitle}
-                  </h3>
+                  <ChartHeader title={actualQuestionTitle} />
                 </div>
                 {/* Respondent Count Badge - Minimal */}
                 {respondentInfo && (

@@ -2,6 +2,7 @@ import { useState, useEffect, memo } from 'react';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '#64748b', wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
@@ -237,9 +238,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-nodered-gray-700">
-                    {questionText || 'Qualitative Analysis'}
-                  </h3>
+                  <ChartHeader title={questionText || 'Qualitative Analysis'} />
                 </div>
                 {/* Respondent Count Badge - Minimal */}
                 {filteredData && filteredData.respondentCount && (

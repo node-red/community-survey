@@ -3,6 +3,7 @@ import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const QUALITY_COMPARISON_QUESTIONS = [
   { id: 'RoNjbJ', name: 'Ease of use/Ease to learn' },
@@ -161,9 +162,7 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
         <div className="flex-1">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <h3 className="text-lg font-semibold text-nodered-gray-700">
-              Compared to alternatives, Node-RED's quality is ...
-            </h3>
+            <ChartHeader title="Compared to alternatives, Node-RED's quality is ..." />
           </div>
 
           {/* Questions Grid */}

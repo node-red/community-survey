@@ -23,6 +23,7 @@ import UnderstandingRatingsGrid from "./components/UnderstandingRatingsGrid";
 import DeviceSatisfactionGrid from "./components/DeviceSatisfactionGrid";
 import TableOfContents from "./components/TableOfContents";
 import RespondentIcon from "./components/RespondentIcon";
+import ChartHeader from "./components/ChartHeader";
 import {
   header,
   sidebar,
@@ -1826,10 +1827,7 @@ function App() {
                                     <div className="flex-1">
                                       <div className="flex items-center justify-between">
                                         <div>
-                                          <h3 className="text-lg font-semibold text-nodered-gray-700">
-                                            What helps you learn/troubleshoot
-                                            Node-RED?
-                                          </h3>
+                                          <ChartHeader title="What helps you learn/troubleshoot Node-RED?" />
                                         </div>
                                         {/* Respondent Count Badge - matching qualitative style */}
                                         {sectionCounts.section1 && (

@@ -3,6 +3,7 @@ import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorScheme = "blue", ratingScale = 7, compact = false, wasmService }) => {
   const [data, setData] = useState(null);
@@ -151,9 +152,10 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-200 bg-white">
-          <h3 className={compact ? "text-sm font-medium text-nodered-gray-700" : "text-lg font-semibold text-nodered-gray-700"}>
-            {questionTitle ? (questionTitle.endsWith('?') ? questionTitle : questionTitle + '?') : 'Rating Analysis'}
-          </h3>
+          <ChartHeader
+            title={questionTitle ? (questionTitle.endsWith('?') ? questionTitle : questionTitle + '?') : 'Rating Analysis'}
+            compact={compact}
+          />
         </div>
 
         {/* Average and Respondent Count */}

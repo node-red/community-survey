@@ -4,6 +4,7 @@ import { ORDINAL_ORDERS } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _showRatingScale = false, _ratingScale = 7, wasmService }) => {
   const [data, setData] = useState(null);
@@ -343,9 +344,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-nodered-gray-700">
-                    {questionTitle ? questionTitle : 'Rating Analysis'}
-                  </h3>
+                  <ChartHeader title={questionTitle ? questionTitle : 'Rating Analysis'} />
                 </div>
                 {/* Respondent Count Badge */}
                 {respondentInfo && (

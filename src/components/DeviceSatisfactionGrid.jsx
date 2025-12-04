@@ -3,6 +3,7 @@ import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const DEVICE_QUESTIONS = [
   { id: 'bepze7', name: 'Desktop/Laptop', colorScheme: 'yellow' },
@@ -161,9 +162,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
         <div className="flex-1">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <h3 className="text-lg font-semibold text-nodered-gray-700">
-              Satisfaction ratings by device type?
-            </h3>
+            <ChartHeader title="Satisfaction ratings by device type?" />
           </div>
 
           {/* Questions Grid */}

@@ -4,6 +4,7 @@ import { FILTER_MAPPINGS } from '../utils/filter-utils';
 import { getChartColor, defaultChartColor } from '../utils/colorPalette';
 import { applyBaselineOrder } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
+import ChartHeader from './ChartHeader';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -170,9 +171,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-nodered-gray-700">
-                    {actualQuestionTitle}
-                  </h3>
+                  <ChartHeader title={actualQuestionTitle} />
                 </div>
                 {/* Respondent Count Badge - Minimal */}
                 {respondentInfo && (

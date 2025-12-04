@@ -3,6 +3,7 @@ import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
   const questions = useMemo(() => [
@@ -156,9 +157,7 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
         <div className="flex-1">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <h3 className="text-lg font-semibold text-nodered-gray-700">
-              How well did you understand Node-RED at first?
-            </h3>
+            <ChartHeader title="How well did you understand Node-RED at first?" />
           </div>
 
           {/* Questions Grid */}

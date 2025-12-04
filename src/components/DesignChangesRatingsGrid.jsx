@@ -3,6 +3,7 @@ import { getRatingScheme } from '../utils/colorPalette';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const DESIGN_CHANGE_QUESTIONS = [
   { id: '089k8A', name: 'Node-RED branding (logo, website, forum)' },
@@ -161,9 +162,7 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
         <div className="flex-1">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <h3 className="text-lg font-semibold text-nodered-gray-700">
-              How would you feel about potential changes to?
-            </h3>
+            <ChartHeader title="How would you feel about potential changes to?" />
           </div>
 
           {/* Questions Grid */}

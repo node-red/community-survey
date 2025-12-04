@@ -4,6 +4,7 @@ import { feature } from 'topojson-client';
 import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
+import ChartHeader from './ChartHeader';
 
 const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   if (import.meta.env.DEV) console.log('=== ChoroplethMap RENDER ===', { questionId, hasWasmService: !!wasmService });
@@ -122,7 +123,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <h3 className="text-lg font-semibold text-nodered-gray-700">{questionTitle}</h3>
+            <ChartHeader title={questionTitle} />
           </div>
           <div className="p-6">
             <div className="text-gray-500">Loading...</div>
@@ -150,7 +151,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
         </div>
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <h3 className="text-lg font-semibold text-nodered-gray-700">{questionTitle}</h3>
+            <ChartHeader title={questionTitle} />
           </div>
           <div className="p-6">
             <div className="text-red-500">Error loading data: {error}</div>
@@ -272,9 +273,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold text-nodered-gray-700">
-                    {questionTitle}
-                  </h3>
+                  <ChartHeader title={questionTitle} />
                 </div>
                 {/* Total Respondents Badge */}
                 <div className="flex items-center gap-1 text-sm flex-shrink-0">
