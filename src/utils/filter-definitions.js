@@ -23,7 +23,7 @@ export const FILTER_DEFINITIONS = {
       { value: '["6 months to 1 year"]', label: '6 months to 1 year' },
       { value: '["1 to 2 years"]', label: '1 to 2 years' },
       { value: '["2 to 5 years"]', label: '2 to 5 years' },
-      { value: '["More than 5 years (I\'m a veteran!)"]', label: 'More than 5 years (I\'m a veteran!)' }
+      { value: '["More than 5 years"]', label: 'More than 5 years' }
     ]
   },
 

@@ -10,7 +10,7 @@ export const ORDINAL_ORDERS = {
     '6 months to 1 year',
     '1 to 2 years',
     '2 to 5 years',
-    'More than 5 years (I\'m a veteran!)',
+    'More than 5 years',
     'Prefer not to say'
   ],
   
