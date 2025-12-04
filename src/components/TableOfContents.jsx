@@ -102,7 +102,6 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
   useEffect(() => {
     if (!containerRef?.current || sections.length === 0) return;
 
-    const container = containerRef.current;
     let rafId = null;
 
     const updateActiveSection = () => {
@@ -112,38 +111,33 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       }
 
       rafId = requestAnimationFrame(() => {
-        const containerRect = container.getBoundingClientRect();
-        const containerTop = containerRect.top;
-        const containerHeight = containerRect.height;
-        
+        const viewportHeight = window.innerHeight;
+
         // Find the first heading that's clearly visible in the viewport
         let activeId = null;
         let fallbackId = null;
         let minDistance = Infinity;
-        
+
         for (const section of sections) {
           if (!section.element) continue;
-          
+
           const rect = section.element.getBoundingClientRect();
-          const elementTop = rect.top;
-          
-          // Distance from top of container (negative = above viewport)
-          const distanceFromTop = elementTop - containerTop;
-          
+          const distanceFromTop = rect.top;
+
           // If heading is in the upper portion of viewport (top 60%), make it active
-          if (distanceFromTop >= 0 && distanceFromTop <= containerHeight * 0.6) {
+          if (distanceFromTop >= 0 && distanceFromTop <= viewportHeight * 0.6) {
             activeId = section.id;
             break; // First one wins - this is a clear active section
           }
-          
+
           // Track closest heading for potential fallback, but only if reasonably close
           const absoluteDistance = Math.abs(distanceFromTop);
-          if (absoluteDistance < minDistance && absoluteDistance < containerHeight * 0.8) {
+          if (absoluteDistance < minDistance && absoluteDistance < viewportHeight * 0.8) {
             minDistance = absoluteDistance;
             fallbackId = section.id;
           }
         }
-        
+
         // Only update if we found a clearly active section, or if we don't have any active section yet
         if (activeId) {
           // Clear active section found
@@ -158,14 +152,14 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       });
     };
 
-    // Listen to scroll events
-    container.addEventListener('scroll', updateActiveSection, { passive: true });
-    
+    // Listen to scroll events on window (page uses window scrolling, not container scrolling)
+    window.addEventListener('scroll', updateActiveSection, { passive: true });
+
     // Initial update
     updateActiveSection();
 
     return () => {
-      container.removeEventListener('scroll', updateActiveSection);
+      window.removeEventListener('scroll', updateActiveSection);
       if (rafId) {
         cancelAnimationFrame(rafId);
       }
