@@ -257,11 +257,27 @@ export function buildHashPreservingFilters(sectionId) {
 
 /**
  * Get the full URL for a section, preserving current filter params.
+ * NOTE: This reads from window.location.hash which may be stale due to debouncing.
+ * Prefer getFullURLWithFiltersState() when you have access to the React filters state.
  *
  * @param {string} sectionId - Section ID
  * @returns {string} Full URL with origin, pathname, and hash with filters
  */
 export function getFullURLWithFilters(sectionId) {
   const hash = buildHashPreservingFilters(sectionId);
+  return `${window.location.origin}${window.location.pathname}${hash}`;
+}
+
+/**
+ * Get the full URL for a section using the provided filters state.
+ * This is the preferred method when you have access to React filters state,
+ * as it ensures the URL reflects the current state rather than potentially stale URL hash.
+ *
+ * @param {Object} filters - Current filter state from React
+ * @param {string} sectionId - Section ID
+ * @returns {string} Full URL with origin, pathname, and hash with filters
+ */
+export function getFullURLWithFiltersState(filters, sectionId) {
+  const hash = serializeFiltersToURL(filters, sectionId);
   return `${window.location.origin}${window.location.pathname}${hash}`;
 }

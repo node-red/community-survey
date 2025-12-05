@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import wasmService from "./services/duckdb-wasm";
 import { SEGMENT_PRESETS, getAllPresets } from "./utils/filter-definitions.js";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { FilterProvider } from "./contexts/FilterContext";
 import {
   QUESTION_TO_FILTER,
   createEmptyFilters,
@@ -858,8 +859,9 @@ function App() {
     : [];
 
   return (
-    <ErrorBoundary showDetails={import.meta.env.DEV}>
-      <div className="min-h-screen bg-nodered-gray-100 font-sans">
+    <FilterProvider filters={filters}>
+      <ErrorBoundary showDetails={import.meta.env.DEV}>
+        <div className="min-h-screen bg-nodered-gray-100 font-sans">
         {/* Landing Page Hero Section */}
         {showHeroSection && (
           <section className="min-h-screen flex items-start pt-24 relative bg-[#8f0000] overflow-hidden z-30">
@@ -3014,8 +3016,9 @@ function App() {
             </div>
           </section>
         )}
-      </div>
-    </ErrorBoundary>
+        </div>
+      </ErrorBoundary>
+    </FilterProvider>
   );
 }
 
