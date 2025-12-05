@@ -7,6 +7,7 @@ import {
   createEmptyFilters,
   countActiveFilters,
 } from "./utils/filter-utils.js";
+import { useURLFilters } from "./utils/useURLFilters.js";
 import { getChartColor, corePalette } from "./utils/colorPalette";
 import BarChart from "./components/BarChart";
 import QualitativeAnalysis from "./components/QualitativeAnalysis";
@@ -44,6 +45,43 @@ function App() {
   const [filterOptions, setFilterOptions] = useState({});
   const [filters, setFilters] = useState(createEmptyFilters());
   const [activePreset, setActivePreset] = useState(null);
+
+  // Callback to restore filters from URL on page load
+  const handleFiltersRestoredFromURL = useCallback(
+    async (urlFilters) => {
+      if (import.meta.env.DEV)
+        console.log("🔗 Restoring filters from URL:", urlFilters);
+
+      setFilters(urlFilters);
+      setFilterLoading(true);
+
+      try {
+        // Wait for wasmService to be ready, then fetch data with restored filters
+        await wasmService.initialize();
+        const [userCount, dashboardData, sectionCounts] = await Promise.all([
+          wasmService.getFilteredCount(urlFilters),
+          wasmService.getDashboardData(urlFilters, selectedSegment),
+          wasmService.getSectionCounts(urlFilters),
+        ]);
+
+        setFilteredUserCount(userCount);
+        setQueryResult(dashboardData);
+        setSectionCounts(sectionCounts);
+      } catch (error) {
+        console.error("Error restoring filters from URL:", error);
+      } finally {
+        setFilterLoading(false);
+      }
+    },
+    [selectedSegment],
+  );
+
+  // Hook for bidirectional URL <-> filter synchronization
+  const { updateURLWithFilters } = useURLFilters(
+    filters,
+    filterOptions,
+    handleFiltersRestoredFromURL,
+  );
   const [filteredUserCount, setFilteredUserCount] = useState(0);
   const [baselineOrders, setBaselineOrders] = useState({});
   const [sectionCounts, setSectionCounts] = useState({
@@ -506,6 +544,9 @@ function App() {
         setQueryResult(dashboardData);
         setSectionCounts(sectionCounts);
         setFilterLoading(false);
+
+        // Update URL with new filter state
+        updateURLWithFilters(newFilters);
       } catch (error) {
         console.error("Filter change error:", error);
         setFilterLoading(false);
@@ -525,6 +566,7 @@ function App() {
       setQueryResult,
       setSectionCounts,
       setActivePreset,
+      updateURLWithFilters,
     ],
   );
 
@@ -554,6 +596,9 @@ function App() {
       setQueryResult(dashboardData);
       setSectionCounts(sectionCounts);
       setFilterLoading(false);
+
+      // Update URL to remove filter params
+      updateURLWithFilters(emptyFilters);
     } catch (error) {
       console.error("Clear filters error:", error);
       setFilterLoading(false);
@@ -602,6 +647,9 @@ function App() {
         setQueryResult(dashboardData);
         setSectionCounts(sectionCounts);
         setFilterLoading(false);
+
+        // Update URL with preset filter state
+        updateURLWithFilters(newFilters);
       } catch (error) {
         console.error("Apply preset error:", error);
         setFilterLoading(false);

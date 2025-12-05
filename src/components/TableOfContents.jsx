@@ -2,6 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '../styles/classNames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
+import {
+  buildHashPreservingFilters,
+  getCurrentSectionFromURL,
+  generateSectionId,
+} from '../utils/url-utils';
 
 const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, isMobile }) => {
   const [sections, setSections] = useState([]);
@@ -11,7 +16,8 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
   const [showSidebarTooltip, setShowSidebarTooltip] = useState(false);
   const tooltipTimeoutRef = useRef(null);
   const [pendingHash, setPendingHash] = useState(() => {
-    return window.location.hash ? window.location.hash.slice(1) : null;
+    // Extract just the section ID, ignoring any filter params after '?'
+    return getCurrentSectionFromURL();
   });
   const isScrollingRef = useRef(false);
 
@@ -26,7 +32,9 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
 
   // When loading with a hash, immediately scroll past hero/intro to reduce wait time
   useEffect(() => {
-    if (pendingHash) {
+    // Read initial hash directly to avoid stale closure warning
+    const initialHash = getCurrentSectionFromURL();
+    if (initialHash) {
       // Find the dashboard section start (after intro) and scroll there instantly
       const dashboardStart = document.getElementById('introduction-section');
       if (dashboardStart) {
@@ -72,10 +80,9 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
 
         // Only add if we haven't seen this text before
         if (!uniqueHeadings.has(text)) {
-          // Create a stable ID if it doesn't exist, based on cleaned text (no counter for stable URLs)
+          // Create a stable ID if it doesn't exist, using shared algorithm for URL consistency
           if (!heading.id) {
-            const cleanText = text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-            heading.id = `section-${cleanText}`;
+            heading.id = generateSectionId(text);
           }
 
           const chartContainer = heading.closest('[data-chart-id]');
@@ -136,9 +143,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       // Mark that we're programmatically scrolling to prevent URL spam
       isScrollingRef.current = true;
 
-      // Update URL hash (use pushState for clicks so back button works)
+      // Update URL hash, preserving any filter params (use pushState for clicks so back button works)
       if (updateHistory) {
-        window.history.pushState(null, '', `#${sectionId}`);
+        const newHash = buildHashPreservingFilters(sectionId);
+        window.history.pushState(null, '', newHash);
       }
 
       window.scrollTo({
@@ -199,8 +207,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
           if (activeId !== activeSection) {
             setActiveSection(activeId);
             // Update URL hash without triggering scroll (only when not programmatically scrolling)
+            // Preserve any filter params in the URL
             if (!isScrollingRef.current) {
-              window.history.replaceState(null, '', `#${activeId}`);
+              const newHash = buildHashPreservingFilters(activeId);
+              window.history.replaceState(null, '', newHash);
             }
           }
         } else if (!activeSection && fallbackId) {
@@ -242,9 +252,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
   // Handle browser back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash) {
-        scrollToSection(hash, false);
+      // Extract just the section ID, ignoring any filter params
+      const sectionId = getCurrentSectionFromURL();
+      if (sectionId) {
+        scrollToSection(sectionId, false);
       }
     };
 

@@ -1,14 +1,9 @@
 import { useState, useCallback, memo } from 'react';
-
-/**
- * Generate a stable section ID from text using the same algorithm as TableOfContents.
- * This ensures IDs match between ChartHeader and ToC navigation.
- */
-const generateSectionId = (text) => {
-  if (!text) return '';
-  const cleanText = text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-  return `section-${cleanText}`;
-};
+import {
+  buildHashPreservingFilters,
+  getFullURLWithFilters,
+  generateSectionId,
+} from '../utils/url-utils';
 
 /**
  * Link icon SVG (GitHub octicon-link style)
@@ -48,11 +43,12 @@ const ChartHeader = ({ title, compact = false, className }) => {
 
     if (!sectionId) return;
 
-    // Update browser URL hash
-    window.history.pushState(null, '', `#${sectionId}`);
+    // Update browser URL hash, preserving any filter params
+    const newHash = buildHashPreservingFilters(sectionId);
+    window.history.pushState(null, '', newHash);
 
-    // Copy full URL to clipboard
-    const fullUrl = `${window.location.origin}${window.location.pathname}#${sectionId}`;
+    // Copy full URL (with filters) to clipboard
+    const fullUrl = getFullURLWithFilters(sectionId);
     navigator.clipboard.writeText(fullUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
