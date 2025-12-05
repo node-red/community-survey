@@ -63,8 +63,11 @@ export function matchSlugToFilterValue(slug, category, filterOptions = null) {
   const definitionOptions = FILTER_DEFINITIONS[category]?.options;
 
   // Prefer database options (actual values), fall back to definitions
-  const options = dbOptions || definitionOptions;
-  if (!options) return null;
+  // Ensure we have an array before iterating
+  const options = (Array.isArray(dbOptions) && dbOptions.length > 0)
+    ? dbOptions
+    : definitionOptions;
+  if (!options || !Array.isArray(options)) return null;
 
   // Search through options to find matching slug
   // Handle both array of strings (from database) and array of objects (from FILTER_DEFINITIONS)
