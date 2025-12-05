@@ -33,30 +33,55 @@ export function useURLFilters(filters, filterOptions, onFiltersRestored) {
 
   // Restore filters from URL on mount (waits for filterOptions to be loaded)
   useEffect(() => {
-    // Prevent multiple initializations or concurrent restorations
-    if (isInitializedRef.current || isRestoringRef.current) return;
+    // Prevent concurrent restorations
+    if (isRestoringRef.current) return;
 
     // Wait for filterOptions to be populated before parsing URL
     // This ensures we can correctly deserialize database values (e.g., useCases)
     const hasFilterOptions = filterOptions && Object.keys(filterOptions).length > 0;
     if (!hasFilterOptions) return;
 
+    // Only run once after filterOptions are loaded
+    if (isInitializedRef.current) return;
+
     const { filters: urlFilters } = parseFiltersFromURL(window.location.hash, filterOptions);
+
+    // Mark as initialized immediately to prevent re-runs
+    isInitializedRef.current = true;
 
     if (hasActiveFilters(urlFilters)) {
       // URL has filters - restore them
       isRestoringRef.current = true;
-      isInitializedRef.current = true;
       lastSerializedRef.current = serializeFiltersToURL(urlFilters, getCurrentSectionFromURL());
 
       // Call restoration callback - async operations handled by caller
       Promise.resolve(onFiltersRestored(urlFilters)).finally(() => {
         isRestoringRef.current = false;
       });
-    } else {
-      // No filters in URL - just mark as initialized
-      isInitializedRef.current = true;
     }
+  }, [filterOptions, onFiltersRestored]);
+
+  // Listen for hash changes to handle browser back/forward and direct URL changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      // Only handle hash changes if filterOptions are loaded and not already restoring
+      const hasFilterOptions = filterOptions && Object.keys(filterOptions).length > 0;
+      if (!hasFilterOptions || isRestoringRef.current) return;
+
+      const { filters: urlFilters } = parseFiltersFromURL(window.location.hash, filterOptions);
+
+      if (hasActiveFilters(urlFilters)) {
+        isRestoringRef.current = true;
+        lastSerializedRef.current = serializeFiltersToURL(urlFilters, getCurrentSectionFromURL());
+
+        Promise.resolve(onFiltersRestored(urlFilters)).finally(() => {
+          isRestoringRef.current = false;
+        });
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, [filterOptions, onFiltersRestored]);
 
   /**

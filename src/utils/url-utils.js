@@ -59,8 +59,12 @@ export function createFilterValueSlug(value) {
  */
 export function matchSlugToFilterValue(slug, category, filterOptions = null) {
   // Use provided filterOptions if available, fall back to FILTER_DEFINITIONS
-  const dbOptions = filterOptions?.[category];
+  const dbOptionsObj = filterOptions?.[category];
   const definitionOptions = FILTER_DEFINITIONS[category]?.options;
+
+  // Extract the options array from the database options object
+  // filterOptions[category] has structure: { questionId, name, options: [...] }
+  const dbOptions = dbOptionsObj?.options;
 
   // Prefer database options (actual values), fall back to definitions
   // Ensure we have an array before iterating
