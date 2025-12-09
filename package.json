@@ -22,9 +22,9 @@
     "express": "^5.1.0",
     "idb": "^8.0.3",
     "prop-types": "^15.8.1",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-is": "^19.1.1",
+    "react": "^19.1.2",
+    "react-dom": "^19.1.2",
+    "react-is": "^19.1.2",
     "recharts": "^3.1.2",
     "topojson-client": "^3.1.0"
   },
