@@ -37,5 +37,11 @@ export default defineConfig(({ command }) => ({
       "Cross-Origin-Embedder-Policy": "require-corp",
       "Cross-Origin-Opener-Policy": "same-origin",
     },
+    // CRITICAL: Enable polling for containerized development (macOS/Windows)
+    // File system events don't propagate reliably through VM → container boundary
+    watch: {
+      usePolling: true,
+      interval: 1000, // Check every 1 second
+    },
   },
 }));

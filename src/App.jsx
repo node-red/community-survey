@@ -669,9 +669,21 @@ function App() {
         console.log(
           "🎯 Applying preset:",
           presetKey,
+          comparisonMode ? `to Column ${activeColumn}` : "to main filters",
           "with filters:",
           JSON.stringify(newFilters, null, 2),
         );
+
+      // In comparison mode, apply to active column; otherwise apply to main filters
+      if (comparisonMode) {
+        if (activeColumn === 'A') {
+          setFiltersA(newFilters);
+        } else {
+          setFiltersB(newFilters);
+        }
+        // Don't update URL or global counts in comparison mode
+        return;
+      }
 
       setFilters(newFilters);
       setActivePreset(presetKey);
@@ -1203,9 +1215,25 @@ function App() {
               </h1>
             </div>
 
-            {/* User count moved to right side */}
+            {/* User count moved to right side - shows comparison mode indicator when active */}
             <div className="flex items-center gap-1 text-sm flex-shrink-0">
-              {filterLoading ? (
+              {comparisonMode ? (
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-600 text-white text-xs font-medium">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Comparison mode
+                  </span>
+                  <div className="flex items-center gap-1 text-xs">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold">A</span>
+                    <span className="text-gray-400">{countActiveFilters(filtersA)}</span>
+                    <span className="text-gray-500 mx-0.5">vs</span>
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] font-bold">B</span>
+                    <span className="text-gray-400">{countActiveFilters(filtersB)}</span>
+                  </div>
+                </div>
+              ) : filterLoading ? (
                 <div className="flex items-center gap-1 text-yellow-400">
                   <div className="w-3 h-3 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                   <span className="text-xs">Updating...</span>
@@ -1221,7 +1249,7 @@ function App() {
                   <RespondentIcon className="w-4 h-4 text-gray-300 sm:hidden" />
                 </>
               )}
-              {getActiveFilterCount() > 0 && (
+              {!comparisonMode && getActiveFilterCount() > 0 && (
                 <span className={header.filterBadge}>
                   <span className="hidden sm:inline">
                     {getActiveFilterCount()}{" "}
@@ -1862,12 +1890,12 @@ function App() {
                               color={getChartColor("GpGjoO")}
                               wasmService={wasmService}
                             />
-                            <HorizontalRatingsChart
-                              questionId="ElR6d2"
-                              questionTitle="How long have you been using Node-RED?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(HorizontalRatingsChart, {
+                              questionId: "ElR6d2",
+                              questionTitle: "How long have you been using Node-RED?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                             {renderChart(QuantitativeChart, {
                               questionId: "VPeNQ6",
                               questionTitle: "What is your primary purpose for using Node-RED?",
@@ -1933,69 +1961,69 @@ function App() {
                         {/* Section 2: Early Satisfaction & Perception (Questions 11-25) */}
                         <div className="my-12 space-y-12">
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="QRZ4R1"
-                              questionTitle="How up-to-date does Node-RED look and feel?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <RatingsChart
-                              questionId="RoNgoj"
-                              questionTitle="Does Node-RED look and feel professional?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <RatingsChart
-                              questionId="erJzrQ"
-                              questionTitle="How engaging does the Node-RED community feel?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <MatrixChart
-                              questionId="OX2gBp"
-                              questionTitle="Which devices do you use for these Node-RED tasks?"
-                              filters={filters}
-                              color={getChartColor("OX2gBp")}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "QRZ4R1",
+                              questionTitle: "How up-to-date does Node-RED look and feel?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(RatingsChart, {
+                              questionId: "RoNgoj",
+                              questionTitle: "Does Node-RED look and feel professional?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(RatingsChart, {
+                              questionId: "erJzrQ",
+                              questionTitle: "How engaging does the Node-RED community feel?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(MatrixChart, {
+                              questionId: "OX2gBp",
+                              questionTitle: "Which devices do you use for these Node-RED tasks?",
+                              filters: filters,
+                              color: getChartColor("OX2gBp"),
+                              wasmService: wasmService,
+                            })}
                             <DeviceSatisfactionGrid
                               filters={filters}
                               wasmService={wasmService}
                             />
-                            <QuantitativeChart
-                              questionId="ZO7ede"
-                              questionTitle="How did you first discover Node-RED?"
-                              filters={filters}
-                              color={getChartColor("ZO7ede")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["ZO7ede"]}
-                            />
-                            <HorizontalRatingsChart
-                              questionId="qGrzbg"
-                              questionTitle="How long did it take to feel comfortable with Node-RED?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <VerticalBarChart
-                              questionId="ZO7eJB"
-                              questionTitle="Do you use Node-RED in production systems/professionally?"
-                              filters={filters}
-                              color={getChartColor("ZO7eJB")}
-                              wasmService={wasmService}
-                            />
-                            <HorizontalRatingsChart
-                              questionId="ZO7eO5"
-                              questionTitle="How many Node-RED instances do you run/manage?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <VerticalBarChart
-                              questionId="kG2v5Z"
-                              questionTitle="How complex are your typical Node-RED configurations?"
-                              filters={filters}
-                              color={getChartColor("kG2v5Z")}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "ZO7ede",
+                              questionTitle: "How did you first discover Node-RED?",
+                              filters: filters,
+                              color: getChartColor("ZO7ede"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["ZO7ede"],
+                            })}
+                            {renderChart(HorizontalRatingsChart, {
+                              questionId: "qGrzbg",
+                              questionTitle: "How long did it take to feel comfortable with Node-RED?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "ZO7eJB",
+                              questionTitle: "Do you use Node-RED in production systems/professionally?",
+                              filters: filters,
+                              color: getChartColor("ZO7eJB"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(HorizontalRatingsChart, {
+                              questionId: "ZO7eO5",
+                              questionTitle: "How many Node-RED instances do you run/manage?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "kG2v5Z",
+                              questionTitle: "How complex are your typical Node-RED configurations?",
+                              filters: filters,
+                              color: getChartColor("kG2v5Z"),
+                              wasmService: wasmService,
+                            })}
                             <UnderstandingRatingsGrid
                               filters={filters}
                               wasmService={wasmService}
@@ -2269,22 +2297,21 @@ function App() {
                                                 Quality Gap Opportunities
                                               </h3>
                                               <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={queryResult.data}
-                                                  title="Quality Gap Opportunities"
-                                                  subtitle="Where would a quality increase create the most value because of already existing reach"
-                                                  valueColumn="Quality Gap Opp"
-                                                  color={corePalette.amber}
-                                                  isMirrored={false}
-                                                  animationScale={
+                                                {renderChart(BarChart, {
+                                                  data: queryResult.data,
+                                                  title: "Quality Gap Opportunities",
+                                                  subtitle: "Where would a quality increase create the most value because of already existing reach",
+                                                  valueColumn: "Quality Gap Opp",
+                                                  color: corePalette.amber,
+                                                  isMirrored: false,
+                                                  animationScale:
                                                     !isSingleColumn
                                                       ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
+                                                      : 1.01,
+                                                  showRespondentsInTooltip:
+                                                    false,
+                                                  filters: filters,
+                                                })}
                                               </div>
                                             </div>
                                           </div>
@@ -2321,8 +2348,8 @@ function App() {
                                                 Quality Ranking
                                               </h3>
                                               <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={
+                                                {renderChart(BarChart, {
+                                                  data:
                                                     baselineOrders[
                                                       "qualityRanking"
                                                     ]
@@ -2350,22 +2377,20 @@ function App() {
                                                               : orderB)
                                                           );
                                                         })
-                                                      : queryResult.data
-                                                  }
-                                                  title="Quality Ranking"
-                                                  subtitle="Ratt of channel depicted in percentage"
-                                                  valueColumn="Quality %"
-                                                  color={corePalette.terracotta}
-                                                  isMirrored={false}
-                                                  animationScale={
+                                                      : queryResult.data,
+                                                  title: "Quality Ranking",
+                                                  subtitle: "Ratt of channel depicted in percentage",
+                                                  valueColumn: "Quality %",
+                                                  color: corePalette.terracotta,
+                                                  isMirrored: false,
+                                                  animationScale:
                                                     !isSingleColumn
                                                       ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
+                                                      : 1.01,
+                                                  showRespondentsInTooltip:
+                                                    false,
+                                                  filters: filters,
+                                                })}
                                               </div>
                                             </div>
                                           </div>
@@ -2405,8 +2430,8 @@ function App() {
                                                 Reach Gap Opportunities
                                               </h3>
                                               <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={
+                                                {renderChart(BarChart, {
+                                                  data:
                                                     baselineOrders[
                                                       "reachGapOpp"
                                                     ]
@@ -2434,26 +2459,23 @@ function App() {
                                                               : orderB)
                                                           );
                                                         })
-                                                      : queryResult.data
-                                                  }
-                                                  title="Reach Gap Opportunities"
-                                                  subtitle="Where would a reach increase create the most value because of already existing quality"
-                                                  valueColumn="Reach Gap Opp"
-                                                  color={corePalette.bronze}
-                                                  isMirrored={
+                                                      : queryResult.data,
+                                                  title: "Reach Gap Opportunities",
+                                                  subtitle: "Where would a reach increase create the most value because of already existing quality",
+                                                  valueColumn: "Reach Gap Opp",
+                                                  color: corePalette.bronze,
+                                                  isMirrored:
                                                     isSingleColumn
                                                       ? false
-                                                      : true
-                                                  }
-                                                  animationScale={
+                                                      : true,
+                                                  animationScale:
                                                     !isSingleColumn
                                                       ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
+                                                      : 1.01,
+                                                  showRespondentsInTooltip:
+                                                    false,
+                                                  filters: filters,
+                                                })}
                                               </div>
                                             </div>
                                           </div>
@@ -2490,8 +2512,8 @@ function App() {
                                                 Reach Ranking
                                               </h3>
                                               <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={
+                                                {renderChart(BarChart, {
+                                                  data:
                                                     baselineOrders[
                                                       "reachRanking"
                                                     ]
@@ -2519,26 +2541,23 @@ function App() {
                                                               : orderB)
                                                           );
                                                         })
-                                                      : queryResult.data
-                                                  }
-                                                  title="Reach Ranking"
-                                                  subtitle="Percentage of people that have stated that the channel is helpful to them"
-                                                  valueColumn="Reach %"
-                                                  color={corePalette.slate}
-                                                  isMirrored={
+                                                      : queryResult.data,
+                                                  title: "Reach Ranking",
+                                                  subtitle: "Percentage of people that have stated that the channel is helpful to them",
+                                                  valueColumn: "Reach %",
+                                                  color: corePalette.slate,
+                                                  isMirrored:
                                                     isSingleColumn
                                                       ? false
-                                                      : true
-                                                  }
-                                                  animationScale={
+                                                      : true,
+                                                  animationScale:
                                                     !isSingleColumn
                                                       ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
+                                                      : 1.01,
+                                                  showRespondentsInTooltip:
+                                                    false,
+                                                  filters: filters,
+                                                })}
                                               </div>
                                             </div>
                                           </div>
@@ -2550,10 +2569,10 @@ function App() {
                                   {/* Individual Channel Ratings */}
                                   {/* Combined Channel Ratings */}
                                   <div className="my-6">
-                                    <ChannelRatingsGrid
-                                      filters={filters}
-                                      wasmService={wasmService}
-                                    />
+                                    {renderChart(ChannelRatingsGrid, {
+                                      filters: filters,
+                                      wasmService: wasmService,
+                                    })}
                                   </div>
                                 </div>
                               </div>
@@ -2564,14 +2583,14 @@ function App() {
                         {/* Section 3: Frustrations & Design Evaluation (Questions 26-50) */}
                         <div className="my-12 space-y-12">
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="kGozGZ"
-                              questionTitle="What frustrates you most about Node-RED?"
-                              filters={filters}
-                              color={getChartColor("kGozGZ")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["kGozGZ"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "kGozGZ",
+                              questionTitle: "What frustrates you most about Node-RED?",
+                              filters: filters,
+                              color: getChartColor("kGozGZ"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["kGozGZ"],
+                            })}
                           </div>
                           <div className="space-y-12">
                             <QualitativeAnalysis
@@ -2608,14 +2627,14 @@ function App() {
                             />
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="erJzEk"
-                              questionTitle="Have you built Node-RED dashboards with any of these solutions"
-                              filters={filters}
-                              color={getChartColor("erJzEk")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["erJzEk"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "erJzEk",
+                              questionTitle: "Have you built Node-RED dashboards with any of these solutions",
+                              filters: filters,
+                              color: getChartColor("erJzEk"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["erJzEk"],
+                            })}
                           </div>
                           <div className="space-y-12">
                             <QualitativeAnalysis
@@ -2628,12 +2647,12 @@ function App() {
                             />
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="2AWpaV"
-                              questionTitle="How often do you share flows with others?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "2AWpaV",
+                              questionTitle: "How often do you share flows with others?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                           <div className="space-y-12">
                             <QualitativeAnalysis
@@ -2654,22 +2673,22 @@ function App() {
                             />
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="089kZ6"
-                              questionTitle="What customization capabilities are important to you?"
-                              filters={filters}
-                              color={getChartColor("089kZ6")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["089kZ6"]}
-                            />
-                            <QuantitativeChart
-                              questionId="8LBr6x"
-                              questionTitle="Do you have specific accessibility requirements?"
-                              filters={filters}
-                              color={getChartColor("8LBr6x")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["8LBr6x"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "089kZ6",
+                              questionTitle: "What customization capabilities are important to you?",
+                              filters: filters,
+                              color: getChartColor("089kZ6"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["089kZ6"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "8LBr6x",
+                              questionTitle: "Do you have specific accessibility requirements?",
+                              filters: filters,
+                              color: getChartColor("8LBr6x"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["8LBr6x"],
+                            })}
                           </div>
                           <div className="space-y-12">
                             <QualitativeAnalysis
@@ -2682,30 +2701,30 @@ function App() {
                             />
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="Dp8ax5"
-                              questionTitle="What other automation tools do you use?"
-                              filters={filters}
-                              color={getChartColor("Dp8ax5")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["Dp8ax5"]}
-                            />
-                            <QuantitativeChart
-                              questionId="Ma4BjA"
-                              questionTitle="Which missing features would most improve your Node-RED experience?"
-                              filters={filters}
-                              color={getChartColor("Ma4BjA")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["Ma4BjA"]}
-                            />
-                            <QuantitativeChart
-                              questionId="NXjP0j"
-                              questionTitle="Is there anything that holds back production adoption?"
-                              filters={filters}
-                              color={getChartColor("NXjP0j")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["NXjP0j"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "Dp8ax5",
+                              questionTitle: "What other automation tools do you use?",
+                              filters: filters,
+                              color: getChartColor("Dp8ax5"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["Dp8ax5"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "Ma4BjA",
+                              questionTitle: "Which missing features would most improve your Node-RED experience?",
+                              filters: filters,
+                              color: getChartColor("Ma4BjA"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["Ma4BjA"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "NXjP0j",
+                              questionTitle: "Is there anything that holds back production adoption?",
+                              filters: filters,
+                              color: getChartColor("NXjP0j"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["NXjP0j"],
+                            })}
                           </div>
                         </div>
 
@@ -2788,12 +2807,12 @@ function App() {
                             />
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="rO4YJv"
-                              questionTitle="How likely are you to recommend Node-RED to a colleague?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "rO4YJv",
+                              questionTitle: "How likely are you to recommend Node-RED to a colleague?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                           <div className="space-y-12">
                             <QualitativeAnalysis
@@ -2806,13 +2825,13 @@ function App() {
                             />
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="a4RvP9"
-                              questionTitle="How would you rate this survey?"
-                              filters={filters}
-                              ratingScale={5}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "a4RvP9",
+                              questionTitle: "How would you rate this survey?",
+                              filters: filters,
+                              ratingScale: 5,
+                              wasmService: wasmService,
+                            })}
                           </div>
                         </div>
                       </div>
