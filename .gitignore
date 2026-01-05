@@ -86,3 +86,4 @@ yarn.lock.backup
 
 # Project instructions (keep local only)
 CLAUDE.md
+compose.yaml
