@@ -1762,7 +1762,12 @@ function App() {
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-3xl lg:max-w-5xl mx-auto px-10 py-12 dashboard-mobile-scale">
+                <div className={cn(
+                  "w-full mx-auto px-10 py-12 dashboard-mobile-scale",
+                  comparisonMode
+                    ? "max-w-7xl overflow-x-auto"
+                    : "max-w-3xl lg:max-w-5xl"
+                )}>
                   {/* SQL Query Card */}
                   {showQuery && queryResult?.query && (
                     <div className={cn(card.base, "mb-6 max-w-4xl")}>
@@ -1883,13 +1888,13 @@ function App() {
                         {/* Section 1: Basic Demographics & Background (Questions 1-10) */}
                         <div className="space-y-12">
                           <div className="grid grid-cols-1 gap-12">
-                            <ChoroplethMap
-                              questionId="GpGjoO"
-                              questionTitle="Country Selection"
-                              filters={filters}
-                              color={getChartColor("GpGjoO")}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(ChoroplethMap, {
+                              questionId: "GpGjoO",
+                              questionTitle: "Country Selection",
+                              filters: filters,
+                              color: getChartColor("GpGjoO"),
+                              wasmService: wasmService,
+                            })}
                             {renderChart(HorizontalRatingsChart, {
                               questionId: "ElR6d2",
                               questionTitle: "How long have you been using Node-RED?",
@@ -1986,10 +1991,10 @@ function App() {
                               color: getChartColor("OX2gBp"),
                               wasmService: wasmService,
                             })}
-                            <DeviceSatisfactionGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(DeviceSatisfactionGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                             {renderChart(QuantitativeChart, {
                               questionId: "ZO7ede",
                               questionTitle: "How did you first discover Node-RED?",
@@ -2024,10 +2029,10 @@ function App() {
                               color: getChartColor("kG2v5Z"),
                               wasmService: wasmService,
                             })}
-                            <UnderstandingRatingsGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(UnderstandingRatingsGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
 
                             {/* Community Channels Explanation Card */}
                             <div className={card.base}>
