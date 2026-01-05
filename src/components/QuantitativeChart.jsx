@@ -97,8 +97,33 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
             total: totalResponses
           });
         } else {
-          setData([]);
-          setRespondentInfo({ filtered: 0, total: 0 });
+          // No data matches filters - check if we can generate placeholder structure
+          // so the chart stays visible with 0% bars
+          let chartData = [];
+          const columnName = filterType ? `${filterType}_pct` : `${actualQuestionId}_pct`;
+
+          if (baselineOrder && baselineOrder.length > 0) {
+            chartData = baselineOrder.map(answerText => {
+              // Clean up the answer text
+              let cleanAnswer = answerText ? answerText.replace(/[[\]"]/g, '') : 'Unknown';
+              if (filterType && cleanAnswer.length > 40) {
+                cleanAnswer = cleanAnswer.substring(0, 37) + '...';
+              }
+              return {
+                Resource: cleanAnswer,
+                resource: cleanAnswer,
+                [columnName]: '-',
+                count: 0
+              };
+            });
+          }
+
+          setData(chartData); // May still be [] if no baselineOrder available
+          // Preserve actual respondent info from result
+          setRespondentInfo({
+            filtered: result.filtered_respondents || 0,
+            total: result.total_respondents || 0
+          });
         }
       } catch (err) {
         setError(err.message);
@@ -136,6 +161,8 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
     );
   }
 
+  // This triggers when no baselineOrder is available for the question
+  // For questions with baseline data, we generate placeholder data instead
   if (!data || data.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">

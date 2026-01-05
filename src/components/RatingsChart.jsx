@@ -63,8 +63,24 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
             total: totalResponses
           });
         } else {
-          setData([]);
-          setRespondentInfo({ filtered: 0, total: 0 });
+          // No data matches filters - generate empty rating scale structure
+          // so the chart stays visible with 0% bars
+          const colors = getRatingScheme(questionId).slice(0, ratingScale);
+          const scores = [];
+          for (let score = 1; score <= ratingScale; score++) {
+            scores.push({
+              label: score.toString(),
+              percentage: 0,
+              count: 0,
+              color: colors[score - 1]
+            });
+          }
+          setData(scores);
+          // Preserve actual respondent info from result
+          setRespondentInfo({
+            filtered: result.filtered_respondents || 0,
+            total: result.total_respondents || 0
+          });
         }
       } catch (err) {
         setError(err.message);
@@ -117,6 +133,8 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
     );
   }
 
+  // This should rarely trigger now since we generate placeholder data in the else branch
+  // Kept as a safety fallback for unexpected edge cases
   if (!data || data.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">

@@ -134,8 +134,36 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
             total: totalResponses
           });
         } else {
-          setData([]);
-          setRespondentInfo({ filtered: 0, total: 0 });
+          // No data matches filters - check if we can generate placeholder structure
+          // so the chart stays visible with 0% bars
+          let chartData = [];
+
+          if (ORDINAL_ORDERS[actualQuestionId]) {
+            // Use ordinal order as category source
+            chartData = ORDINAL_ORDERS[actualQuestionId].map(category => ({
+              category,
+              percentage: 0,
+              displayPercentage: '-',
+              count: 0,
+              hasData: false
+            }));
+          } else if (baselineOrder && baselineOrder.length > 0) {
+            // Use baseline order as category source
+            chartData = baselineOrder.map(category => ({
+              category,
+              percentage: 0,
+              displayPercentage: '-',
+              count: 0,
+              hasData: false
+            }));
+          }
+
+          setData(chartData); // May still be [] if no category source available
+          // Preserve actual respondent info from result
+          setRespondentInfo({
+            filtered: result.filtered_respondents || 0,
+            total: result.total_respondents || 0
+          });
         }
       } catch (err) {
         setError(err.message);
@@ -172,6 +200,8 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
     );
   }
 
+  // This triggers when no ORDINAL_ORDERS or baselineOrder is available for the question
+  // For questions with predefined categories, we generate placeholder data instead
   if (!data || data.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">

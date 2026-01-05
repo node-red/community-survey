@@ -169,8 +169,27 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
             total: totalResponses
           });
         } else {
-          setData([]);
-          setRespondentInfo({ filtered: 0, total: 0 });
+          // No data matches filters - generate placeholder structure
+          // so the chart stays visible with 0% bars
+          const fullColors = getRatingScheme(questionId);
+          const predefinedOrder = ORDINAL_ORDERS[questionId];
+
+          if (predefinedOrder && predefinedOrder.length > 0) {
+            const placeholderData = predefinedOrder.map((category, index) => ({
+              label: category,
+              percentage: 0,
+              count: 0,
+              color: fullColors[Math.min(index, fullColors.length - 1)]
+            }));
+            setData(placeholderData);
+          } else {
+            setData([]);
+          }
+          // Preserve actual respondent info from result
+          setRespondentInfo({
+            filtered: result.filtered_respondents || 0,
+            total: result.total_respondents || 0
+          });
         }
       } catch (err) {
         setError(err.message);

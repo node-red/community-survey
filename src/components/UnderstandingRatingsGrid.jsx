@@ -42,10 +42,11 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
             };
           }
           
+          // Generate placeholder 1-7 rating scale so chart shows 0% bars
           return {
             id: question.id,
-            data: [],
-            respondentCount: 0
+            data: processRatingData([], 7, question.id),
+            respondentCount: result.filtered_respondents || 0
           };
         });
 

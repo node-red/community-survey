@@ -132,6 +132,9 @@ const BarChart = ({
 
   const maxValue = Math.max(...chartData.filter(d => d.hasData).map(d => d.value));
 
+  // Parent components (QuantitativeChart) now generate placeholder data with 0 values
+  // when baselineOrder is available. This fallback only triggers for charts without
+  // predefined categories where no data exists at all.
   if (chartData.length === 0) {
     return (
       <div className={cn(chart.container, containerClassName)}>

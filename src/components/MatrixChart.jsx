@@ -27,11 +27,29 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
       try {
         setLoading(true);
         setError(null);
-        
+
         if (!wasmService) return;
-        
+
         const result = await wasmService.getMatrixData(questionId, filters);
-        setData(result.data || []);
+
+        if (result.data && result.data.length > 0) {
+          setData(result.data);
+        } else {
+          // No data matches filters - generate placeholder structure
+          // so the chart stays visible with 0% bars
+          const placeholderData = subQuestions.map(subQ => {
+            const entry = {
+              sub_question_id: subQ.id,
+              total_respondents: 0
+            };
+            // Add zero values for each device option
+            ['Desktop/Laptop', 'Tablet', 'Phone'].forEach(device => {
+              entry[device] = { percentage: 0, count: 0 };
+            });
+            return entry;
+          });
+          setData(placeholderData);
+        }
       } catch (err) {
         console.error('Error fetching matrix data:', err);
         setError(err.message);
