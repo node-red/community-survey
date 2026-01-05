@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import wasmService from "./services/duckdb-wasm";
 import { SEGMENT_PRESETS, getAllPresets } from "./utils/filter-definitions.js";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { FilterProvider } from "./contexts/FilterContext";
+import { FilterProvider, ComparisonProvider } from "./contexts/FilterContext";
+import ComparisonChartWrapper from "./components/ComparisonChartWrapper";
 import {
   QUESTION_TO_FILTER,
   createEmptyFilters,
@@ -46,6 +47,12 @@ function App() {
   const [filterOptions, setFilterOptions] = useState({});
   const [filters, setFilters] = useState(createEmptyFilters());
   const [activePreset, setActivePreset] = useState(null);
+
+  // Comparison mode state
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [filtersA, setFiltersA] = useState(createEmptyFilters());
+  const [filtersB, setFiltersB] = useState(createEmptyFilters());
+  const [activeColumn, setActiveColumn] = useState('A');
 
   // Callback to restore filters from URL on page load
   const handleFiltersRestoredFromURL = useCallback(
@@ -466,7 +473,37 @@ function App() {
           category,
           value,
           checked,
+          comparisonMode,
+          activeColumn,
         });
+
+      // Handle comparison mode separately
+      if (comparisonMode) {
+        const currentColumnFilters = activeColumn === 'A' ? filtersA : filtersB;
+        const setColumnFilters = activeColumn === 'A' ? setFiltersA : setFiltersB;
+
+        // Defensive null checking
+        if (!currentColumnFilters[category]) {
+          console.warn(`❌ Filter category '${category}' not found in column ${activeColumn} filters`);
+          return;
+        }
+
+        // Compute new filters for this column
+        const newColumnFilters = {
+          ...currentColumnFilters,
+          [category]: checked
+            ? currentColumnFilters[category].includes(value)
+              ? currentColumnFilters[category]
+              : [...currentColumnFilters[category], value]
+            : currentColumnFilters[category].filter((v) => v !== value),
+        };
+
+        // Update the column's filters (charts will re-render with new filters)
+        setColumnFilters(newColumnFilters);
+        return;
+      }
+
+      // Normal mode handling below
       if (import.meta.env.DEV)
         console.log("🎯 Filter state keys:", Object.keys(filters));
       if (import.meta.env.DEV)
@@ -568,6 +605,10 @@ function App() {
       setSectionCounts,
       setActivePreset,
       updateURLWithFilters,
+      comparisonMode,
+      activeColumn,
+      filtersA,
+      filtersB,
     ],
   );
 
@@ -662,6 +703,61 @@ function App() {
   const getActiveFilterCount = useCallback(() => {
     return countActiveFilters(filters);
   }, [filters]);
+
+  // Toggle comparison mode
+  const toggleComparisonMode = useCallback(() => {
+    if (!comparisonMode) {
+      // Entering comparison mode - copy current filters to column A
+      setFiltersA(filters);
+      setFiltersB(createEmptyFilters());
+      setActiveColumn('A');
+      setComparisonMode(true);
+    } else {
+      // Exiting comparison mode - keep column A filters as the active filters
+      setFilters(filtersA);
+      setComparisonMode(false);
+    }
+  }, [comparisonMode, filters, filtersA]);
+
+  // Get current filters based on comparison mode and active column
+  const getCurrentFilters = useCallback(() => {
+    if (!comparisonMode) return filters;
+    return activeColumn === 'A' ? filtersA : filtersB;
+  }, [comparisonMode, activeColumn, filters, filtersA, filtersB]);
+
+  // Set current filters based on comparison mode and active column (reserved for future use)
+  const _setCurrentFilters = useCallback((newFilters) => {
+    if (!comparisonMode) {
+      setFilters(newFilters);
+    } else if (activeColumn === 'A') {
+      setFiltersA(newFilters);
+    } else {
+      setFiltersB(newFilters);
+    }
+  }, [comparisonMode, activeColumn]);
+
+  /**
+   * Helper function to render a chart with comparison mode support.
+   * In normal mode, renders the chart with current filters.
+   * In comparison mode, renders the chart twice side-by-side with filtersA and filtersB.
+   */
+  const renderChart = useCallback((ChartComponent, chartProps) => {
+    if (comparisonMode) {
+      // Extract filters from chartProps (we'll provide filtersA and filtersB instead)
+      const { filters: _, ...restProps } = chartProps;
+      void _; // Suppress unused variable warning
+      return (
+        <ComparisonChartWrapper
+          ChartComponent={ChartComponent}
+          chartProps={restProps}
+          filtersA={filtersA}
+          filtersB={filtersB}
+        />
+      );
+    }
+    // Normal mode - render chart directly with provided props
+    return <ChartComponent {...chartProps} />;
+  }, [comparisonMode, filtersA, filtersB]);
 
   // Sidebar item tooltip handlers
   const handleSidebarItemMouseEnter = (event, text) => {
@@ -1190,9 +1286,59 @@ function App() {
                   </div>
                 </div>
 
+                {/* Comparison Mode Toggle */}
+                <div className="px-4 py-2 bg-white border-b border-gray-200">
+                  <button
+                    onClick={toggleComparisonMode}
+                    className={cn(
+                      "w-full px-3 py-1.5 text-xs font-medium rounded border transition-colors",
+                      comparisonMode
+                        ? "bg-purple-600 text-white border-purple-600 hover:bg-purple-700"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                    )}
+                  >
+                    {comparisonMode ? "Exit Compare Mode" : "Compare Segments"}
+                  </button>
+                </div>
+
+                {/* Column Selector Tabs (visible in comparison mode) */}
+                {comparisonMode && (
+                  <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setActiveColumn('A')}
+                        className={cn(
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5",
+                          activeColumn === 'A'
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                        )}
+                      >
+                        <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">A</span>
+                        <span className="truncate">({countActiveFilters(filtersA)})</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveColumn('B')}
+                        className={cn(
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5",
+                          activeColumn === 'B'
+                            ? "bg-orange-500 text-white border-orange-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                        )}
+                      >
+                        <span className="w-4 h-4 rounded-full bg-orange-600 text-white text-[10px] flex items-center justify-center font-bold">B</span>
+                        <span className="truncate">({countActiveFilters(filtersB)})</span>
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-1 text-center">
+                      Editing Column {activeColumn}
+                    </p>
+                  </div>
+                )}
+
                 <div className={sidebar.content}>
                   {/* Clear Filters - Node-RED Style */}
-                  {getActiveFilterCount() > 0 && (
+                  {!comparisonMode && getActiveFilterCount() > 0 && (
                     <div className={sidebar.preset.wrapper}>
                       <button
                         className={sidebar.clearButton}
@@ -1281,7 +1427,9 @@ function App() {
                               return null;
                             }
 
-                            const selectedValues = filters[filterKey] || [];
+                            // Use current column's filters in comparison mode
+                            const currentFilters = comparisonMode ? getCurrentFilters() : filters;
+                            const selectedValues = currentFilters[filterKey] || [];
                             const selectedCount = selectedValues.length;
 
                             // Debug logging for checkbox state
@@ -1720,65 +1868,65 @@ function App() {
                               filters={filters}
                               wasmService={wasmService}
                             />
-                            <QuantitativeChart
-                              questionId="VPeNQ6"
-                              questionTitle="What is your primary purpose for using Node-RED?"
-                              filters={filters}
-                              color={getChartColor("VPeNQ6")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["VPeNQ6"]}
-                            />
-                            <VerticalBarChart
-                              questionId="joRz61"
-                              questionTitle="What size organization do you work with?"
-                              filters={filters}
-                              color={getChartColor("joRz61")}
-                              wasmService={wasmService}
-                            />
-                            <QuantitativeChart
-                              questionId="2AWoaM"
-                              questionTitle="What industry are you in?"
-                              filters={filters}
-                              color={getChartColor("2AWoaM")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["2AWoaM"]}
-                            />
-                            <VerticalBarChart
-                              questionId="P9xr1x"
-                              questionTitle="How much influence do you have in choosing automation tools?"
-                              filters={filters}
-                              color={getChartColor("P9xr1x")}
-                              wasmService={wasmService}
-                            />
-                            <QuantitativeChart
-                              questionId="rO4YaX"
-                              questionTitle="What do you use Node-RED for?"
-                              filters={filters}
-                              color={getChartColor("rO4YaX")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["rO4YaX"]}
-                            />
-                            <QuantitativeChart
-                              questionId="476OJ5"
-                              questionTitle="Where do you typically run Node-RED?"
-                              filters={filters}
-                              color={getChartColor("476OJ5")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["476OJ5"]}
-                            />
-                            <VerticalBarChart
-                              questionId="xDqzMk"
-                              questionTitle="What's your programming experience level?"
-                              filters={filters}
-                              color={getChartColor("xDqzMk")}
-                              wasmService={wasmService}
-                            />
-                            <RatingsChart
-                              questionId="qGrzG5"
-                              questionTitle="Overall satisfaction with Node-RED?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "VPeNQ6",
+                              questionTitle: "What is your primary purpose for using Node-RED?",
+                              filters: filters,
+                              color: getChartColor("VPeNQ6"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["VPeNQ6"],
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "joRz61",
+                              questionTitle: "What size organization do you work with?",
+                              filters: filters,
+                              color: getChartColor("joRz61"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "2AWoaM",
+                              questionTitle: "What industry are you in?",
+                              filters: filters,
+                              color: getChartColor("2AWoaM"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["2AWoaM"],
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "P9xr1x",
+                              questionTitle: "How much influence do you have in choosing automation tools?",
+                              filters: filters,
+                              color: getChartColor("P9xr1x"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "rO4YaX",
+                              questionTitle: "What do you use Node-RED for?",
+                              filters: filters,
+                              color: getChartColor("rO4YaX"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["rO4YaX"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "476OJ5",
+                              questionTitle: "Where do you typically run Node-RED?",
+                              filters: filters,
+                              color: getChartColor("476OJ5"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["476OJ5"],
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "xDqzMk",
+                              questionTitle: "What's your programming experience level?",
+                              filters: filters,
+                              color: getChartColor("xDqzMk"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(RatingsChart, {
+                              questionId: "qGrzG5",
+                              questionTitle: "Overall satisfaction with Node-RED?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                         </div>
 
