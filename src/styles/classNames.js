@@ -117,7 +117,7 @@ export const sidebar = {
       "border-b border-gray-200 px-3 py-2 text-[11px] font-medium text-gray-600 uppercase flex justify-between items-center relative",
   },
   clearButton:
-    "w-full px-3 py-1.5 bg-white border border-[#c12120] rounded-[3px] text-[#c12120] text-[11px] font-bold cursor-pointer transition-all duration-150 uppercase hover:bg-[#c12120] hover:text-white",
+    "w-full px-[7px] py-[3px] bg-white border border-[#c12120] rounded-[3px] text-[#c12120] text-[11px] font-bold cursor-pointer transition-all duration-150 uppercase hover:bg-[#c12120] hover:text-white",
 };
 
 // Main content area

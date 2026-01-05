@@ -3,7 +3,7 @@ import wasmService from "./services/duckdb-wasm";
 import { SEGMENT_PRESETS, getAllPresets } from "./utils/filter-definitions.js";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { FilterProvider, ComparisonProvider } from "./contexts/FilterContext";
-import ComparisonChartWrapper from "./components/ComparisonChartWrapper";
+import UnifiedChartWrapper from "./components/UnifiedChartWrapper";
 import {
   QUESTION_TO_FILTER,
   createEmptyFilters,
@@ -53,6 +53,7 @@ function App() {
   const [filtersA, setFiltersA] = useState(createEmptyFilters());
   const [filtersB, setFiltersB] = useState(createEmptyFilters());
   const [activeColumn, setActiveColumn] = useState('A');
+  const [hasEverEnabledComparison, setHasEverEnabledComparison] = useState(false);
 
   // Callback to restore filters from URL on page load
   const handleFiltersRestoredFromURL = useCallback(
@@ -724,10 +725,12 @@ function App() {
       setFiltersB(createEmptyFilters());
       setActiveColumn('A');
       setComparisonMode(true);
+      setHasEverEnabledComparison(true); // Triggers Column B to mount
     } else {
       // Exiting comparison mode - keep column A filters as the active filters
       setFilters(filtersA);
       setComparisonMode(false);
+      // Keep hasEverEnabledComparison true - Column B stays mounted for fast re-toggle
     }
   }, [comparisonMode, filters, filtersA]);
 
@@ -754,22 +757,21 @@ function App() {
    * In comparison mode, renders the chart twice side-by-side with filtersA and filtersB.
    */
   const renderChart = useCallback((ChartComponent, chartProps) => {
-    if (comparisonMode) {
-      // Extract filters from chartProps (we'll provide filtersA and filtersB instead)
-      const { filters: _, ...restProps } = chartProps;
-      void _; // Suppress unused variable warning
-      return (
-        <ComparisonChartWrapper
-          ChartComponent={ChartComponent}
-          chartProps={restProps}
-          filtersA={filtersA}
-          filtersB={filtersB}
-        />
-      );
-    }
-    // Normal mode - render chart directly with provided props
-    return <ChartComponent {...chartProps} />;
-  }, [comparisonMode, filtersA, filtersB]);
+    // Extract filters from chartProps since UnifiedChartWrapper handles them
+    const { filters: _, ...restProps } = chartProps;
+    void _; // Suppress unused variable warning
+
+    return (
+      <UnifiedChartWrapper
+        ChartComponent={ChartComponent}
+        chartProps={restProps}
+        comparisonMode={comparisonMode}
+        hasEverEnabledComparison={hasEverEnabledComparison}
+        filtersA={comparisonMode ? filtersA : filters}
+        filtersB={filtersB}
+      />
+    );
+  }, [comparisonMode, hasEverEnabledComparison, filters, filtersA, filtersB]);
 
   // Sidebar item tooltip handlers
   const handleSidebarItemMouseEnter = (event, text) => {
@@ -1306,10 +1308,9 @@ function App() {
                   <button
                     onClick={toggleComparisonMode}
                     className={cn(
-                      "w-full px-3 py-1.5 text-xs font-medium rounded border transition-colors",
                       comparisonMode
-                        ? "bg-purple-600 text-white border-purple-600 hover:bg-purple-700"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                        ? sidebar.clearButton
+                        : sidebar.preset.button
                     )}
                   >
                     {comparisonMode ? "Exit Compare Mode" : "Compare Segments"}

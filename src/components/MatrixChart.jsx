@@ -4,6 +4,14 @@ import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-uti
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 
+// Define the sub-questions for the matrix (constant, outside component)
+const SUB_QUESTIONS = [
+  { id: '0f096ad2-1241-4657-98ac-1c721f958999', label: 'Editing flows' },
+  { id: '31f69859-8ab9-4202-8d56-143007730ee1', label: 'Viewing runtime data' },
+  { id: '0be2d6bd-10ce-4387-ab24-9bbb64ce6b09', label: 'Accessing dashboards' },
+  { id: '91356092-cf0a-4bb5-b467-2c84645328aa', label: 'Managing flows' }
+];
+
 const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,14 +21,6 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   useHideTooltipOnScroll(setShowTooltip);
-
-  // Define the sub-questions for the matrix
-  const subQuestions = [
-    { id: '0f096ad2-1241-4657-98ac-1c721f958999', label: 'Editing flows' },
-    { id: '31f69859-8ab9-4202-8d56-143007730ee1', label: 'Viewing runtime data' },
-    { id: '0be2d6bd-10ce-4387-ab24-9bbb64ce6b09', label: 'Accessing dashboards' },
-    { id: '91356092-cf0a-4bb5-b467-2c84645328aa', label: 'Managing flows' }
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +37,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
         } else {
           // No data matches filters - generate placeholder structure
           // so the chart stays visible with 0% bars
-          const placeholderData = subQuestions.map(subQ => {
+          const placeholderData = SUB_QUESTIONS.map(subQ => {
             const entry = {
               sub_question_id: subQ.id,
               total_respondents: 0
@@ -150,7 +150,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
         
         {/* Matrix Data */}
         <div className="p-4">
-          {subQuestions.map((subQ, index) => {
+          {SUB_QUESTIONS.map((subQ, index) => {
             const subData = Array.isArray(data) ? (data.find(d => d.sub_question_id === subQ.id) || {}) : {};
 
             // Calculate percentages for each device option
