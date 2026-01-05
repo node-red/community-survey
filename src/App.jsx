@@ -719,6 +719,9 @@ function App() {
 
   // Toggle comparison mode
   const toggleComparisonMode = useCallback(() => {
+    // Save current chart before layout change
+    const currentChart = getCurrentlyVisibleChart();
+
     if (!comparisonMode) {
       // Entering comparison mode - copy current filters to column A
       setFiltersA(filters);
@@ -732,7 +735,14 @@ function App() {
       setComparisonMode(false);
       // Keep hasEverEnabledComparison true - Column B stays mounted for fast re-toggle
     }
-  }, [comparisonMode, filters, filtersA]);
+
+    // Restore scroll position after layout updates
+    if (currentChart) {
+      setTimeout(() => {
+        scrollToChart(currentChart);
+      }, 100);
+    }
+  }, [comparisonMode, filters, filtersA, getCurrentlyVisibleChart]);
 
   // Get current filters based on comparison mode and active column
   const getCurrentFilters = useCallback(() => {
