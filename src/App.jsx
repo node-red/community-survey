@@ -1354,20 +1354,38 @@ function App() {
                 <div className={sidebar.content}>
                   {/* Clear Filters - Node-RED Style */}
                   {!comparisonMode && getActiveFilterCount() > 0 && (
-                    <div className={sidebar.preset.wrapper}>
+                    <div className={cn(sidebar.preset.wrapper, "border-gray-200")}>
                       <button
                         className={sidebar.clearButton}
                         onClick={clearFilters}
                         data-testid="clear-filters"
                       >
-                        Clear All Filters ({getActiveFilterCount()} active)
+                        Clear filters
+                      </button>
+                    </div>
+                  )}
+                  {/* Clear Filters for active column in comparison mode */}
+                  {comparisonMode && countActiveFilters(activeColumn === 'A' ? filtersA : filtersB) > 0 && (
+                    <div className={cn(sidebar.preset.wrapper, "border-gray-200")}>
+                      <button
+                        className={sidebar.clearButton}
+                        onClick={() => {
+                          if (activeColumn === 'A') {
+                            setFiltersA(createEmptyFilters());
+                          } else {
+                            setFiltersB(createEmptyFilters());
+                          }
+                        }}
+                        data-testid="clear-filters-column"
+                      >
+                        Clear filters
                       </button>
                     </div>
                   )}
 
                   {/* Segments Category */}
                   <div className={sidebar.category.base}>
-                    <div className="bg-[#f3f3f3] border-t border-b border-gray-300 pl-4 pr-4 py-2 text-xs text-left font-medium text-gray-500 uppercase flex justify-between items-center relative">
+                    <div className="bg-[#f3f3f3] border-b border-gray-200 pl-4 pr-4 py-2 text-xs text-left font-medium text-gray-500 uppercase flex justify-between items-center relative">
                       <span
                         className="truncate"
                         onMouseEnter={(e) =>
