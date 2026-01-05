@@ -172,7 +172,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] flex transition-all duration-200 shadow-sm" data-chart-id={actualQuestionId}>
+    <div className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm" data-chart-id={actualQuestionId}>
       {/* Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
         <svg

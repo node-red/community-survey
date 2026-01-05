@@ -66,7 +66,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
   // Once we have data, keep showing it while loading new filtered data
   if (loading && data.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+      <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">
             <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="#d1d5db" fill="white" />
@@ -86,7 +86,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+      <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">
             <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="#d1d5db" fill="white" />
@@ -113,7 +113,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
   // Render the matrix as multiple horizontal segmented bars similar to RatingsChart
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+    <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
       {/* Left Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">

@@ -48,10 +48,10 @@ const UnifiedChartWrapper = (props) => {
         </div>
       </div>
 
-      {/* Column B - Hidden when not in comparison mode, lazy loaded */}
+      {/* Column B - Animates in/out with width + opacity transition */}
       <div className={cn(
-        "flex-1 min-w-[500px]",
-        !comparisonMode && "hidden"
+        "flex-1 min-w-[500px] transition-all duration-300 ease-out",
+        !comparisonMode && "!flex-none !w-0 !min-w-0 opacity-0 overflow-hidden"
       )}>
         {hasEverEnabledComparison && (
           <div className="border-l-2 border-orange-500 pl-3 relative">
