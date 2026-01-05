@@ -2042,38 +2042,38 @@ function App() {
                             })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="gqlzqJ"
-                              questionText="What's the single biggest improvement Node-RED needs?"
-                              filters={filters}
-                              color={getChartColor("gqlzqJ")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["gqlzqJ"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "gqlzqJ",
+                              questionText: "What's the single biggest improvement Node-RED needs?",
+                              filters: filters,
+                              color: getChartColor("gqlzqJ"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["gqlzqJ"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <DesignChangesRatingsGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <QualityComparisonRatingsGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(DesignChangesRatingsGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QualityComparisonRatingsGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                         </div>
 
                         {/* Section 4: Learning, Dashboards & Sharing (Questions 39-50) */}
                         <div className="my-12 space-y-12">
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="6KlPdY"
-                              questionText="What would make learning Node-RED easier for newcomers?"
-                              filters={filters}
-                              color={getChartColor("6KlPdY")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["6KlPdY"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "6KlPdY",
+                              questionText: "What would make learning Node-RED easier for newcomers?",
+                              filters: filters,
+                              color: getChartColor("6KlPdY"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["6KlPdY"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
                             {renderChart(QuantitativeChart, {
@@ -2086,14 +2086,14 @@ function App() {
                             })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="joRj6E"
-                              questionText="What has made it difficult to create or use Node-RED dashboards?"
-                              filters={filters}
-                              color={getChartColor("joRj6E")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["joRj6E"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "joRj6E",
+                              questionText: "What has made it difficult to create or use Node-RED dashboards?",
+                              filters: filters,
+                              color: getChartColor("joRj6E"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["joRj6E"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
                             {renderChart(RatingsChart, {
@@ -2104,22 +2104,22 @@ function App() {
                             })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="xDqAMo"
-                              questionText="What makes sharing flows difficult for you?"
-                              filters={filters}
-                              color={getChartColor("xDqAMo")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["xDqAMo"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="RoNAMl"
-                              questionText="How would you wish sharing flows would work?"
-                              filters={filters}
-                              color={getChartColor("RoNAMl")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["RoNAMl"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "xDqAMo",
+                              questionText: "What makes sharing flows difficult for you?",
+                              filters: filters,
+                              color: getChartColor("xDqAMo"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["xDqAMo"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "RoNAMl",
+                              questionText: "How would you wish sharing flows would work?",
+                              filters: filters,
+                              color: getChartColor("RoNAMl"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["RoNAMl"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
                             {renderChart(QuantitativeChart, {
@@ -2140,14 +2140,14 @@ function App() {
                             })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="oRPqY1"
-                              questionText="Why do you choose to use Node-RED over alternatives?"
-                              filters={filters}
-                              color={getChartColor("oRPqY1")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["oRPqY1"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "oRPqY1",
+                              questionText: "Why do you choose to use Node-RED over alternatives?",
+                              filters: filters,
+                              color: getChartColor("oRPqY1"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["oRPqY1"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
                             {renderChart(QuantitativeChart, {
@@ -2180,80 +2180,80 @@ function App() {
                         {/* Section 5: Future, AI & Final Thoughts (Questions 51-63) */}
                         <div className="my-12 space-y-12">
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="P9xrbb"
-                              questionText="If you could change one thing about Node-RED, what would it be?"
-                              filters={filters}
-                              color={getChartColor("P9xrbb")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["P9xrbb"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="oRPZqP"
-                              questionText="What aspects of Node-RED must be changed or be updated?"
-                              filters={filters}
-                              color={getChartColor("oRPZqP")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["oRPZqP"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="XoaQoz"
-                              questionText="What aspects of Node-RED should ideally never change?"
-                              filters={filters}
-                              color={getChartColor("XoaQoz")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["XoaQoz"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="JlPolX"
-                              questionText="What do you love most about Node-RED right now?"
-                              filters={filters}
-                              color={getChartColor("JlPolX")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["JlPolX"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="y4Q14d"
-                              questionText="What makes Node-RED feel like 'Node-RED' to you?"
-                              filters={filters}
-                              color={getChartColor("y4Q14d")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["y4Q14d"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="OX26KK"
-                              questionText="What would draw you away from Node-RED?"
-                              filters={filters}
-                              color={getChartColor("OX26KK")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["OX26KK"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="xDqzdv"
-                              questionText="What expectations do you have regarding AI for Node-RED?"
-                              filters={filters}
-                              color={getChartColor("xDqzdv")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["xDqzdv"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="a4LqQX"
-                              questionText="Why is that? (AI follow-up)"
-                              filters={filters}
-                              color={getChartColor("a4LqQX")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["a4LqQX"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "P9xrbb",
+                              questionText: "If you could change one thing about Node-RED, what would it be?",
+                              filters: filters,
+                              color: getChartColor("P9xrbb"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["P9xrbb"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "oRPZqP",
+                              questionText: "What aspects of Node-RED must be changed or be updated?",
+                              filters: filters,
+                              color: getChartColor("oRPZqP"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["oRPZqP"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "XoaQoz",
+                              questionText: "What aspects of Node-RED should ideally never change?",
+                              filters: filters,
+                              color: getChartColor("XoaQoz"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["XoaQoz"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "JlPolX",
+                              questionText: "What do you love most about Node-RED right now?",
+                              filters: filters,
+                              color: getChartColor("JlPolX"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["JlPolX"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "y4Q14d",
+                              questionText: "What makes Node-RED feel like 'Node-RED' to you?",
+                              filters: filters,
+                              color: getChartColor("y4Q14d"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["y4Q14d"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "OX26KK",
+                              questionText: "What would draw you away from Node-RED?",
+                              filters: filters,
+                              color: getChartColor("OX26KK"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["OX26KK"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "xDqzdv",
+                              questionText: "What expectations do you have regarding AI for Node-RED?",
+                              filters: filters,
+                              color: getChartColor("xDqzdv"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["xDqzdv"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "a4LqQX",
+                              questionText: "Why is that? (AI follow-up)",
+                              filters: filters,
+                              color: getChartColor("a4LqQX"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["a4LqQX"],
+                            })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="ElR6ZN"
-                              questionText="Any concerns about Node-RED's future direction?"
-                              filters={filters}
-                              color={getChartColor("ElR6ZN")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["ElR6ZN"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "ElR6ZN",
+                              questionText: "Any concerns about Node-RED's future direction?",
+                              filters: filters,
+                              color: getChartColor("ElR6ZN"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["ElR6ZN"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
                             {renderChart(RatingsChart, {
@@ -2264,14 +2264,14 @@ function App() {
                             })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="476O9O"
-                              questionText="Any final thoughts or suggestions?"
-                              filters={filters}
-                              color={getChartColor("476O9O")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["476O9O"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "476O9O",
+                              questionText: "Any final thoughts or suggestions?",
+                              filters: filters,
+                              color: getChartColor("476O9O"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["476O9O"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
                             {renderChart(RatingsChart, {
