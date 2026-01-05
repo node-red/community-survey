@@ -297,9 +297,9 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
             </div>
           </div>
 
-          {/* Charts in 2x2 Grid */}
+          {/* Charts - always single column (comparison mode handles side-by-side) */}
           {hasData && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-6">
+            <div className="grid grid-cols-1 gap-6 my-6">
               {/* Left Column - Quality Charts */}
               <div className="space-y-6">
                 {/* Quality Gap Chart */}

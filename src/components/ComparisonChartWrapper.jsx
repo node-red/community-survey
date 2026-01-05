@@ -29,7 +29,7 @@ const ComparisonChartWrapper = (props) => {
   return (
     <div className="flex gap-4">
       {/* Column A */}
-      <div className="flex-1 min-w-[400px] relative">
+      <div className="flex-1 min-w-[500px] relative">
         <div className="absolute -top-6 left-0 right-0 flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-bold">
             A
@@ -44,7 +44,7 @@ const ComparisonChartWrapper = (props) => {
       </div>
 
       {/* Column B */}
-      <div className="flex-1 min-w-[400px] relative">
+      <div className="flex-1 min-w-[500px] relative">
         <div className="absolute -top-6 left-0 right-0 flex items-center gap-2">
           <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold">
             B
