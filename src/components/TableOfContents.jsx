@@ -155,9 +155,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       });
 
       // Reset scrolling flag after animation completes
+      // Using 800ms to accommodate longer smooth scroll animations
       setTimeout(() => {
         isScrollingRef.current = false;
-      }, 500);
+      }, 800);
     }
   }, []);
 
@@ -206,9 +207,10 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
           // Clear active section found
           if (activeId !== activeSection) {
             setActiveSection(activeId);
-            // Update URL hash without triggering scroll (only when not programmatically scrolling)
+            // Update URL hash without triggering scroll (only when not programmatically scrolling
+            // or when we have a pending hash from URL navigation that hasn't been processed yet)
             // Preserve any filter params in the URL
-            if (!isScrollingRef.current) {
+            if (!isScrollingRef.current && !pendingHash) {
               const newHash = buildHashPreservingFilters(activeId);
               window.history.replaceState(null, '', newHash);
             }
@@ -233,7 +235,7 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
         cancelAnimationFrame(rafId);
       }
     };
-  }, [containerRef, sections, activeSection]);
+  }, [containerRef, sections, activeSection, pendingHash]);
 
   // Handle initial page load with hash - wait for section to be discovered
   useEffect(() => {
@@ -244,7 +246,11 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       // Small delay to ensure layout is stable after charts load
       setTimeout(() => {
         scrollToSection(pendingHash, false);
-        setPendingHash(null);
+        // Delay clearing pendingHash until scroll animation completes
+        // This prevents URL updates during the smooth scroll animation
+        setTimeout(() => {
+          setPendingHash(null);
+        }, 800); // Allow time for smooth scroll to complete
       }, 100);
     }
   }, [sections, pendingHash, scrollToSection]);
