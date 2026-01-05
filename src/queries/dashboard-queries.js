@@ -117,7 +117,7 @@ usage_data AS (
 SELECT 
     'All Respondents (' || (SELECT total FROM respondent_count) || ' users)' as "Segment",
     ar.channel as "Resource",
-    COALESCE(CAST(ROUND(ud.reach_pct, 0) AS INTEGER) || '%', '0%') as "Reach %",
+    COALESCE(CAST(ROUND(ud.reach_pct, 0) AS INTEGER) || '%', '-') as "Reach %",
     COALESCE(ud.selected_count || '/' || (SELECT total FROM respondent_count), '0/' || (SELECT total FROM respondent_count)) as "Users",
     COALESCE(CAST(ROUND(ud.avg_rating, 0) AS INTEGER) || '/7', '-') as "Rating",
     COALESCE(CAST(ROUND(ud.quality_pct, 0) AS INTEGER) || '%', '-') as "Quality %",
