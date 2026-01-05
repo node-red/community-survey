@@ -719,8 +719,18 @@ function App() {
 
   // Toggle comparison mode
   const toggleComparisonMode = useCallback(() => {
-    // Save current chart before layout change
+    // Find current chart and its relative position in viewport
     const currentChart = getCurrentlyVisibleChart();
+    let relativeOffset = 0;
+
+    if (currentChart) {
+      const chartElement = document.querySelector(`[data-chart-id="${currentChart}"]`);
+      if (chartElement) {
+        const rect = chartElement.getBoundingClientRect();
+        // Store how far from viewport top the chart currently is
+        relativeOffset = rect.top;
+      }
+    }
 
     if (!comparisonMode) {
       // Entering comparison mode - copy current filters to column A
@@ -736,11 +746,23 @@ function App() {
       // Keep hasEverEnabledComparison true - Column B stays mounted for fast re-toggle
     }
 
-    // Restore scroll position after layout updates
+    // Restore chart to same relative viewport position after DOM settles
+    // Use double requestAnimationFrame: first waits for React commit, second for browser layout/paint
     if (currentChart) {
-      setTimeout(() => {
-        scrollToChart(currentChart);
-      }, 100);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const chartElement = document.querySelector(`[data-chart-id="${currentChart}"]`);
+          if (chartElement) {
+            const rect = chartElement.getBoundingClientRect();
+            const absoluteTop = rect.top + window.scrollY;
+            // Scroll so chart appears at same relative position as before
+            window.scrollTo({
+              top: absoluteTop - relativeOffset,
+              behavior: 'instant'
+            });
+          }
+        });
+      });
     }
   }, [comparisonMode, filters, filtersA, getCurrentlyVisibleChart]);
 
