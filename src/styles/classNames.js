@@ -74,7 +74,7 @@ export const sidebar = {
   filterIcon:
     "absolute left-[8px] top-1/2 -translate-y-1/2 w-[14px] h-[14px] text-[#999] pointer-events-none",
   filter:
-    "w-full pl-[28px] pr-[8px] py-[3px] h-[24px] rounded-[3px] text-[13px] bg-white text-[#333] placeholder-[#999] focus:outline-none focus:border-[#6baed6]",
+    "w-full pl-[28px] pr-[8px] py-[3px] h-[24px] rounded-[3px] text-[13px] bg-white text-[#333] placeholder-[#999] focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:border-[#3b82f6]",
   content: "p-0 flex-1 overflow-y-auto",
   category: {
     base: "border-b border-[#ddd]",
@@ -90,7 +90,7 @@ export const sidebar = {
   preset: {
     wrapper: "px-4 py-2 bg-white sticky top-0 z-10 border-b border-[#ddd]",
     button:
-      "w-full px-[7px] py-[3px] border border-[#999] rounded-[3px] bg-white text-[#333] text-[11px] cursor-pointer transition-all duration-150 hover:bg-[#f0f0f0] hover:border-[#6baed6]",
+      "w-full px-[7px] py-[3px] border border-[#999] rounded-[3px] bg-white text-[#333] text-[11px] cursor-pointer transition-all duration-150 hover:bg-[#f0f0f0] hover:border-[#6baed6] focus:outline focus:outline-2 focus:outline-[#3b82f6]",
     buttonActive: "!bg-[#6baed6] !text-white !border-[#5ba0c5] hover:!bg-[#5ba0c5]",
   },
   filterCategory: {
@@ -117,7 +117,7 @@ export const sidebar = {
       "border-b border-gray-200 px-3 py-2 text-[11px] font-medium text-gray-600 uppercase flex justify-between items-center relative",
   },
   clearButton:
-    "w-full px-[7px] py-[3px] bg-white border border-[#c12120] rounded-[3px] text-[#c12120] text-[11px] font-bold cursor-pointer transition-all duration-150 uppercase hover:bg-[#c12120] hover:text-white",
+    "w-full px-[7px] py-[3px] bg-white border border-[#c12120] rounded-[3px] text-[#c12120] text-[11px] font-bold cursor-pointer transition-all duration-150 uppercase hover:bg-[#c12120] hover:text-white focus:outline focus:outline-2 focus:outline-[#3b82f6]",
 };
 
 // Main content area

@@ -1140,13 +1140,13 @@ function App() {
                 <div className="flex flex-col sm:flex-row gap-4 mb-12">
                   <button
                     onClick={scrollToDashboard}
-                    className="px-8 py-4 bg-white text-[#8f0000] rounded-lg font-semibold text-lg hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
+                    className="px-8 py-4 bg-white text-[#8f0000] rounded-lg font-semibold text-lg hover:bg-white/90 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-2"
                   >
                     Explore the survey results
                   </button>
                   <button
                     onClick={scrollToIntroduction}
-                    className="px-8 py-4 bg-transparent text-white rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all border-2 border-white"
+                    className="px-8 py-4 bg-transparent text-white rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all border-2 border-white focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-2"
                   >
                     Read introduction
                   </button>
@@ -1157,7 +1157,7 @@ function App() {
             {/* Scroll Indicator */}
             <button
               onClick={scrollToIntroduction}
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer hover:scale-110 transition-transform"
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer hover:scale-110 transition-transform focus:outline focus:outline-2 focus:outline-[#3b82f6] rounded-full"
             >
               <svg
                 className="w-6 h-6 text-white/70"
@@ -1304,7 +1304,7 @@ function App() {
             {/* Scroll Indicator */}
             <button
               onClick={scrollToDashboard}
-              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer hover:scale-110 transition-transform"
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer hover:scale-110 transition-transform focus:outline focus:outline-2 focus:outline-[#3b82f6] rounded-full"
             >
               <svg
                 className="w-6 h-6 text-nodered-gray-500"
@@ -1456,7 +1456,7 @@ function App() {
                       <button
                         onClick={() => setActiveColumn('A')}
                         className={cn(
-                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10",
                           activeColumn === 'A'
                             ? "bg-blue-500 text-white border-blue-500"
                             : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
@@ -1468,7 +1468,7 @@ function App() {
                       <button
                         onClick={() => setActiveColumn('B')}
                         className={cn(
-                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10",
                           activeColumn === 'B'
                             ? "bg-blue-500 text-white border-blue-500"
                             : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"

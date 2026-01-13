@@ -346,7 +346,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
                   }
                 }
               }}
-              className="w-full px-2 py-1 text-[12px] border border-[#ccc] rounded-sm bg-white placeholder-[#999] focus:outline focus:outline-2 focus:outline-[#c22e2e] focus:border-[#c22e2e]"
+              className="w-full px-2 py-1 text-[12px] border border-[#ccc] rounded-sm bg-white placeholder-[#999] focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:border-[#3b82f6]"
             />
           </div>
         </div>
@@ -364,7 +364,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
                       "w-full text-left pl-1 pr-3 py-[3px] text-[12px] transition-all duration-150",
                       "hover:bg-[#f0f0f0]",
                       "flex items-center gap-2",
-                      "focus:outline focus:outline-2 focus:outline-[#c22e2e]",
+                      "focus:outline focus:outline-2 focus:outline-[#3b82f6]",
                       activeSection === section.id
                         ? "bg-[#e8e8e8] text-[#333] font-medium"
                         : "text-[#555]"
