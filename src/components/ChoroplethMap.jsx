@@ -107,7 +107,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
   // Once we have data, keep showing it while loading new filtered data
   if (loading && data.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+      <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
           <svg
             width="20"
@@ -135,7 +135,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+      <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
           <svg
             width="20"

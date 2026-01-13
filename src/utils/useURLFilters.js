@@ -1,5 +1,6 @@
 // Custom hook for bidirectional URL <-> filter synchronization
 // Manages filter state persistence in URL hash parameters
+// Supports both normal mode and comparison mode
 
 import { useEffect, useRef, useCallback } from 'react';
 import {
@@ -9,21 +10,21 @@ import {
   getCurrentSectionFromURL,
 } from './url-utils.js';
 
-// Note: serializeFiltersToURL is used indirectly via getCurrentSectionFromURL for lastSerializedRef
-
 /**
  * Custom hook for synchronizing filter state with URL hash.
+ * Supports both normal mode and comparison mode.
  *
  * Features:
  * - Restores filters from URL on initial page load
  * - Updates URL when filters change (debounced, using replaceState)
- * - Provides helper to update section while preserving filter params
+ * - Handles comparison mode state (filtersA, filtersB)
  *
- * @param {Object} filters - Current filter state
+ * @param {Object} filters - Current filter state (normal mode)
  * @param {Object} filterOptions - Filter options from database (for URL deserialization)
  * @param {Function} onFiltersRestored - Callback when filters are restored from URL
- *                                       Receives (filters) and should trigger data fetch
- * @returns {Object} - { updateURLWithFilters, buildHashWithFilters, isInitialized }
+ *                                       Signature: (filters, comparisonState) => void
+ *                                       comparisonState: { comparisonMode, filtersA, filtersB } | null
+ * @returns {Object} - { updateURLWithFilters, updateURLWithComparisonState, isInitialized, isRestoring }
  */
 export function useURLFilters(filters, filterOptions, onFiltersRestored) {
   const isInitializedRef = useRef(false);
@@ -44,18 +45,38 @@ export function useURLFilters(filters, filterOptions, onFiltersRestored) {
     // Only run once after filterOptions are loaded
     if (isInitializedRef.current) return;
 
-    const { filters: urlFilters } = parseFiltersFromURL(window.location.hash, filterOptions);
+    const result = parseFiltersFromURL(window.location.hash, filterOptions);
 
     // Mark as initialized immediately to prevent re-runs
     isInitializedRef.current = true;
 
-    if (hasActiveFilters(urlFilters)) {
-      // URL has filters - restore them
-      isRestoringRef.current = true;
-      lastSerializedRef.current = serializeFiltersToURL(urlFilters, getCurrentSectionFromURL());
+    if (result.comparisonMode) {
+      // Comparison mode URL - restore full comparison state
+      const hasComparisonFilters = hasActiveFilters(result.filtersA) || hasActiveFilters(result.filtersB);
+      if (hasComparisonFilters || result.comparisonMode) {
+        isRestoringRef.current = true;
+        lastSerializedRef.current = serializeFiltersToURL(null, result.sectionId, {
+          comparisonMode: true,
+          filtersA: result.filtersA,
+          filtersB: result.filtersB,
+        });
 
-      // Call restoration callback - async operations handled by caller
-      Promise.resolve(onFiltersRestored(urlFilters)).finally(() => {
+        // Call restoration callback with comparison state
+        Promise.resolve(onFiltersRestored(null, {
+          comparisonMode: true,
+          filtersA: result.filtersA,
+          filtersB: result.filtersB,
+        })).finally(() => {
+          isRestoringRef.current = false;
+        });
+      }
+    } else if (hasActiveFilters(result.filters)) {
+      // Normal mode URL with filters
+      isRestoringRef.current = true;
+      lastSerializedRef.current = serializeFiltersToURL(result.filters, getCurrentSectionFromURL());
+
+      // Call restoration callback - normal mode (comparisonState = null)
+      Promise.resolve(onFiltersRestored(result.filters, null)).finally(() => {
         isRestoringRef.current = false;
       });
     }
@@ -68,13 +89,33 @@ export function useURLFilters(filters, filterOptions, onFiltersRestored) {
       const hasFilterOptions = filterOptions && Object.keys(filterOptions).length > 0;
       if (!hasFilterOptions || isRestoringRef.current) return;
 
-      const { filters: urlFilters } = parseFiltersFromURL(window.location.hash, filterOptions);
+      const result = parseFiltersFromURL(window.location.hash, filterOptions);
 
-      if (hasActiveFilters(urlFilters)) {
+      if (result.comparisonMode) {
+        // Comparison mode URL
+        const hasComparisonFilters = hasActiveFilters(result.filtersA) || hasActiveFilters(result.filtersB);
+        if (hasComparisonFilters || result.comparisonMode) {
+          isRestoringRef.current = true;
+          lastSerializedRef.current = serializeFiltersToURL(null, result.sectionId, {
+            comparisonMode: true,
+            filtersA: result.filtersA,
+            filtersB: result.filtersB,
+          });
+
+          Promise.resolve(onFiltersRestored(null, {
+            comparisonMode: true,
+            filtersA: result.filtersA,
+            filtersB: result.filtersB,
+          })).finally(() => {
+            isRestoringRef.current = false;
+          });
+        }
+      } else if (hasActiveFilters(result.filters)) {
+        // Normal mode URL
         isRestoringRef.current = true;
-        lastSerializedRef.current = serializeFiltersToURL(urlFilters, getCurrentSectionFromURL());
+        lastSerializedRef.current = serializeFiltersToURL(result.filters, getCurrentSectionFromURL());
 
-        Promise.resolve(onFiltersRestored(urlFilters)).finally(() => {
+        Promise.resolve(onFiltersRestored(result.filters, null)).finally(() => {
           isRestoringRef.current = false;
         });
       }
@@ -85,7 +126,7 @@ export function useURLFilters(filters, filterOptions, onFiltersRestored) {
   }, [filterOptions, onFiltersRestored]);
 
   /**
-   * Update URL with new filter state.
+   * Update URL with new filter state (normal mode).
    * Debounced to avoid excessive history manipulation during rapid changes.
    * Uses replaceState (no history entry) as per user preference.
    */
@@ -114,6 +155,38 @@ export function useURLFilters(filters, filterOptions, onFiltersRestored) {
     }, 150); // Short debounce for responsive feel
   }, []);
 
+  /**
+   * Update URL with comparison mode state.
+   * Debounced to avoid excessive history manipulation during rapid changes.
+   * Uses replaceState (no history entry) as per user preference.
+   *
+   * @param {Object} comparisonState - { comparisonMode, filtersA, filtersB }
+   */
+  const updateURLWithComparisonState = useCallback((comparisonState) => {
+    // Clear any pending debounce
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      const currentSection = getCurrentSectionFromURL();
+      const newHash = serializeFiltersToURL(null, currentSection, comparisonState);
+
+      // Avoid unnecessary updates
+      if (newHash === lastSerializedRef.current) return;
+
+      lastSerializedRef.current = newHash;
+
+      if (newHash) {
+        window.history.replaceState(null, '', newHash);
+      } else {
+        // No filters and no section - remove hash
+        const url = window.location.pathname + window.location.search;
+        window.history.replaceState(null, '', url);
+      }
+    }, 150); // Short debounce for responsive feel
+  }, []);
+
   // Cleanup debounce timeout on unmount
   useEffect(() => {
     return () => {
@@ -125,6 +198,7 @@ export function useURLFilters(filters, filterOptions, onFiltersRestored) {
 
   return {
     updateURLWithFilters,
+    updateURLWithComparisonState,
     isInitialized: isInitializedRef.current,
     isRestoring: isRestoringRef.current,
   };

@@ -2,9 +2,10 @@ import { useState, useCallback, memo } from 'react';
 import {
   serializeFiltersToURL,
   getFullURLWithFiltersState,
+  getFullURLWithComparisonState,
   generateSectionId,
 } from '../utils/url-utils';
-import { useFilters } from '../contexts/FilterContext';
+import { useFilters, useComparison } from '../contexts/FilterContext';
 import Tooltip from './Tooltip';
 import { getTooltipPosition } from '../utils/tooltip-utils';
 
@@ -24,6 +25,8 @@ const ChartHeader = ({ title, compact = false, className }) => {
 
   // Get filters from context - this is the source of truth
   const filters = useFilters();
+  // Get comparison state from context
+  const { comparisonMode, filtersA, filtersB } = useComparison();
   const sectionId = generateSectionId(title);
 
   const handleAnchorClick = useCallback((e) => {
@@ -32,19 +35,30 @@ const ChartHeader = ({ title, compact = false, className }) => {
 
     if (!sectionId) return;
 
+    let newHash, fullUrl;
+
+    if (comparisonMode) {
+      // Comparison mode - include both filter sets
+      const comparisonState = { comparisonMode: true, filtersA, filtersB };
+      newHash = serializeFiltersToURL(null, sectionId, comparisonState);
+      fullUrl = getFullURLWithComparisonState(comparisonState, sectionId);
+    } else {
+      // Normal mode
+      newHash = serializeFiltersToURL(filters, sectionId);
+      fullUrl = getFullURLWithFiltersState(filters, sectionId);
+    }
+
     // Build hash from React state (source of truth, not potentially stale URL)
-    const newHash = serializeFiltersToURL(filters, sectionId);
     window.history.pushState(null, '', newHash);
 
     // Copy full URL with current filters from React state
-    const fullUrl = getFullURLWithFiltersState(filters, sectionId);
     navigator.clipboard.writeText(fullUrl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     }).catch(() => {
       // Fallback: just update the hash without clipboard notification
     });
-  }, [sectionId, filters]);
+  }, [sectionId, filters, comparisonMode, filtersA, filtersB]);
 
   const handleMouseEnter = useCallback((e) => {
     if (!copied) {

@@ -71,13 +71,22 @@ body {
   scrollbar-color: auto;
 }
 
-/* Mobile viewport scaling for dashboard section */
+/* Viewport scaling for dashboard section */
 /* Using transform: scale() instead of zoom for cross-browser compatibility (iOS Safari doesn't support zoom) */
 @media (max-width: 767px) {
   .dashboard-mobile-scale {
     transform: scale(0.7);
     transform-origin: top left;
-    width: 142.857%; /* 1/0.7 to compensate for scale */
+    width: calc(100% / 0.7);
   }
 }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dashboard-mobile-scale {
+    transform: scale(0.85);
+    transform-origin: top left;
+    width: calc(100% / 0.85);
+  }
+}
+
 

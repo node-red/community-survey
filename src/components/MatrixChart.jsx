@@ -4,6 +4,14 @@ import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-uti
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 
+// Define the sub-questions for the matrix (constant, outside component)
+const SUB_QUESTIONS = [
+  { id: '0f096ad2-1241-4657-98ac-1c721f958999', label: 'Editing flows' },
+  { id: '31f69859-8ab9-4202-8d56-143007730ee1', label: 'Viewing runtime data' },
+  { id: '0be2d6bd-10ce-4387-ab24-9bbb64ce6b09', label: 'Accessing dashboards' },
+  { id: '91356092-cf0a-4bb5-b467-2c84645328aa', label: 'Managing flows' }
+];
+
 const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,14 +21,6 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   useHideTooltipOnScroll(setShowTooltip);
-
-  // Define the sub-questions for the matrix
-  const subQuestions = [
-    { id: '0f096ad2-1241-4657-98ac-1c721f958999', label: 'Editing flows' },
-    { id: '31f69859-8ab9-4202-8d56-143007730ee1', label: 'Viewing runtime data' },
-    { id: '0be2d6bd-10ce-4387-ab24-9bbb64ce6b09', label: 'Accessing dashboards' },
-    { id: '91356092-cf0a-4bb5-b467-2c84645328aa', label: 'Managing flows' }
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +37,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
         } else {
           // No data matches filters - generate placeholder structure
           // so the chart stays visible with 0% bars
-          const placeholderData = subQuestions.map(subQ => {
+          const placeholderData = SUB_QUESTIONS.map(subQ => {
             const entry = {
               sub_question_id: subQ.id,
               total_respondents: 0
@@ -66,7 +66,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
   // Once we have data, keep showing it while loading new filtered data
   if (loading && data.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+      <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">
             <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="#d1d5db" fill="white" />
@@ -86,7 +86,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+      <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">
             <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="#d1d5db" fill="white" />
@@ -113,7 +113,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
   // Render the matrix as multiple horizontal segmented bars similar to RatingsChart
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-300 flex">
+    <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
       {/* Left Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">
@@ -150,7 +150,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
         
         {/* Matrix Data */}
         <div className="p-4">
-          {subQuestions.map((subQ, index) => {
+          {SUB_QUESTIONS.map((subQ, index) => {
             const subData = Array.isArray(data) ? (data.find(d => d.sub_question_id === subQ.id) || {}) : {};
 
             // Calculate percentages for each device option

@@ -2,14 +2,15 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import wasmService from "./services/duckdb-wasm";
 import { SEGMENT_PRESETS, getAllPresets } from "./utils/filter-definitions.js";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { FilterProvider } from "./contexts/FilterContext";
+import { FilterProvider, ComparisonProvider } from "./contexts/FilterContext";
+import UnifiedChartWrapper from "./components/UnifiedChartWrapper";
 import {
   QUESTION_TO_FILTER,
   createEmptyFilters,
   countActiveFilters,
 } from "./utils/filter-utils.js";
 import { useURLFilters } from "./utils/useURLFilters.js";
-import { getChartColor, corePalette } from "./utils/colorPalette";
+import { getChartColor } from "./utils/colorPalette";
 import BarChart from "./components/BarChart";
 import QualitativeAnalysis from "./components/QualitativeAnalysis";
 import QuantitativeChart from "./components/QuantitativeChart";
@@ -19,6 +20,7 @@ import RatingsChart from "./components/RatingsChart";
 import HorizontalRatingsChart from "./components/HorizontalRatingsChart";
 import MatrixChart from "./components/MatrixChart";
 import ChannelRatingsGrid from "./components/ChannelRatingsGrid";
+import LearningChannelsSection from "./components/LearningChannelsSection";
 import DesignChangesRatingsGrid from "./components/DesignChangesRatingsGrid";
 import QualityComparisonRatingsGrid from "./components/QualityComparisonRatingsGrid";
 import UnderstandingRatingsGrid from "./components/UnderstandingRatingsGrid";
@@ -32,7 +34,6 @@ import {
   mainContent,
   card,
   error,
-  table,
   cn,
 } from "./styles/classNames";
 
@@ -47,9 +48,35 @@ function App() {
   const [filters, setFilters] = useState(createEmptyFilters());
   const [activePreset, setActivePreset] = useState(null);
 
+  // Comparison mode state
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [filtersA, setFiltersA] = useState(createEmptyFilters());
+  const [filtersB, setFiltersB] = useState(createEmptyFilters());
+  const [activeColumn, setActiveColumn] = useState('A');
+  const [hasEverEnabledComparison, setHasEverEnabledComparison] = useState(false);
+
   // Callback to restore filters from URL on page load
+  // Supports both normal mode (urlFilters) and comparison mode (comparisonState)
   const handleFiltersRestoredFromURL = useCallback(
-    async (urlFilters) => {
+    async (urlFilters, comparisonState) => {
+      if (comparisonState?.comparisonMode) {
+        // Restoring comparison mode from URL
+        if (import.meta.env.DEV)
+          console.log("🔗 Restoring comparison mode from URL:", comparisonState);
+
+        setComparisonMode(true);
+        setFiltersA(comparisonState.filtersA);
+        setFiltersB(comparisonState.filtersB);
+        setHasEverEnabledComparison(true);
+        setActiveColumn('A'); // Default to column A on restore
+
+        // In comparison mode, charts fetch their own data with their respective filters
+        // No need to fetch centralized dashboard data
+        setFilterLoading(false);
+        return;
+      }
+
+      // Normal mode restoration
       if (import.meta.env.DEV)
         console.log("🔗 Restoring filters from URL:", urlFilters);
 
@@ -78,14 +105,14 @@ function App() {
   );
 
   // Hook for bidirectional URL <-> filter synchronization
-  const { updateURLWithFilters } = useURLFilters(
+  const { updateURLWithFilters, updateURLWithComparisonState } = useURLFilters(
     filters,
     filterOptions,
     handleFiltersRestoredFromURL,
   );
   const [filteredUserCount, setFilteredUserCount] = useState(0);
   const [baselineOrders, setBaselineOrders] = useState({});
-  const [sectionCounts, setSectionCounts] = useState({
+  const [_sectionCounts, setSectionCounts] = useState({
     section1: { filtered: 466, total: 466 },
     section2: { filtered: 432, total: 432 },
   });
@@ -93,6 +120,14 @@ function App() {
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
+  // Track if viewport is too narrow for comparison mode with sticky sidebars
+  const [isNarrowForComparison, setIsNarrowForComparison] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 1280 : false,
+  );
+  // Track if viewport is too narrow for TOC to push in comparison mode (needs room for both sidebars)
+  const [isNarrowForToc, setIsNarrowForToc] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 1600 : false,
   );
   const sidebarWidth = 180; // Static width, no longer resizable
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
@@ -153,8 +188,12 @@ function App() {
     const handleResize = () => {
       const isNarrow = window.innerWidth < 1024; // lg breakpoint
       const isMobileViewport = window.innerWidth < 768; // Mobile breakpoint
+      const isNarrowForComparisonViewport = window.innerWidth < 1280; // xl breakpoint - left sidebar can push
+      const isNarrowForTocViewport = window.innerWidth < 1600; // TOC needs more room (both sidebars + content)
       setIsSingleColumn(isNarrow);
       setIsMobile(isMobileViewport);
+      setIsNarrowForComparison(isNarrowForComparisonViewport);
+      setIsNarrowForToc(isNarrowForTocViewport);
 
       // Auto-collapse both sidebars on any resize while in mobile viewport
       if (isMobileViewport) {
@@ -466,7 +505,45 @@ function App() {
           category,
           value,
           checked,
+          comparisonMode,
+          activeColumn,
         });
+
+      // Handle comparison mode separately
+      if (comparisonMode) {
+        const currentColumnFilters = activeColumn === 'A' ? filtersA : filtersB;
+        const setColumnFilters = activeColumn === 'A' ? setFiltersA : setFiltersB;
+
+        // Defensive null checking
+        if (!currentColumnFilters[category]) {
+          console.warn(`❌ Filter category '${category}' not found in column ${activeColumn} filters`);
+          return;
+        }
+
+        // Compute new filters for this column
+        const newColumnFilters = {
+          ...currentColumnFilters,
+          [category]: checked
+            ? currentColumnFilters[category].includes(value)
+              ? currentColumnFilters[category]
+              : [...currentColumnFilters[category], value]
+            : currentColumnFilters[category].filter((v) => v !== value),
+        };
+
+        // Update the column's filters (charts will re-render with new filters)
+        setColumnFilters(newColumnFilters);
+
+        // Update URL with comparison state
+        const newComparisonState = {
+          comparisonMode: true,
+          filtersA: activeColumn === 'A' ? newColumnFilters : filtersA,
+          filtersB: activeColumn === 'B' ? newColumnFilters : filtersB,
+        };
+        updateURLWithComparisonState(newComparisonState);
+        return;
+      }
+
+      // Normal mode handling below
       if (import.meta.env.DEV)
         console.log("🎯 Filter state keys:", Object.keys(filters));
       if (import.meta.env.DEV)
@@ -568,6 +645,11 @@ function App() {
       setSectionCounts,
       setActivePreset,
       updateURLWithFilters,
+      updateURLWithComparisonState,
+      comparisonMode,
+      activeColumn,
+      filtersA,
+      filtersB,
     ],
   );
 
@@ -628,9 +710,27 @@ function App() {
         console.log(
           "🎯 Applying preset:",
           presetKey,
+          comparisonMode ? `to Column ${activeColumn}` : "to main filters",
           "with filters:",
           JSON.stringify(newFilters, null, 2),
         );
+
+      // In comparison mode, apply to active column; otherwise apply to main filters
+      if (comparisonMode) {
+        if (activeColumn === 'A') {
+          setFiltersA(newFilters);
+        } else {
+          setFiltersB(newFilters);
+        }
+
+        // Update URL with comparison state (don't update global counts though)
+        updateURLWithComparisonState({
+          comparisonMode: true,
+          filtersA: activeColumn === 'A' ? newFilters : filtersA,
+          filtersB: activeColumn === 'B' ? newFilters : filtersB,
+        });
+        return;
+      }
 
       setFilters(newFilters);
       setActivePreset(presetKey);
@@ -662,6 +762,106 @@ function App() {
   const getActiveFilterCount = useCallback(() => {
     return countActiveFilters(filters);
   }, [filters]);
+
+  // Toggle comparison mode
+  const toggleComparisonMode = useCallback(() => {
+    // Find current chart and its relative position in viewport
+    const currentChart = getCurrentlyVisibleChart();
+    let relativeOffset = 0;
+
+    if (currentChart) {
+      const chartElement = document.querySelector(`[data-chart-id="${currentChart}"]`);
+      if (chartElement) {
+        const rect = chartElement.getBoundingClientRect();
+        // Store how far from viewport top the chart currently is
+        relativeOffset = rect.top;
+      }
+    }
+
+    if (!comparisonMode) {
+      // Entering comparison mode - copy current filters to column A
+      const newFiltersA = filters;
+      const newFiltersB = createEmptyFilters();
+      setFiltersA(newFiltersA);
+      setFiltersB(newFiltersB);
+      setActiveColumn('A');
+      setComparisonMode(true);
+      setHasEverEnabledComparison(true); // Triggers Column B to mount
+
+      // Update URL to comparison mode
+      updateURLWithComparisonState({
+        comparisonMode: true,
+        filtersA: newFiltersA,
+        filtersB: newFiltersB,
+      });
+    } else {
+      // Exiting comparison mode - keep column A filters as the active filters
+      setFilters(filtersA);
+      setComparisonMode(false);
+      // Keep hasEverEnabledComparison true - Column B stays mounted for fast re-toggle
+
+      // Update URL back to normal mode
+      updateURLWithFilters(filtersA);
+    }
+
+    // Restore chart to same relative viewport position after DOM settles
+    // Use double requestAnimationFrame: first waits for React commit, second for browser layout/paint
+    if (currentChart) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const chartElement = document.querySelector(`[data-chart-id="${currentChart}"]`);
+          if (chartElement) {
+            const rect = chartElement.getBoundingClientRect();
+            const absoluteTop = rect.top + window.scrollY;
+            // Scroll so chart appears at same relative position as before
+            window.scrollTo({
+              top: absoluteTop - relativeOffset,
+              behavior: 'instant'
+            });
+          }
+        });
+      });
+    }
+  }, [comparisonMode, filters, filtersA, getCurrentlyVisibleChart, updateURLWithComparisonState, updateURLWithFilters]);
+
+  // Get current filters based on comparison mode and active column
+  const getCurrentFilters = useCallback(() => {
+    if (!comparisonMode) return filters;
+    return activeColumn === 'A' ? filtersA : filtersB;
+  }, [comparisonMode, activeColumn, filters, filtersA, filtersB]);
+
+  // Set current filters based on comparison mode and active column (reserved for future use)
+  const _setCurrentFilters = useCallback((newFilters) => {
+    if (!comparisonMode) {
+      setFilters(newFilters);
+    } else if (activeColumn === 'A') {
+      setFiltersA(newFilters);
+    } else {
+      setFiltersB(newFilters);
+    }
+  }, [comparisonMode, activeColumn]);
+
+  /**
+   * Helper function to render a chart with comparison mode support.
+   * In normal mode, renders the chart with current filters.
+   * In comparison mode, renders the chart twice side-by-side with filtersA and filtersB.
+   */
+  const renderChart = useCallback((ChartComponent, chartProps) => {
+    // Extract filters from chartProps since UnifiedChartWrapper handles them
+    const { filters: _, ...restProps } = chartProps;
+    void _; // Suppress unused variable warning
+
+    return (
+      <UnifiedChartWrapper
+        ChartComponent={ChartComponent}
+        chartProps={restProps}
+        comparisonMode={comparisonMode}
+        hasEverEnabledComparison={hasEverEnabledComparison}
+        filtersA={comparisonMode ? filtersA : filters}
+        filtersB={filtersB}
+      />
+    );
+  }, [comparisonMode, hasEverEnabledComparison, filters, filtersA, filtersB]);
 
   // Sidebar item tooltip handlers
   const handleSidebarItemMouseEnter = (event, text) => {
@@ -841,25 +1041,13 @@ function App() {
     }
   };
 
-  // Function to format cell values
-  const formatCellValue = (value) => {
-    if (value === null || value === undefined) return "-";
-    if (typeof value === "object") return JSON.stringify(value);
-    if (typeof value === "number" && !Number.isInteger(value)) {
-      return value.toFixed(2);
-    }
-    return value;
-  };
-
   // Don't block everything on initial loading - only show loading in dashboard section
   const hasData =
     queryResult && queryResult.data && queryResult.data.length > 0;
-  const columns = hasData
-    ? Object.keys(queryResult.data[0]).filter((col) => col !== "Segment")
-    : [];
 
   return (
     <FilterProvider filters={filters}>
+      <ComparisonProvider value={{ comparisonMode, filtersA, filtersB, activeColumn }}>
       <ErrorBoundary showDetails={import.meta.env.DEV}>
         <div className="min-h-screen bg-nodered-gray-100 font-sans">
         {/* Landing Page Hero Section */}
@@ -1102,14 +1290,33 @@ function App() {
           {/* Node-RED Header - Sticky to viewport */}
           <header className="h-12 bg-black border-b-2 border-[#c02020] flex items-center justify-between pl-4 pr-4 sm:pr-8 text-white sticky top-0 z-50">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <h1 className="inline font-sans text-base font-normal text-white h-auto leading-[30px] whitespace-nowrap align-middle w-auto">
+              <h1 className="inline font-sans text-base font-normal text-white h-auto leading-[30px] truncate align-middle">
                 Node-RED Modernization Survey Results
               </h1>
             </div>
 
-            {/* User count moved to right side */}
+            {/* User count moved to right side - shows comparison mode indicator when active */}
             <div className="flex items-center gap-1 text-sm flex-shrink-0">
-              {filterLoading ? (
+              {comparisonMode ? (
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#c22e2e] text-white text-xs font-medium"
+                    title="Compare two filter configurations side-by-side"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <span className="hidden sm:inline">Comparison mode</span>
+                  </span>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold ring-2 ring-white">A</span>
+                    <span className="text-gray-400">{countActiveFilters(filtersA)}</span>
+                    <span className="text-gray-500 mx-0.5">vs</span>
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] font-bold ring-2 ring-white">B</span>
+                    <span className="text-gray-400">{countActiveFilters(filtersB)}</span>
+                  </div>
+                </div>
+              ) : filterLoading ? (
                 <div className="flex items-center gap-1 text-yellow-400">
                   <div className="w-3 h-3 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
                   <span className="text-xs">Updating...</span>
@@ -1125,7 +1332,7 @@ function App() {
                   <RespondentIcon className="w-4 h-4 text-gray-300 sm:hidden" />
                 </>
               )}
-              {getActiveFilterCount() > 0 && (
+              {!comparisonMode && getActiveFilterCount() > 0 && (
                 <span className={header.filterBadge}>
                   <span className="hidden sm:inline">
                     {getActiveFilterCount()}{" "}
@@ -1138,8 +1345,8 @@ function App() {
           </header>
           {/* Dashboard Container with Sidebars */}
           <div className="relative flex">
-            {/* Mobile Backdrop Overlay */}
-            {isMobile && (!sidebarCollapsed || !tocCollapsed) && (
+            {/* Backdrop Overlay - shows when sidebars overlay content (mobile or comparison mode on narrow viewports) */}
+            {(isMobile || (comparisonMode && isNarrowForComparison)) && (!sidebarCollapsed || !tocCollapsed) && (
               <div
                 className="fixed inset-0 bg-black/50 z-10 transition-opacity duration-300"
                 style={{ top: "48px" }}
@@ -1150,14 +1357,15 @@ function App() {
               />
             )}
             {/* Left Sidebar - Node-RED Palette Style */}
+            {/* Use fixed (overlay) positioning on mobile OR when comparison mode is active on narrow viewports */}
             <aside
               className={cn(
                 "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] z-20 transition-all duration-300 ease-in-out",
-                isMobile ? "fixed left-0" : "sticky self-start",
+                (isMobile || (comparisonMode && isNarrowForComparison)) ? "fixed left-0" : "sticky self-start",
               )}
               style={{
                 width: sidebarCollapsed ? "7px" : `${sidebarWidth}px`,
-                height: isMobile ? "calc(100vh - 48px)" : "100vh",
+                height: (isMobile || (comparisonMode && isNarrowForComparison)) ? "calc(100vh - 48px)" : "100vh",
                 maxHeight: "calc(100vh - 48px)",
                 top: "48px",
               }}
@@ -1190,23 +1398,97 @@ function App() {
                   </div>
                 </div>
 
+                {/* Comparison Mode Toggle */}
+                <div className="px-4 py-2 bg-white border-b border-gray-200">
+                  <button
+                    onClick={toggleComparisonMode}
+                    className={cn(
+                      comparisonMode
+                        ? sidebar.clearButton
+                        : sidebar.preset.button
+                    )}
+                  >
+                    {comparisonMode ? "Exit Compare Mode" : "Compare Segments"}
+                  </button>
+                </div>
+
+                {/* Column Selector Tabs (visible in comparison mode) */}
+                {comparisonMode && (
+                  <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setActiveColumn('A')}
+                        className={cn(
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                          activeColumn === 'A'
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                        )}
+                      >
+                        <span className="w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white">A</span>
+                        <span className="truncate">({countActiveFilters(filtersA)})</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveColumn('B')}
+                        className={cn(
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
+                          activeColumn === 'B'
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                        )}
+                      >
+                        <span className="w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white">B</span>
+                        <span className="truncate">({countActiveFilters(filtersB)})</span>
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-1 text-center">
+                      Editing Column {activeColumn}
+                    </p>
+                  </div>
+                )}
+
                 <div className={sidebar.content}>
                   {/* Clear Filters - Node-RED Style */}
-                  {getActiveFilterCount() > 0 && (
-                    <div className={sidebar.preset.wrapper}>
+                  {!comparisonMode && getActiveFilterCount() > 0 && (
+                    <div className={cn(sidebar.preset.wrapper, "border-gray-200")}>
                       <button
                         className={sidebar.clearButton}
                         onClick={clearFilters}
                         data-testid="clear-filters"
                       >
-                        Clear All Filters ({getActiveFilterCount()} active)
+                        Clear filters
+                      </button>
+                    </div>
+                  )}
+                  {/* Clear Filters for active column in comparison mode */}
+                  {comparisonMode && countActiveFilters(activeColumn === 'A' ? filtersA : filtersB) > 0 && (
+                    <div className={cn(sidebar.preset.wrapper, "border-gray-200")}>
+                      <button
+                        className={sidebar.clearButton}
+                        onClick={() => {
+                          const emptyFilters = createEmptyFilters();
+                          if (activeColumn === 'A') {
+                            setFiltersA(emptyFilters);
+                          } else {
+                            setFiltersB(emptyFilters);
+                          }
+                          // Update URL with cleared filters
+                          updateURLWithComparisonState({
+                            comparisonMode: true,
+                            filtersA: activeColumn === 'A' ? emptyFilters : filtersA,
+                            filtersB: activeColumn === 'B' ? emptyFilters : filtersB,
+                          });
+                        }}
+                        data-testid="clear-filters-column"
+                      >
+                        Clear filters
                       </button>
                     </div>
                   )}
 
                   {/* Segments Category */}
                   <div className={sidebar.category.base}>
-                    <div className="bg-[#f3f3f3] border-t border-b border-gray-300 pl-4 pr-4 py-2 text-xs text-left font-medium text-gray-500 uppercase flex justify-between items-center relative">
+                    <div className="bg-[#f3f3f3] border-b border-gray-200 pl-4 pr-4 py-2 text-xs text-left font-medium text-gray-500 uppercase flex justify-between items-center relative">
                       <span
                         className="truncate"
                         onMouseEnter={(e) =>
@@ -1281,7 +1563,9 @@ function App() {
                               return null;
                             }
 
-                            const selectedValues = filters[filterKey] || [];
+                            // Use current column's filters in comparison mode
+                            const currentFilters = comparisonMode ? getCurrentFilters() : filters;
+                            const selectedValues = currentFilters[filterKey] || [];
                             const selectedCount = selectedValues.length;
 
                             // Debug logging for checkbox state
@@ -1485,16 +1769,16 @@ function App() {
                 <div className="relative group">
                   <button
                     className={`absolute w-6 h-12 flex items-center justify-center transition-transform duration-200 ${
-                      showSidebarToggle || sidebarCollapsed || isMobile
+                      showSidebarToggle || sidebarCollapsed || isMobile || (comparisonMode && isNarrowForComparison)
                         ? "opacity-100"
                         : "opacity-0 pointer-events-none"
                     } ${
-                      showSidebarToggle || isMobile
+                      showSidebarToggle || isMobile || (comparisonMode && isNarrowForComparison)
                         ? "bg-white hover:bg-gray-50 border border-gray-300 shadow-sm"
                         : "bg-transparent border border-transparent"
                     }`}
                     onClick={() => {
-                      if (isMobile && sidebarCollapsed) setTocCollapsed(true);
+                      if ((isMobile || (comparisonMode && isNarrowForComparison)) && sidebarCollapsed) setTocCollapsed(true);
                       setSidebarCollapsed(!sidebarCollapsed);
                     }}
                     style={{
@@ -1503,7 +1787,7 @@ function App() {
                       borderRadius: "0 4px 4px 0",
                       position: "relative",
                       transform:
-                        showSidebarToggle || sidebarCollapsed || isMobile
+                        showSidebarToggle || sidebarCollapsed || isMobile || (comparisonMode && isNarrowForComparison)
                           ? "translateX(0)"
                           : "translateX(-10px)",
                     }}
@@ -1586,7 +1870,12 @@ function App() {
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-3xl lg:max-w-5xl mx-auto px-10 py-12 dashboard-mobile-scale">
+                <div className={cn(
+                  "w-full mx-auto px-10 py-12 dashboard-mobile-scale",
+                  comparisonMode
+                    ? "max-w-7xl overflow-x-auto"
+                    : "lg:max-w-5xl"
+                )}>
                   {/* SQL Query Card */}
                   {showQuery && queryResult?.query && (
                     <div className={cn(card.base, "mb-6 max-w-4xl")}>
@@ -1689,11 +1978,14 @@ function App() {
                           <div className="max-w-3xl">
                             <div className="text-sm text-nodered-gray-600 font-light leading-relaxed max-w-2xl">
                               <p className="mb-2">
-                                Use the filters in the left sidebar to explore
+                                Use the <span className="font-medium text-nodered-gray-700">filters</span> in the left sidebar to explore
                                 different segments of the community and what
                                 they responded regarding the questions. Expand
-                                the right sidebar to see a table of contents to
-                                quickly navigate to a specific question.
+                                the right sidebar to see a <span className="font-medium text-nodered-gray-700">table of contents</span> to
+                                quickly navigate to a specific question. Enable{" "}
+                                <span className="font-medium text-nodered-gray-700">comparison mode</span> to view two filter configurations
+                                side-by-side and discover differences between
+                                user segments.
                               </p>
                             </div>
                           </div>
@@ -1707,964 +1999,412 @@ function App() {
                         {/* Section 1: Basic Demographics & Background (Questions 1-10) */}
                         <div className="space-y-12">
                           <div className="grid grid-cols-1 gap-12">
-                            <ChoroplethMap
-                              questionId="GpGjoO"
-                              questionTitle="Country Selection"
-                              filters={filters}
-                              color={getChartColor("GpGjoO")}
-                              wasmService={wasmService}
-                            />
-                            <HorizontalRatingsChart
-                              questionId="ElR6d2"
-                              questionTitle="How long have you been using Node-RED?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <QuantitativeChart
-                              questionId="VPeNQ6"
-                              questionTitle="What is your primary purpose for using Node-RED?"
-                              filters={filters}
-                              color={getChartColor("VPeNQ6")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["VPeNQ6"]}
-                            />
-                            <VerticalBarChart
-                              questionId="joRz61"
-                              questionTitle="What size organization do you work with?"
-                              filters={filters}
-                              color={getChartColor("joRz61")}
-                              wasmService={wasmService}
-                            />
-                            <QuantitativeChart
-                              questionId="2AWoaM"
-                              questionTitle="What industry are you in?"
-                              filters={filters}
-                              color={getChartColor("2AWoaM")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["2AWoaM"]}
-                            />
-                            <VerticalBarChart
-                              questionId="P9xr1x"
-                              questionTitle="How much influence do you have in choosing automation tools?"
-                              filters={filters}
-                              color={getChartColor("P9xr1x")}
-                              wasmService={wasmService}
-                            />
-                            <QuantitativeChart
-                              questionId="rO4YaX"
-                              questionTitle="What do you use Node-RED for?"
-                              filters={filters}
-                              color={getChartColor("rO4YaX")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["rO4YaX"]}
-                            />
-                            <QuantitativeChart
-                              questionId="476OJ5"
-                              questionTitle="Where do you typically run Node-RED?"
-                              filters={filters}
-                              color={getChartColor("476OJ5")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["476OJ5"]}
-                            />
-                            <VerticalBarChart
-                              questionId="xDqzMk"
-                              questionTitle="What's your programming experience level?"
-                              filters={filters}
-                              color={getChartColor("xDqzMk")}
-                              wasmService={wasmService}
-                            />
-                            <RatingsChart
-                              questionId="qGrzG5"
-                              questionTitle="Overall satisfaction with Node-RED?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(ChoroplethMap, {
+                              questionId: "GpGjoO",
+                              questionTitle: "Country Selection",
+                              filters: filters,
+                              color: getChartColor("GpGjoO"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(HorizontalRatingsChart, {
+                              questionId: "ElR6d2",
+                              questionTitle: "How long have you been using Node-RED?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "VPeNQ6",
+                              questionTitle: "What is your primary purpose for using Node-RED?",
+                              filters: filters,
+                              color: getChartColor("VPeNQ6"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["VPeNQ6"],
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "joRz61",
+                              questionTitle: "What size organization do you work with?",
+                              filters: filters,
+                              color: getChartColor("joRz61"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "2AWoaM",
+                              questionTitle: "What industry are you in?",
+                              filters: filters,
+                              color: getChartColor("2AWoaM"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["2AWoaM"],
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "P9xr1x",
+                              questionTitle: "How much influence do you have in choosing automation tools?",
+                              filters: filters,
+                              color: getChartColor("P9xr1x"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "rO4YaX",
+                              questionTitle: "What do you use Node-RED for?",
+                              filters: filters,
+                              color: getChartColor("rO4YaX"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["rO4YaX"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "476OJ5",
+                              questionTitle: "Where do you typically run Node-RED?",
+                              filters: filters,
+                              color: getChartColor("476OJ5"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["476OJ5"],
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "xDqzMk",
+                              questionTitle: "What's your programming experience level?",
+                              filters: filters,
+                              color: getChartColor("xDqzMk"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(RatingsChart, {
+                              questionId: "qGrzG5",
+                              questionTitle: "Overall satisfaction with Node-RED?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                         </div>
 
                         {/* Section 2: Early Satisfaction & Perception (Questions 11-25) */}
                         <div className="my-12 space-y-12">
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="QRZ4R1"
-                              questionTitle="How up-to-date does Node-RED look and feel?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <RatingsChart
-                              questionId="RoNgoj"
-                              questionTitle="Does Node-RED look and feel professional?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <RatingsChart
-                              questionId="erJzrQ"
-                              questionTitle="How engaging does the Node-RED community feel?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <MatrixChart
-                              questionId="OX2gBp"
-                              questionTitle="Which devices do you use for these Node-RED tasks?"
-                              filters={filters}
-                              color={getChartColor("OX2gBp")}
-                              wasmService={wasmService}
-                            />
-                            <DeviceSatisfactionGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <QuantitativeChart
-                              questionId="ZO7ede"
-                              questionTitle="How did you first discover Node-RED?"
-                              filters={filters}
-                              color={getChartColor("ZO7ede")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["ZO7ede"]}
-                            />
-                            <HorizontalRatingsChart
-                              questionId="qGrzbg"
-                              questionTitle="How long did it take to feel comfortable with Node-RED?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <VerticalBarChart
-                              questionId="ZO7eJB"
-                              questionTitle="Do you use Node-RED in production systems/professionally?"
-                              filters={filters}
-                              color={getChartColor("ZO7eJB")}
-                              wasmService={wasmService}
-                            />
-                            <HorizontalRatingsChart
-                              questionId="ZO7eO5"
-                              questionTitle="How many Node-RED instances do you run/manage?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <VerticalBarChart
-                              questionId="kG2v5Z"
-                              questionTitle="How complex are your typical Node-RED configurations?"
-                              filters={filters}
-                              color={getChartColor("kG2v5Z")}
-                              wasmService={wasmService}
-                            />
-                            <UnderstandingRatingsGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "QRZ4R1",
+                              questionTitle: "How up-to-date does Node-RED look and feel?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(RatingsChart, {
+                              questionId: "RoNgoj",
+                              questionTitle: "Does Node-RED look and feel professional?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(RatingsChart, {
+                              questionId: "erJzrQ",
+                              questionTitle: "How engaging does the Node-RED community feel?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(MatrixChart, {
+                              questionId: "OX2gBp",
+                              questionTitle: "Which devices do you use for these Node-RED tasks?",
+                              filters: filters,
+                              color: getChartColor("OX2gBp"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(DeviceSatisfactionGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "ZO7ede",
+                              questionTitle: "How did you first discover Node-RED?",
+                              filters: filters,
+                              color: getChartColor("ZO7ede"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["ZO7ede"],
+                            })}
+                            {renderChart(HorizontalRatingsChart, {
+                              questionId: "qGrzbg",
+                              questionTitle: "How long did it take to feel comfortable with Node-RED?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "ZO7eJB",
+                              questionTitle: "Do you use Node-RED in production systems/professionally?",
+                              filters: filters,
+                              color: getChartColor("ZO7eJB"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(HorizontalRatingsChart, {
+                              questionId: "ZO7eO5",
+                              questionTitle: "How many Node-RED instances do you run/manage?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(VerticalBarChart, {
+                              questionId: "kG2v5Z",
+                              questionTitle: "How complex are your typical Node-RED configurations?",
+                              filters: filters,
+                              color: getChartColor("kG2v5Z"),
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(UnderstandingRatingsGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
 
-                            {/* Community Channels Explanation Card */}
-                            <div className={card.base}>
-                              <div className={card.iconSection}>
-                                <svg
-                                  className="w-5 h-5"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="#d1d5db"
-                                  strokeWidth="1.5"
-                                >
-                                  <path
-                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                                    stroke="#d1d5db"
-                                    fill="white"
-                                  />
-                                </svg>
-                              </div>
-                              <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-                                {/* Header - matching qualitative sections */}
-                                <div className="px-4 py-3 border-b border-gray-200 bg-white">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex-1">
-                                      <div className="flex items-center justify-between">
-                                        <div>
-                                          <ChartHeader title="What helps you learn/troubleshoot Node-RED?" />
-                                        </div>
-                                        {/* Respondent Count Badge - matching qualitative style */}
-                                        {sectionCounts.section1 && (
-                                          <div className="flex items-center gap-1 text-sm flex-shrink-0">
-                                            <span className="text-gray-600 font-bold">
-                                              {sectionCounts.section1.filtered}
-                                            </span>
-                                            <span className="text-gray-500 hidden sm:inline">
-                                              respondents
-                                            </span>
-                                            <RespondentIcon className="w-4 h-4 text-gray-500 sm:hidden" />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Content Body */}
-                                <div className="flex-1 p-4">
-                                  <div className="max-w-3xl lg:max-w-5xl">
-                                    <div className="text-sm text-nodered-gray-600 font-light leading-relaxed max-w-2xl lg:max-w-4xl space-y-2">
-                                      <p className="font-medium">
-                                        <strong>Key Metrics:</strong>
-                                      </p>
-                                      <ul className="list-disc pl-5 space-y-1">
-                                        <li>
-                                          <strong>Reach:</strong> Percentage of
-                                          survey respondents who selected the
-                                          channel as helpful
-                                        </li>
-                                        <li>
-                                          <strong>Quality:</strong> Average
-                                          helpfulness grade given by those who
-                                          use the channel
-                                        </li>
-                                      </ul>
-                                      <p className="font-medium">
-                                        <strong>Opportunity Metrics:</strong>
-                                      </p>
-                                      <ul className="list-disc pl-5 space-y-1">
-                                        <li>
-                                          <strong>
-                                            Quality Gap Opportunity:
-                                          </strong>{" "}
-                                          Where quality improvements would
-                                          create the most value due to existing
-                                          reach
-                                        </li>
-                                        <li>
-                                          <strong>
-                                            Reach Gap Opportunity:
-                                          </strong>{" "}
-                                          Where expanding reach would create the
-                                          most value due to existing quality
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  {/* Data Table - Full Width at Top */}
-                                  <div className={cn(card.base, "my-6")}>
-                                    <div className={card.iconSection}>
-                                      <svg
-                                        className="w-5 h-5"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#d1d5db"
-                                        strokeWidth="1.5"
-                                      >
-                                        <rect
-                                          x="3"
-                                          y="3"
-                                          width="18"
-                                          height="18"
-                                          rx="2"
-                                          fill="white"
-                                          stroke="#d1d5db"
-                                        />
-                                        <line x1="3" y1="9" x2="21" y2="9" />
-                                        <line x1="3" y1="15" x2="21" y2="15" />
-                                        <line x1="9" y1="9" x2="9" y2="21" />
-                                        <line x1="15" y1="9" x2="15" y2="21" />
-                                      </svg>
-                                    </div>
-                                    <div className={card.content}>
-                                      <div
-                                        className={cn(
-                                          card.body,
-                                          "bg-white p-0 overflow-hidden",
-                                        )}
-                                      >
-                                        {hasData ? (
-                                          <div className={table.wrapper}>
-                                            <table className={table.base}>
-                                              <thead className="bg-[#f3f3f3] border-b border-gray-300">
-                                                <tr>
-                                                  {columns.map((col, index) => {
-                                                    let headerText = col
-                                                      .replace(/_/g, " ")
-                                                      .replace(/\b\w/g, (c) =>
-                                                        c.toUpperCase(),
-                                                      );
-
-                                                    if (index === 0) {
-                                                      headerText = "Channel";
-                                                    } else if (
-                                                      headerText === "Reach %"
-                                                    ) {
-                                                      headerText = "Reach";
-                                                    } else if (
-                                                      headerText === "Quality %"
-                                                    ) {
-                                                      headerText = "Quality";
-                                                    }
-
-                                                    const numericCols = [
-                                                      "count",
-                                                      "score",
-                                                      "percentage",
-                                                      "pct",
-                                                      "rating",
-                                                      "answered",
-                                                      "total",
-                                                    ];
-                                                    const _isNumeric =
-                                                      numericCols.some((term) =>
-                                                        col
-                                                          .toLowerCase()
-                                                          .includes(term),
-                                                      );
-
-                                                    return (
-                                                      <th
-                                                        key={col}
-                                                        className={cn(
-                                                          index === 0
-                                                            ? table.headerCellFirst
-                                                            : table.headerCellNumeric,
-                                                        )}
-                                                      >
-                                                        {headerText}
-                                                      </th>
-                                                    );
-                                                  })}
-                                                </tr>
-                                              </thead>
-                                              <tbody className={table.body}>
-                                                {queryResult.data.map(
-                                                  (row, rowIndex) => (
-                                                    <tr
-                                                      key={rowIndex}
-                                                      className={table.row}
-                                                    >
-                                                      {columns.map(
-                                                        (col, colIndex) => {
-                                                          const numericCols = [
-                                                            "count",
-                                                            "score",
-                                                            "percentage",
-                                                            "pct",
-                                                            "rating",
-                                                            "answered",
-                                                            "total",
-                                                            "impact",
-                                                          ];
-                                                          const _isNumeric =
-                                                            numericCols.some(
-                                                              (term) =>
-                                                                col
-                                                                  .toLowerCase()
-                                                                  .includes(
-                                                                    term,
-                                                                  ),
-                                                            ) &&
-                                                            typeof row[col] ===
-                                                              "number";
-
-                                                          return (
-                                                            <td
-                                                              key={col}
-                                                              className={cn(
-                                                                colIndex === 0
-                                                                  ? table.cellFirst
-                                                                  : table.cell,
-                                                              )}
-                                                            >
-                                                              {formatCellValue(
-                                                                row[col],
-                                                              )}
-                                                            </td>
-                                                          );
-                                                        },
-                                                      )}
-                                                    </tr>
-                                                  ),
-                                                )}
-                                              </tbody>
-                                            </table>
-                                          </div>
-                                        ) : (
-                                          <div className="text-center text-gray-500 py-8">
-                                            <p>No data to display</p>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  {/* Charts in 2x2 Grid */}
-                                  {hasData && (
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 my-6">
-                                      {/* Left Column - Quality Charts */}
-                                      <div className="space-y-6">
-                                        {/* Quality Gap Chart */}
-                                        <div className={card.base}>
-                                          <div className={card.iconSection}>
-                                            <svg
-                                              className="w-5 h-5"
-                                              viewBox="0 0 24 24"
-                                              fill="white"
-                                              stroke="#d1d5db"
-                                              strokeWidth="1.5"
-                                            >
-                                              <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-                                              <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                              <path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                            </svg>
-                                          </div>
-                                          <div className={card.content}>
-                                            <div
-                                              className={cn(
-                                                card.body,
-                                                "bg-white",
-                                              )}
-                                            >
-                                              <h3
-                                                className={cn(
-                                                  card.title,
-                                                  "hidden",
-                                                )}
-                                              >
-                                                Quality Gap Opportunities
-                                              </h3>
-                                              <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={queryResult.data}
-                                                  title="Quality Gap Opportunities"
-                                                  subtitle="Where would a quality increase create the most value because of already existing reach"
-                                                  valueColumn="Quality Gap Opp"
-                                                  color={corePalette.amber}
-                                                  isMirrored={false}
-                                                  animationScale={
-                                                    !isSingleColumn
-                                                      ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Quality Ranking Chart */}
-                                        <div className={card.base}>
-                                          <div className={card.iconSection}>
-                                            <svg
-                                              className="w-5 h-5"
-                                              viewBox="0 0 24 24"
-                                              fill="white"
-                                              stroke="#d1d5db"
-                                              strokeWidth="1.5"
-                                            >
-                                              <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-                                              <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                              <path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                            </svg>
-                                          </div>
-                                          <div className={card.content}>
-                                            <div
-                                              className={cn(
-                                                card.body,
-                                                "bg-white",
-                                              )}
-                                            >
-                                              <h3
-                                                className={cn(
-                                                  card.title,
-                                                  "hidden",
-                                                )}
-                                              >
-                                                Quality Ranking
-                                              </h3>
-                                              <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={
-                                                    baselineOrders[
-                                                      "qualityRanking"
-                                                    ]
-                                                      ? [
-                                                          ...queryResult.data,
-                                                        ].sort((a, b) => {
-                                                          const orderA =
-                                                            baselineOrders[
-                                                              "qualityRanking"
-                                                            ].indexOf(
-                                                              a.Resource,
-                                                            );
-                                                          const orderB =
-                                                            baselineOrders[
-                                                              "qualityRanking"
-                                                            ].indexOf(
-                                                              b.Resource,
-                                                            );
-                                                          return (
-                                                            (orderA === -1
-                                                              ? 999
-                                                              : orderA) -
-                                                            (orderB === -1
-                                                              ? 999
-                                                              : orderB)
-                                                          );
-                                                        })
-                                                      : queryResult.data
-                                                  }
-                                                  title="Quality Ranking"
-                                                  subtitle="Ratt of channel depicted in percentage"
-                                                  valueColumn="Quality %"
-                                                  color={corePalette.terracotta}
-                                                  isMirrored={false}
-                                                  animationScale={
-                                                    !isSingleColumn
-                                                      ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      {/* Right Column - Reach Charts (Mirrored) */}
-                                      <div className="space-y-6">
-                                        {/* Reach Gap Chart */}
-                                        <div className={card.base}>
-                                          <div className={card.iconSection}>
-                                            <svg
-                                              className="w-5 h-5"
-                                              viewBox="0 0 24 24"
-                                              fill="white"
-                                              stroke="#d1d5db"
-                                              strokeWidth="1.5"
-                                            >
-                                              <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-                                              <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                              <path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                            </svg>
-                                          </div>
-                                          <div className={card.content}>
-                                            <div
-                                              className={cn(
-                                                card.body,
-                                                "bg-white",
-                                              )}
-                                            >
-                                              <h3
-                                                className={cn(
-                                                  card.title,
-                                                  "hidden",
-                                                )}
-                                              >
-                                                Reach Gap Opportunities
-                                              </h3>
-                                              <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={
-                                                    baselineOrders[
-                                                      "reachGapOpp"
-                                                    ]
-                                                      ? [
-                                                          ...queryResult.data,
-                                                        ].sort((a, b) => {
-                                                          const orderA =
-                                                            baselineOrders[
-                                                              "reachGapOpp"
-                                                            ].indexOf(
-                                                              a.Resource,
-                                                            );
-                                                          const orderB =
-                                                            baselineOrders[
-                                                              "reachGapOpp"
-                                                            ].indexOf(
-                                                              b.Resource,
-                                                            );
-                                                          return (
-                                                            (orderA === -1
-                                                              ? 999
-                                                              : orderA) -
-                                                            (orderB === -1
-                                                              ? 999
-                                                              : orderB)
-                                                          );
-                                                        })
-                                                      : queryResult.data
-                                                  }
-                                                  title="Reach Gap Opportunities"
-                                                  subtitle="Where would a reach increase create the most value because of already existing quality"
-                                                  valueColumn="Reach Gap Opp"
-                                                  color={corePalette.bronze}
-                                                  isMirrored={
-                                                    isSingleColumn
-                                                      ? false
-                                                      : true
-                                                  }
-                                                  animationScale={
-                                                    !isSingleColumn
-                                                      ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        {/* Reach Ranking Chart */}
-                                        <div className={card.base}>
-                                          <div className={card.iconSection}>
-                                            <svg
-                                              className="w-5 h-5"
-                                              viewBox="0 0 24 24"
-                                              fill="white"
-                                              stroke="#d1d5db"
-                                              strokeWidth="1.5"
-                                            >
-                                              <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-                                              <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                              <path d="M9 5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
-                                            </svg>
-                                          </div>
-                                          <div className={card.content}>
-                                            <div
-                                              className={cn(
-                                                card.body,
-                                                "bg-white",
-                                              )}
-                                            >
-                                              <h3
-                                                className={cn(
-                                                  card.title,
-                                                  "hidden",
-                                                )}
-                                              >
-                                                Reach Ranking
-                                              </h3>
-                                              <div className="min-h-[300px]">
-                                                <BarChart
-                                                  data={
-                                                    baselineOrders[
-                                                      "reachRanking"
-                                                    ]
-                                                      ? [
-                                                          ...queryResult.data,
-                                                        ].sort((a, b) => {
-                                                          const orderA =
-                                                            baselineOrders[
-                                                              "reachRanking"
-                                                            ].indexOf(
-                                                              a.Resource,
-                                                            );
-                                                          const orderB =
-                                                            baselineOrders[
-                                                              "reachRanking"
-                                                            ].indexOf(
-                                                              b.Resource,
-                                                            );
-                                                          return (
-                                                            (orderA === -1
-                                                              ? 999
-                                                              : orderA) -
-                                                            (orderB === -1
-                                                              ? 999
-                                                              : orderB)
-                                                          );
-                                                        })
-                                                      : queryResult.data
-                                                  }
-                                                  title="Reach Ranking"
-                                                  subtitle="Percentage of people that have stated that the channel is helpful to them"
-                                                  valueColumn="Reach %"
-                                                  color={corePalette.slate}
-                                                  isMirrored={
-                                                    isSingleColumn
-                                                      ? false
-                                                      : true
-                                                  }
-                                                  animationScale={
-                                                    !isSingleColumn
-                                                      ? 1.02
-                                                      : 1.01
-                                                  }
-                                                  showRespondentsInTooltip={
-                                                    false
-                                                  }
-                                                />
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {/* Individual Channel Ratings */}
-                                  {/* Combined Channel Ratings */}
-                                  <div className="my-6">
-                                    <ChannelRatingsGrid
-                                      filters={filters}
-                                      wasmService={wasmService}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                            {/* Learning Channels Section */}
+                            {renderChart(LearningChannelsSection, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                         </div>
 
                         {/* Section 3: Frustrations & Design Evaluation (Questions 26-50) */}
                         <div className="my-12 space-y-12">
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="kGozGZ"
-                              questionTitle="What frustrates you most about Node-RED?"
-                              filters={filters}
-                              color={getChartColor("kGozGZ")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["kGozGZ"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "kGozGZ",
+                              questionTitle: "What frustrates you most about Node-RED?",
+                              filters: filters,
+                              color: getChartColor("kGozGZ"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["kGozGZ"],
+                            })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="gqlzqJ"
-                              questionText="What's the single biggest improvement Node-RED needs?"
-                              filters={filters}
-                              color={getChartColor("gqlzqJ")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["gqlzqJ"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "gqlzqJ",
+                              questionText: "What's the single biggest improvement Node-RED needs?",
+                              filters: filters,
+                              color: getChartColor("gqlzqJ"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["gqlzqJ"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <DesignChangesRatingsGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
-                            <QualityComparisonRatingsGrid
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(DesignChangesRatingsGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
+                            {renderChart(QualityComparisonRatingsGrid, {
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                         </div>
 
                         {/* Section 4: Learning, Dashboards & Sharing (Questions 39-50) */}
                         <div className="my-12 space-y-12">
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="6KlPdY"
-                              questionText="What would make learning Node-RED easier for newcomers?"
-                              filters={filters}
-                              color={getChartColor("6KlPdY")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["6KlPdY"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "6KlPdY",
+                              questionText: "What would make learning Node-RED easier for newcomers?",
+                              filters: filters,
+                              color: getChartColor("6KlPdY"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["6KlPdY"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="erJzEk"
-                              questionTitle="Have you built Node-RED dashboards with any of these solutions"
-                              filters={filters}
-                              color={getChartColor("erJzEk")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["erJzEk"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "erJzEk",
+                              questionTitle: "Have you built Node-RED dashboards with any of these solutions",
+                              filters: filters,
+                              color: getChartColor("erJzEk"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["erJzEk"],
+                            })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="joRj6E"
-                              questionText="What has made it difficult to create or use Node-RED dashboards?"
-                              filters={filters}
-                              color={getChartColor("joRj6E")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["joRj6E"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "joRj6E",
+                              questionText: "What has made it difficult to create or use Node-RED dashboards?",
+                              filters: filters,
+                              color: getChartColor("joRj6E"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["joRj6E"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="2AWpaV"
-                              questionTitle="How often do you share flows with others?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "2AWpaV",
+                              questionTitle: "How often do you share flows with others?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="xDqAMo"
-                              questionText="What makes sharing flows difficult for you?"
-                              filters={filters}
-                              color={getChartColor("xDqAMo")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["xDqAMo"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="RoNAMl"
-                              questionText="How would you wish sharing flows would work?"
-                              filters={filters}
-                              color={getChartColor("RoNAMl")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["RoNAMl"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "xDqAMo",
+                              questionText: "What makes sharing flows difficult for you?",
+                              filters: filters,
+                              color: getChartColor("xDqAMo"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["xDqAMo"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "RoNAMl",
+                              questionText: "How would you wish sharing flows would work?",
+                              filters: filters,
+                              color: getChartColor("RoNAMl"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["RoNAMl"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="089kZ6"
-                              questionTitle="What customization capabilities are important to you?"
-                              filters={filters}
-                              color={getChartColor("089kZ6")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["089kZ6"]}
-                            />
-                            <QuantitativeChart
-                              questionId="8LBr6x"
-                              questionTitle="Do you have specific accessibility requirements?"
-                              filters={filters}
-                              color={getChartColor("8LBr6x")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["8LBr6x"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "089kZ6",
+                              questionTitle: "What customization capabilities are important to you?",
+                              filters: filters,
+                              color: getChartColor("089kZ6"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["089kZ6"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "8LBr6x",
+                              questionTitle: "Do you have specific accessibility requirements?",
+                              filters: filters,
+                              color: getChartColor("8LBr6x"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["8LBr6x"],
+                            })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="oRPqY1"
-                              questionText="Why do you choose to use Node-RED over alternatives?"
-                              filters={filters}
-                              color={getChartColor("oRPqY1")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["oRPqY1"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "oRPqY1",
+                              questionText: "Why do you choose to use Node-RED over alternatives?",
+                              filters: filters,
+                              color: getChartColor("oRPqY1"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["oRPqY1"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <QuantitativeChart
-                              questionId="Dp8ax5"
-                              questionTitle="What other automation tools do you use?"
-                              filters={filters}
-                              color={getChartColor("Dp8ax5")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["Dp8ax5"]}
-                            />
-                            <QuantitativeChart
-                              questionId="Ma4BjA"
-                              questionTitle="Which missing features would most improve your Node-RED experience?"
-                              filters={filters}
-                              color={getChartColor("Ma4BjA")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["Ma4BjA"]}
-                            />
-                            <QuantitativeChart
-                              questionId="NXjP0j"
-                              questionTitle="Is there anything that holds back production adoption?"
-                              filters={filters}
-                              color={getChartColor("NXjP0j")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["NXjP0j"]}
-                            />
+                            {renderChart(QuantitativeChart, {
+                              questionId: "Dp8ax5",
+                              questionTitle: "What other automation tools do you use?",
+                              filters: filters,
+                              color: getChartColor("Dp8ax5"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["Dp8ax5"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "Ma4BjA",
+                              questionTitle: "Which missing features would most improve your Node-RED experience?",
+                              filters: filters,
+                              color: getChartColor("Ma4BjA"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["Ma4BjA"],
+                            })}
+                            {renderChart(QuantitativeChart, {
+                              questionId: "NXjP0j",
+                              questionTitle: "Is there anything that holds back production adoption?",
+                              filters: filters,
+                              color: getChartColor("NXjP0j"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["NXjP0j"],
+                            })}
                           </div>
                         </div>
 
                         {/* Section 5: Future, AI & Final Thoughts (Questions 51-63) */}
                         <div className="my-12 space-y-12">
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="P9xrbb"
-                              questionText="If you could change one thing about Node-RED, what would it be?"
-                              filters={filters}
-                              color={getChartColor("P9xrbb")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["P9xrbb"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="oRPZqP"
-                              questionText="What aspects of Node-RED must be changed or be updated?"
-                              filters={filters}
-                              color={getChartColor("oRPZqP")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["oRPZqP"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="XoaQoz"
-                              questionText="What aspects of Node-RED should ideally never change?"
-                              filters={filters}
-                              color={getChartColor("XoaQoz")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["XoaQoz"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="JlPolX"
-                              questionText="What do you love most about Node-RED right now?"
-                              filters={filters}
-                              color={getChartColor("JlPolX")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["JlPolX"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="y4Q14d"
-                              questionText="What makes Node-RED feel like 'Node-RED' to you?"
-                              filters={filters}
-                              color={getChartColor("y4Q14d")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["y4Q14d"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="OX26KK"
-                              questionText="What would draw you away from Node-RED?"
-                              filters={filters}
-                              color={getChartColor("OX26KK")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["OX26KK"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="xDqzdv"
-                              questionText="What expectations do you have regarding AI for Node-RED?"
-                              filters={filters}
-                              color={getChartColor("xDqzdv")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["xDqzdv"]}
-                            />
-                            <QualitativeAnalysis
-                              questionId="a4LqQX"
-                              questionText="Why is that? (AI follow-up)"
-                              filters={filters}
-                              color={getChartColor("a4LqQX")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["a4LqQX"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "P9xrbb",
+                              questionText: "If you could change one thing about Node-RED, what would it be?",
+                              filters: filters,
+                              color: getChartColor("P9xrbb"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["P9xrbb"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "oRPZqP",
+                              questionText: "What aspects of Node-RED must be changed or be updated?",
+                              filters: filters,
+                              color: getChartColor("oRPZqP"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["oRPZqP"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "XoaQoz",
+                              questionText: "What aspects of Node-RED should ideally never change?",
+                              filters: filters,
+                              color: getChartColor("XoaQoz"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["XoaQoz"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "JlPolX",
+                              questionText: "What do you love most about Node-RED right now?",
+                              filters: filters,
+                              color: getChartColor("JlPolX"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["JlPolX"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "y4Q14d",
+                              questionText: "What makes Node-RED feel like 'Node-RED' to you?",
+                              filters: filters,
+                              color: getChartColor("y4Q14d"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["y4Q14d"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "OX26KK",
+                              questionText: "What would draw you away from Node-RED?",
+                              filters: filters,
+                              color: getChartColor("OX26KK"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["OX26KK"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "xDqzdv",
+                              questionText: "What expectations do you have regarding AI for Node-RED?",
+                              filters: filters,
+                              color: getChartColor("xDqzdv"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["xDqzdv"],
+                            })}
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "a4LqQX",
+                              questionText: "Why is that? (AI follow-up)",
+                              filters: filters,
+                              color: getChartColor("a4LqQX"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["a4LqQX"],
+                            })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="ElR6ZN"
-                              questionText="Any concerns about Node-RED's future direction?"
-                              filters={filters}
-                              color={getChartColor("ElR6ZN")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["ElR6ZN"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "ElR6ZN",
+                              questionText: "Any concerns about Node-RED's future direction?",
+                              filters: filters,
+                              color: getChartColor("ElR6ZN"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["ElR6ZN"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="rO4YJv"
-                              questionTitle="How likely are you to recommend Node-RED to a colleague?"
-                              filters={filters}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "rO4YJv",
+                              questionTitle: "How likely are you to recommend Node-RED to a colleague?",
+                              filters: filters,
+                              wasmService: wasmService,
+                            })}
                           </div>
                           <div className="space-y-12">
-                            <QualitativeAnalysis
-                              questionId="476O9O"
-                              questionText="Any final thoughts or suggestions?"
-                              filters={filters}
-                              color={getChartColor("476O9O")}
-                              wasmService={wasmService}
-                              baselineOrder={baselineOrders["476O9O"]}
-                            />
+                            {renderChart(QualitativeAnalysis, {
+                              questionId: "476O9O",
+                              questionText: "Any final thoughts or suggestions?",
+                              filters: filters,
+                              color: getChartColor("476O9O"),
+                              wasmService: wasmService,
+                              baselineOrder: baselineOrders["476O9O"],
+                            })}
                           </div>
                           <div className="grid grid-cols-1 gap-12">
-                            <RatingsChart
-                              questionId="a4RvP9"
-                              questionTitle="How would you rate this survey?"
-                              filters={filters}
-                              ratingScale={5}
-                              wasmService={wasmService}
-                            />
+                            {renderChart(RatingsChart, {
+                              questionId: "a4RvP9",
+                              questionTitle: "How would you rate this survey?",
+                              filters: filters,
+                              ratingScale: 5,
+                              wasmService: wasmService,
+                            })}
                           </div>
                         </div>
                       </div>
@@ -2675,17 +2415,18 @@ function App() {
             </main>
 
             {/* Table of Contents - Right Sidebar */}
+            {/* TOC can push at ≥1600px in comparison mode (enough room for both sidebars + content) */}
             <TableOfContents
               containerRef={mainContentRef}
               width={tocWidth}
               collapsed={tocCollapsed}
               onToggle={() => {
-                if (isMobile && tocCollapsed) setSidebarCollapsed(true);
+                if ((isMobile || (comparisonMode && isNarrowForToc)) && tocCollapsed) setSidebarCollapsed(true);
                 setTocCollapsed(!tocCollapsed);
               }}
               onItemMouseEnter={handleTocItemMouseEnter}
               onItemMouseLeave={handleTocItemMouseLeave}
-              isMobile={isMobile}
+              useOverlay={isMobile || (comparisonMode && isNarrowForToc)}
             />
 
             {/* TOC Resize Handle */}
@@ -3018,6 +2759,7 @@ function App() {
         )}
         </div>
       </ErrorBoundary>
+      </ComparisonProvider>
     </FilterProvider>
   );
 }
