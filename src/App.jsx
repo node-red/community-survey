@@ -722,7 +722,13 @@ function App() {
         } else {
           setFiltersB(newFilters);
         }
-        // Don't update URL or global counts in comparison mode
+
+        // Update URL with comparison state (don't update global counts though)
+        updateURLWithComparisonState({
+          comparisonMode: true,
+          filtersA: activeColumn === 'A' ? newFilters : filtersA,
+          filtersB: activeColumn === 'B' ? newFilters : filtersB,
+        });
         return;
       }
 
@@ -1460,11 +1466,18 @@ function App() {
                       <button
                         className={sidebar.clearButton}
                         onClick={() => {
+                          const emptyFilters = createEmptyFilters();
                           if (activeColumn === 'A') {
-                            setFiltersA(createEmptyFilters());
+                            setFiltersA(emptyFilters);
                           } else {
-                            setFiltersB(createEmptyFilters());
+                            setFiltersB(emptyFilters);
                           }
+                          // Update URL with cleared filters
+                          updateURLWithComparisonState({
+                            comparisonMode: true,
+                            filtersA: activeColumn === 'A' ? emptyFilters : filtersA,
+                            filtersB: activeColumn === 'B' ? emptyFilters : filtersB,
+                          });
                         }}
                         data-testid="clear-filters-column"
                       >
