@@ -51,7 +51,7 @@ const UnifiedChartWrapper = (props) => {
       {/* Column B - Animates in/out with width + opacity transition */}
       <div className={cn(
         "flex-1 lg:min-w-[450px] transition-all duration-300 ease-out",
-        !comparisonMode && "!flex-none !w-0 !min-w-0 opacity-0 overflow-hidden"
+        !comparisonMode && "!flex-none !w-0 !min-w-0 !h-0 opacity-0 overflow-hidden"
       )}>
         {hasEverEnabledComparison && (
           <div className="border-l-2 border-orange-500 pl-3 relative">
