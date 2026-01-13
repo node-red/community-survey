@@ -56,8 +56,27 @@ function App() {
   const [hasEverEnabledComparison, setHasEverEnabledComparison] = useState(false);
 
   // Callback to restore filters from URL on page load
+  // Supports both normal mode (urlFilters) and comparison mode (comparisonState)
   const handleFiltersRestoredFromURL = useCallback(
-    async (urlFilters) => {
+    async (urlFilters, comparisonState) => {
+      if (comparisonState?.comparisonMode) {
+        // Restoring comparison mode from URL
+        if (import.meta.env.DEV)
+          console.log("🔗 Restoring comparison mode from URL:", comparisonState);
+
+        setComparisonMode(true);
+        setFiltersA(comparisonState.filtersA);
+        setFiltersB(comparisonState.filtersB);
+        setHasEverEnabledComparison(true);
+        setActiveColumn('A'); // Default to column A on restore
+
+        // In comparison mode, charts fetch their own data with their respective filters
+        // No need to fetch centralized dashboard data
+        setFilterLoading(false);
+        return;
+      }
+
+      // Normal mode restoration
       if (import.meta.env.DEV)
         console.log("🔗 Restoring filters from URL:", urlFilters);
 
@@ -86,7 +105,7 @@ function App() {
   );
 
   // Hook for bidirectional URL <-> filter synchronization
-  const { updateURLWithFilters } = useURLFilters(
+  const { updateURLWithFilters, updateURLWithComparisonState } = useURLFilters(
     filters,
     filterOptions,
     handleFiltersRestoredFromURL,
@@ -513,6 +532,14 @@ function App() {
 
         // Update the column's filters (charts will re-render with new filters)
         setColumnFilters(newColumnFilters);
+
+        // Update URL with comparison state
+        const newComparisonState = {
+          comparisonMode: true,
+          filtersA: activeColumn === 'A' ? newColumnFilters : filtersA,
+          filtersB: activeColumn === 'B' ? newColumnFilters : filtersB,
+        };
+        updateURLWithComparisonState(newComparisonState);
         return;
       }
 
@@ -618,6 +645,7 @@ function App() {
       setSectionCounts,
       setActivePreset,
       updateURLWithFilters,
+      updateURLWithComparisonState,
       comparisonMode,
       activeColumn,
       filtersA,
@@ -746,16 +774,28 @@ function App() {
 
     if (!comparisonMode) {
       // Entering comparison mode - copy current filters to column A
-      setFiltersA(filters);
-      setFiltersB(createEmptyFilters());
+      const newFiltersA = filters;
+      const newFiltersB = createEmptyFilters();
+      setFiltersA(newFiltersA);
+      setFiltersB(newFiltersB);
       setActiveColumn('A');
       setComparisonMode(true);
       setHasEverEnabledComparison(true); // Triggers Column B to mount
+
+      // Update URL to comparison mode
+      updateURLWithComparisonState({
+        comparisonMode: true,
+        filtersA: newFiltersA,
+        filtersB: newFiltersB,
+      });
     } else {
       // Exiting comparison mode - keep column A filters as the active filters
       setFilters(filtersA);
       setComparisonMode(false);
       // Keep hasEverEnabledComparison true - Column B stays mounted for fast re-toggle
+
+      // Update URL back to normal mode
+      updateURLWithFilters(filtersA);
     }
 
     // Restore chart to same relative viewport position after DOM settles
@@ -776,7 +816,7 @@ function App() {
         });
       });
     }
-  }, [comparisonMode, filters, filtersA, getCurrentlyVisibleChart]);
+  }, [comparisonMode, filters, filtersA, getCurrentlyVisibleChart, updateURLWithComparisonState, updateURLWithFilters]);
 
   // Get current filters based on comparison mode and active column
   const getCurrentFilters = useCallback(() => {
@@ -1001,6 +1041,7 @@ function App() {
 
   return (
     <FilterProvider filters={filters}>
+      <ComparisonProvider value={{ comparisonMode, filtersA, filtersB, activeColumn }}>
       <ErrorBoundary showDetails={import.meta.env.DEV}>
         <div className="min-h-screen bg-nodered-gray-100 font-sans">
         {/* Landing Page Hero Section */}
@@ -2705,6 +2746,7 @@ function App() {
         )}
         </div>
       </ErrorBoundary>
+      </ComparisonProvider>
     </FilterProvider>
   );
 }
