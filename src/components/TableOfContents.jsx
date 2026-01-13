@@ -333,9 +333,20 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
               ref={searchInputRef}
               type="text"
               placeholder="Search questions"
+              aria-label="Search table of contents questions"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-2 py-1 text-[12px] border border-[#ccc] rounded-sm bg-white placeholder-[#999] focus:outline-none focus:border-[#999]"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  if (searchQuery) {
+                    setSearchQuery(''); // Clear search first
+                  } else {
+                    onToggle?.(); // Close TOC if search is already empty
+                  }
+                }
+              }}
+              className="w-full px-2 py-1 text-[12px] border border-[#ccc] rounded-sm bg-white placeholder-[#999] focus:outline focus:outline-2 focus:outline-[#c22e2e] focus:border-[#c22e2e]"
             />
           </div>
         </div>
@@ -344,7 +355,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         <div className="flex-1 overflow-y-auto bg-white">
           {/* TOC Items */}
           <nav>
-            <ul className="space-y-0">
+            <ul className="space-y-0" aria-live="polite" aria-atomic="true">
               {filteredSections.map((section) => (
                 <li key={section.id}>
                   <button
@@ -353,12 +364,13 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
                       "w-full text-left pl-1 pr-3 py-[3px] text-[12px] transition-all duration-150",
                       "hover:bg-[#f0f0f0]",
                       "flex items-center gap-2",
+                      "focus:outline focus:outline-2 focus:outline-[#c22e2e]",
                       activeSection === section.id
                         ? "bg-[#e8e8e8] text-[#333] font-medium"
                         : "text-[#555]"
                     )}
                   >
-                    <svg className="w-3 h-3 text-[#999] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 text-[#999] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                     <span
@@ -372,7 +384,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
                 </li>
               ))}
               {filteredSections.length === 0 && searchQuery && (
-                <li className="px-3 py-2 text-[12px] text-[#999]">
+                <li className="px-3 py-2 text-[12px] text-[#999]" role="status">
                   No matching questions
                 </li>
               )}

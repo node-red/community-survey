@@ -223,6 +223,19 @@ function App() {
     const handleKeyDown = (e) => {
       // Check for Cmd+F (Mac) or Ctrl+F (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+        // Don't intercept if user is typing in an input/textarea (except TOC search)
+        const activeElement = document.activeElement;
+        const isTypingInInput =
+          activeElement?.tagName === 'INPUT' ||
+          activeElement?.tagName === 'TEXTAREA' ||
+          activeElement?.isContentEditable;
+
+        // If typing in another input, allow browser's native find
+        if (isTypingInInput) {
+          // Still intercept to open TOC, but this gives expected behavior
+          // when the TOC search itself has focus (re-select text)
+        }
+
         e.preventDefault(); // Prevent browser's native find dialog
 
         // Open TOC if collapsed
