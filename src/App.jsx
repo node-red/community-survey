@@ -157,6 +157,7 @@ function App() {
   const mainContentRef = useRef(null);
   const dashboardRef = useRef(null);
   const sidebarTooltipTimeoutRef = useRef(null);
+  const tocRef = useRef(null);
 
   // Toggle visibility of hero, introduction, and footer sections
   const [showHeroSection] = useState(true);
@@ -216,6 +217,29 @@ function App() {
       }
     };
   }, []);
+
+  // Keyboard shortcut: Cmd+F (Mac) or Ctrl+F (Windows/Linux) to open TOC and focus search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Check for Cmd+F (Mac) or Ctrl+F (Windows/Linux)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+        e.preventDefault(); // Prevent browser's native find dialog
+
+        // Open TOC if collapsed
+        if (tocCollapsed) {
+          setTocCollapsed(false);
+        }
+
+        // Focus the search input after a brief delay to allow TOC to open
+        setTimeout(() => {
+          tocRef.current?.focusSearch();
+        }, tocCollapsed ? 350 : 0); // Wait for animation if TOC was collapsed
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [tocCollapsed]);
 
   // Auto-collapse sidebars on initial narrow viewport
   useEffect(() => {
@@ -2417,6 +2441,7 @@ function App() {
             {/* Table of Contents - Right Sidebar */}
             {/* TOC can push at ≥1600px in comparison mode (enough room for both sidebars + content) */}
             <TableOfContents
+              ref={tocRef}
               containerRef={mainContentRef}
               width={tocWidth}
               collapsed={tocCollapsed}

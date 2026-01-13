@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { cn } from '../styles/classNames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
@@ -8,13 +8,24 @@ import {
   generateSectionId,
 } from '../utils/url-utils';
 
-const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, useOverlay }) => {
+const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, useOverlay }, ref) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebarToggle, setShowSidebarToggle] = useState(false);
   const [showSidebarTooltip, setShowSidebarTooltip] = useState(false);
   const tooltipTimeoutRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  // Expose focusSearch method to parent components
+  useImperativeHandle(ref, () => ({
+    focusSearch: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+        searchInputRef.current.select();
+      }
+    }
+  }), []);
   const [pendingHash, setPendingHash] = useState(() => {
     // Extract just the section ID, ignoring any filter params after '?'
     return getCurrentSectionFromURL();
@@ -319,6 +330,7 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
         <div className="bg-[#f3f3f3] border-b border-[#ddd] px-3 py-2">
           <div className="relative">
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search questions"
               value={searchQuery}
@@ -478,6 +490,6 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       </div>
     </div>
   );
-};
+});
 
 export default TableOfContents;
