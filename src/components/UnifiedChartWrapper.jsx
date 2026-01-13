@@ -28,12 +28,12 @@ const UnifiedChartWrapper = (props) => {
 
   return (
     <div className={cn(
-      "flex gap-4",
+      "flex flex-col lg:flex-row gap-4",
       !comparisonMode && "justify-center"
     )}>
       {/* Column A - Always visible */}
       <div className={cn(
-        comparisonMode ? "flex-1 min-w-[500px]" : "w-full"
+        comparisonMode ? "flex-1 lg:min-w-[450px]" : "w-full"
       )}>
         <div className={cn(
           "relative",
@@ -50,7 +50,7 @@ const UnifiedChartWrapper = (props) => {
 
       {/* Column B - Animates in/out with width + opacity transition */}
       <div className={cn(
-        "flex-1 min-w-[500px] transition-all duration-300 ease-out",
+        "flex-1 lg:min-w-[450px] transition-all duration-300 ease-out",
         !comparisonMode && "!flex-none !w-0 !min-w-0 opacity-0 overflow-hidden"
       )}>
         {hasEverEnabledComparison && (

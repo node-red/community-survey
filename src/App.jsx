@@ -102,6 +102,14 @@ function App() {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
+  // Track if viewport is too narrow for comparison mode with sticky sidebars
+  const [isNarrowForComparison, setIsNarrowForComparison] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 1280 : false,
+  );
+  // Track if viewport is too narrow for TOC to push in comparison mode (needs room for both sidebars)
+  const [isNarrowForToc, setIsNarrowForToc] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 1600 : false,
+  );
   const sidebarWidth = 180; // Static width, no longer resizable
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 1024 : false,
@@ -161,8 +169,12 @@ function App() {
     const handleResize = () => {
       const isNarrow = window.innerWidth < 1024; // lg breakpoint
       const isMobileViewport = window.innerWidth < 768; // Mobile breakpoint
+      const isNarrowForComparisonViewport = window.innerWidth < 1280; // xl breakpoint - left sidebar can push
+      const isNarrowForTocViewport = window.innerWidth < 1600; // TOC needs more room (both sidebars + content)
       setIsSingleColumn(isNarrow);
       setIsMobile(isMobileViewport);
+      setIsNarrowForComparison(isNarrowForComparisonViewport);
+      setIsNarrowForToc(isNarrowForTocViewport);
 
       // Auto-collapse both sidebars on any resize while in mobile viewport
       if (isMobileViewport) {
@@ -1283,8 +1295,8 @@ function App() {
           </header>
           {/* Dashboard Container with Sidebars */}
           <div className="relative flex">
-            {/* Mobile Backdrop Overlay */}
-            {isMobile && (!sidebarCollapsed || !tocCollapsed) && (
+            {/* Backdrop Overlay - shows when sidebars overlay content (mobile or comparison mode on narrow viewports) */}
+            {(isMobile || (comparisonMode && isNarrowForComparison)) && (!sidebarCollapsed || !tocCollapsed) && (
               <div
                 className="fixed inset-0 bg-black/50 z-10 transition-opacity duration-300"
                 style={{ top: "48px" }}
@@ -1295,14 +1307,15 @@ function App() {
               />
             )}
             {/* Left Sidebar - Node-RED Palette Style */}
+            {/* Use fixed (overlay) positioning on mobile OR when comparison mode is active on narrow viewports */}
             <aside
               className={cn(
                 "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] z-20 transition-all duration-300 ease-in-out",
-                isMobile ? "fixed left-0" : "sticky self-start",
+                (isMobile || (comparisonMode && isNarrowForComparison)) ? "fixed left-0" : "sticky self-start",
               )}
               style={{
                 width: sidebarCollapsed ? "7px" : `${sidebarWidth}px`,
-                height: isMobile ? "calc(100vh - 48px)" : "100vh",
+                height: (isMobile || (comparisonMode && isNarrowForComparison)) ? "calc(100vh - 48px)" : "100vh",
                 maxHeight: "calc(100vh - 48px)",
                 top: "48px",
               }}
@@ -1699,16 +1712,16 @@ function App() {
                 <div className="relative group">
                   <button
                     className={`absolute w-6 h-12 flex items-center justify-center transition-transform duration-200 ${
-                      showSidebarToggle || sidebarCollapsed || isMobile
+                      showSidebarToggle || sidebarCollapsed || isMobile || (comparisonMode && isNarrowForComparison)
                         ? "opacity-100"
                         : "opacity-0 pointer-events-none"
                     } ${
-                      showSidebarToggle || isMobile
+                      showSidebarToggle || isMobile || (comparisonMode && isNarrowForComparison)
                         ? "bg-white hover:bg-gray-50 border border-gray-300 shadow-sm"
                         : "bg-transparent border border-transparent"
                     }`}
                     onClick={() => {
-                      if (isMobile && sidebarCollapsed) setTocCollapsed(true);
+                      if ((isMobile || (comparisonMode && isNarrowForComparison)) && sidebarCollapsed) setTocCollapsed(true);
                       setSidebarCollapsed(!sidebarCollapsed);
                     }}
                     style={{
@@ -1717,7 +1730,7 @@ function App() {
                       borderRadius: "0 4px 4px 0",
                       position: "relative",
                       transform:
-                        showSidebarToggle || sidebarCollapsed || isMobile
+                        showSidebarToggle || sidebarCollapsed || isMobile || (comparisonMode && isNarrowForComparison)
                           ? "translateX(0)"
                           : "translateX(-10px)",
                     }}
@@ -2342,17 +2355,18 @@ function App() {
             </main>
 
             {/* Table of Contents - Right Sidebar */}
+            {/* TOC can push at ≥1600px in comparison mode (enough room for both sidebars + content) */}
             <TableOfContents
               containerRef={mainContentRef}
               width={tocWidth}
               collapsed={tocCollapsed}
               onToggle={() => {
-                if (isMobile && tocCollapsed) setSidebarCollapsed(true);
+                if ((isMobile || (comparisonMode && isNarrowForToc)) && tocCollapsed) setSidebarCollapsed(true);
                 setTocCollapsed(!tocCollapsed);
               }}
               onItemMouseEnter={handleTocItemMouseEnter}
               onItemMouseLeave={handleTocItemMouseLeave}
-              isMobile={isMobile}
+              useOverlay={isMobile || (comparisonMode && isNarrowForToc)}
             />
 
             {/* TOC Resize Handle */}

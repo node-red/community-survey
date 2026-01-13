@@ -8,7 +8,7 @@ import {
   generateSectionId,
 } from '../utils/url-utils';
 
-const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, isMobile }) => {
+const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, useOverlay }) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -281,13 +281,13 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
       className={cn(
         "bg-[#f3f3f3]",
         "z-20",
-        isMobile ? "fixed right-0" : "sticky top-12 right-0 self-start"
+        useOverlay ? "fixed right-0" : "sticky top-12 right-0 self-start"
       )}
       style={{
         width: collapsed ? "8px" : `${width}px`,
         transition: "width 300ms ease-in-out",
         borderLeft: "1px solid #bbbbbb",
-        height: isMobile ? "calc(100vh - 48px)" : "100vh",
+        height: useOverlay ? "calc(100vh - 48px)" : "100vh",
         maxHeight: "calc(100vh - 48px)",
         top: "48px",
       }}
@@ -423,11 +423,11 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
         <div className="relative group">
           <button
             className={`absolute w-6 h-12 flex items-center justify-center transition-transform duration-200 ${
-              showSidebarToggle || collapsed || isMobile
+              showSidebarToggle || collapsed || useOverlay
                 ? "opacity-100"
                 : "opacity-0 pointer-events-none"
             } ${
-              showSidebarToggle || isMobile
+              showSidebarToggle || useOverlay
                 ? "bg-white hover:bg-gray-50 border border-gray-300 shadow-sm"
                 : "bg-transparent border border-transparent"
             }`}
@@ -438,7 +438,7 @@ const TableOfContents = ({ containerRef, width, collapsed, onToggle, onItemMouse
               borderRadius: "3px 0 0 3px",
               borderRight: showSidebarToggle ? "none" : undefined,
               position: "relative",
-              transform: (showSidebarToggle || collapsed || isMobile) ? "translateX(0)" : "translateX(10px)",
+              transform: (showSidebarToggle || collapsed || useOverlay) ? "translateX(0)" : "translateX(10px)",
             }}
           >
             <svg
