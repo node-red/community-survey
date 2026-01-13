@@ -1820,7 +1820,7 @@ function App() {
                   "w-full mx-auto px-10 py-12 dashboard-mobile-scale",
                   comparisonMode
                     ? "max-w-7xl overflow-x-auto"
-                    : "md:max-w-5xl"
+                    : "lg:max-w-5xl"
                 )}>
                   {/* SQL Query Card */}
                   {showQuery && queryResult?.query && (
