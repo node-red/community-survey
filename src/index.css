@@ -77,7 +77,8 @@ body {
   .dashboard-mobile-scale {
     transform: scale(0.7);
     transform-origin: top left;
-    width: 142.857%; /* 1/0.7 to compensate for scale */
+    width: calc(100% / 0.7); /* Use calc for precise viewport fill */
   }
 }
+
 

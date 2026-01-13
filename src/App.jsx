@@ -1252,17 +1252,20 @@ function App() {
             <div className="flex items-center gap-1 text-sm flex-shrink-0">
               {comparisonMode ? (
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-600 text-white text-xs font-medium">
+                  <span
+                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#c22e2e] text-white text-xs font-medium"
+                    title="Compare two filter configurations side-by-side"
+                  >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     <span className="hidden sm:inline">Comparison mode</span>
                   </span>
-                  <div className="flex items-center gap-1 text-xs">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold">A</span>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold ring-2 ring-white">A</span>
                     <span className="text-gray-400">{countActiveFilters(filtersA)}</span>
                     <span className="text-gray-500 mx-0.5">vs</span>
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] font-bold">B</span>
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] font-bold ring-2 ring-white">B</span>
                     <span className="text-gray-400">{countActiveFilters(filtersB)}</span>
                   </div>
                 </div>
@@ -1369,25 +1372,25 @@ function App() {
                       <button
                         onClick={() => setActiveColumn('A')}
                         className={cn(
-                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5",
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
                           activeColumn === 'A'
                             ? "bg-blue-500 text-white border-blue-500"
                             : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
                         )}
                       >
-                        <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">A</span>
+                        <span className="w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white">A</span>
                         <span className="truncate">({countActiveFilters(filtersA)})</span>
                       </button>
                       <button
                         onClick={() => setActiveColumn('B')}
                         className={cn(
-                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5",
+                          "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5 cursor-pointer",
                           activeColumn === 'B'
-                            ? "bg-orange-500 text-white border-orange-500"
+                            ? "bg-blue-500 text-white border-blue-500"
                             : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
                         )}
                       >
-                        <span className="w-4 h-4 rounded-full bg-orange-600 text-white text-[10px] flex items-center justify-center font-bold">B</span>
+                        <span className="w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white">B</span>
                         <span className="truncate">({countActiveFilters(filtersB)})</span>
                       </button>
                     </div>
@@ -1817,7 +1820,7 @@ function App() {
                   "w-full mx-auto px-10 py-12 dashboard-mobile-scale",
                   comparisonMode
                     ? "max-w-7xl overflow-x-auto"
-                    : "max-w-3xl lg:max-w-5xl"
+                    : "md:max-w-3xl lg:max-w-5xl"
                 )}>
                   {/* SQL Query Card */}
                   {showQuery && queryResult?.query && (
@@ -1921,11 +1924,14 @@ function App() {
                           <div className="max-w-3xl">
                             <div className="text-sm text-nodered-gray-600 font-light leading-relaxed max-w-2xl">
                               <p className="mb-2">
-                                Use the filters in the left sidebar to explore
+                                Use the <span className="font-medium text-nodered-gray-700">filters</span> in the left sidebar to explore
                                 different segments of the community and what
                                 they responded regarding the questions. Expand
-                                the right sidebar to see a table of contents to
-                                quickly navigate to a specific question.
+                                the right sidebar to see a <span className="font-medium text-nodered-gray-700">table of contents</span> to
+                                quickly navigate to a specific question. Enable{" "}
+                                <span className="font-medium text-nodered-gray-700">comparison mode</span> to view two filter configurations
+                                side-by-side and discover differences between
+                                user segments.
                               </p>
                             </div>
                           </div>
