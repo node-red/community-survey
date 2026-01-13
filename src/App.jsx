@@ -1243,7 +1243,7 @@ function App() {
           {/* Node-RED Header - Sticky to viewport */}
           <header className="h-12 bg-black border-b-2 border-[#c02020] flex items-center justify-between pl-4 pr-4 sm:pr-8 text-white sticky top-0 z-50">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <h1 className="inline font-sans text-base font-normal text-white h-auto leading-[30px] whitespace-nowrap align-middle w-auto">
+              <h1 className="inline font-sans text-base font-normal text-white h-auto leading-[30px] truncate align-middle">
                 Node-RED Modernization Survey Results
               </h1>
             </div>
@@ -1256,7 +1256,7 @@ function App() {
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    Comparison mode
+                    <span className="hidden sm:inline">Comparison mode</span>
                   </span>
                   <div className="flex items-center gap-1 text-xs">
                     <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold">A</span>
