@@ -1,16 +1,19 @@
 /* TEAM */
+Node-RED
+Site: https://nodered.org
+
 Product Designer/Design Engineer: Dimitrie Hoekstra
 Site: https://dimitr.ie
+
+Nick O'Leary - Node-RED Creator
+Site: https://knolleary.net
 
 Team: FlowFuse
 Site: https://flowfuse.com
 
 /* THANKS */
-Nick O'Leary - Node-RED Creator
-Site: https://knolleary.net
-
 Node-RED Community
-Site: https://nodered.org
+Site: https://discourse.nodered.org/
 
 All survey respondents who shared their experiences
 
