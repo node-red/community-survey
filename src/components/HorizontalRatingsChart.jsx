@@ -468,9 +468,9 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
                       }
                     }}
                   >
-                    {/* Percentage inside the bar on the left (only if it fits) */}
+                    {/* Percentage inside the bar - left for first bar, right for subsequent bars */}
                     {percentageFitsInside && (
-                      <span className="text-white text-xs font-bold pl-2 pr-2">
+                      <span className={`text-white text-xs font-bold ${index === 0 ? 'pl-2 pr-2' : 'ml-auto pl-2 pr-2'}`}>
                         {item.count === 0 ? '-' : (Math.round(item.percentage) === 0 ? '<1%' : `${Math.round(item.percentage)}%`)}
                       </span>
                     )}
