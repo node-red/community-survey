@@ -135,7 +135,7 @@ const ChartHeader = ({ title, compact = false, className, onSectionIdReady }) =>
         className="opacity-100 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-150 text-gray-400 hover:text-nodered-red focus:outline-none rounded-sm"
         aria-label={copied ? `Link copied to clipboard` : `Copy link to ${title}`}
       >
-        <span className={copied ? 'text-[#c12120]' : ''}>{copied ? '✓' : '#'}</span>
+        <span aria-hidden="true" className={copied ? 'text-[#c12120]' : ''}>{copied ? '✓' : '#'}</span>
       </a>
 
       {/* Tooltip for anchor link */}

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useRef, useEffect } from 'react';
 import { cn } from '../styles/classNames';
 
 /**
@@ -25,6 +25,20 @@ const UnifiedChartWrapper = (props) => {
     filtersA,
     filtersB,
   } = props;
+
+  const columnBRef = useRef(null);
+
+  // Apply inert attribute imperatively (React doesn't handle boolean attributes correctly)
+  useEffect(() => {
+    const columnB = columnBRef.current;
+    if (!columnB) return;
+
+    if (!comparisonMode) {
+      columnB.setAttribute('inert', '');
+    } else {
+      columnB.removeAttribute('inert');
+    }
+  }, [comparisonMode]);
 
   return (
     <div
@@ -55,13 +69,13 @@ const UnifiedChartWrapper = (props) => {
       </div>
 
       {/* Column B - Animates in/out with width + opacity transition */}
-      {/* inert attribute prevents keyboard focus and screen reader access when hidden */}
+      {/* inert attribute set imperatively via useEffect for reliable browser support */}
       <div
+        ref={columnBRef}
         className={cn(
           "flex-1 lg:min-w-[450px] transition-all duration-300 ease-out",
           !comparisonMode && "!flex-none !w-0 !min-w-0 !h-0 opacity-0 overflow-hidden"
         )}
-        inert={!comparisonMode ? "" : undefined}
       >
         {hasEverEnabledComparison && (
           <div className="border-l-2 border-orange-500 pl-3 relative">

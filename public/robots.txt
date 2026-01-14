@@ -1,0 +1,13 @@
+# Node-RED User Experience Survey 2025 - robots.txt
+# https://nodered.org/community-survey/
+
+User-agent: *
+Allow: /
+
+# Exclude WASM and worker files (not useful for indexing)
+Disallow: /*.wasm$
+Disallow: /*.worker.js$
+
+# LLM-friendly documentation
+# See https://llmstxt.org/ for specification
+# AI agents can use llms.txt for structured site documentation

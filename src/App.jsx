@@ -2661,6 +2661,15 @@ function App() {
                               filters: filters,
                               ratingScale: 5,
                               wasmService: wasmService,
+                              skipTargetId: "stay-involved",
+                            })}
+                          </div>
+                          <div id="stay-involved" className="grid grid-cols-1 gap-12">
+                            {renderChart(HorizontalRatingsChart, {
+                              questionId: "joRzJE",
+                              questionTitle: "Would you like to stay involved?",
+                              filters: filters,
+                              wasmService: wasmService,
                               skipTargetId: "thank-you",
                             })}
                           </div>

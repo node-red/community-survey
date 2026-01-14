@@ -7,7 +7,7 @@ import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 import SkipLink from './SkipLink';
 
-const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _showRatingScale = false, _ratingScale = 7, wasmService }) => {
+const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _showRatingScale = false, _ratingScale = 7, wasmService, skipTargetId }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -385,7 +385,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
             </div>
           </div>
         </div>
-        <SkipLink chartId={questionId} />
+        <SkipLink chartId={questionId} targetId={skipTargetId} />
 
         {/* Staircase/Waterfall Bars */}
         <div className="p-4">

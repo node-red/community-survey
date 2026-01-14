@@ -58,7 +58,16 @@ const SkipLink = ({ label = "Skip to next section", chartId, targetId }) => {
         targetElement.setAttribute('tabindex', '-1');
       }
       targetElement.focus();
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Calculate scroll position with offset for fixed header (h-12 = 48px + 16px padding)
+      const headerOffset = 64;
+      const elementPosition = targetElement.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   }, [chartId, targetId]);
 

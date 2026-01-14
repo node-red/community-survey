@@ -75,7 +75,8 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
       const allHeadings = container.querySelectorAll('h3');
 
       Array.from(allHeadings).forEach((heading) => {
-        const text = heading.textContent.trim();
+        // Strip anchor link symbols (# and ✓) from the text
+        const text = heading.textContent.trim().replace(/[#✓]\s*$/, '').trim();
 
         // Skip empty headings
         if (!text) return;

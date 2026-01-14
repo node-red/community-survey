@@ -1,0 +1,350 @@
+# Node-RED User Experience Survey 2025
+
+> Interactive dashboard presenting results from 600+ Node-RED users worldwide. Data is queryable via DuckDB WASM running entirely in the browser - no backend required.
+
+This is a React-based data visualization application that uses client-side SQL via DuckDB WASM. The survey explores how the Node-RED community uses the platform, their challenges, and vision for the future of low-code programming.
+
+## Data Model
+
+The database file `node_red_survey.duckdb` contains survey responses in an EAV (Entity-Attribute-Value) schema.
+
+### Main Table: survey.responses
+
+| Column | Type | Description |
+|--------|------|-------------|
+| respondent_id | VARCHAR | Unique identifier for each survey respondent |
+| question_id | VARCHAR | Short code identifying the survey question |
+| answer_text | VARCHAR | Response value (plain text, JSON array, or numeric string) |
+
+## Complete Question ID Reference
+
+### Demographics & Filter Questions
+
+| Question ID | Category | Description | Answer Format |
+|-------------|----------|-------------|---------------|
+| ElR6d2 | Experience | How long using Node-RED | Single-select JSON: `["Less than 6 months"]` to `["More than 5 years"]` |
+| VPeNQ6 | Purpose | Primary use of Node-RED | Multi-select JSON array |
+| joRz61 | Organization | Organization size | Single-select JSON: `["1-10 people"]` to `["500+ people"]` |
+| 2AWoaM | Industry | Work industry | Multi-select JSON array |
+| P9xr1x | Influence | Decision-making role | Single-select JSON |
+| xDqzMk | Programming | Programming experience level | Single-select JSON: `["No programming experience"]` to `["Expert"]` |
+| kG2v5Z | Complexity | Typical flow complexity | Single-select JSON |
+| ZO7eJB | Production | Production usage status | Single-select JSON |
+| ZO7eO5 | Instances | Number of managed instances | Single-select JSON: `["1"]` to `["1000+"]` |
+| GpGjoO | Geography | Country (numeric code) | Plain integer (NOT in JSON array) |
+| rO4YaX | Use Cases | What Node-RED is used for | Multi-select JSON array |
+| 476OJ5 | Environment | Where Node-RED runs | Multi-select JSON array |
+| 2AWolV | Email | Email domain type | Single-select: Personal Email or Work Email |
+| ZO7ede | Discovery | How did you first discover Node-RED | Single-select JSON |
+
+### Learning Resources Question
+
+| Question ID | Description | Answer Format |
+|-------------|-------------|---------------|
+| NXjPAO | Learning resources used | Multi-select JSON array |
+
+### Learning Channel Rating Questions (1-7 scale)
+
+Follow-up questions for users who selected specific learning resources in NXjPAO:
+
+| Question ID | Resource Being Rated |
+|-------------|---------------------|
+| QRZ4AX | Official Website & Node-RED documentation |
+| 9Zk4d5 | Node-RED Flow Library |
+| qGr8Bk | YouTube |
+| WRWqAk | Community Forum (Discourse) |
+| vDZ8Xv | Stack Overflow |
+| kGo8b1 | AI Assistance (ChatGPT/etc) |
+| 6Kl6DP | GitHub |
+| erJzBl | Node-RED Academy |
+| a4LpOv | Node-RED Cookbook |
+| BpyJE5 | Reddit |
+| bep1Zg | Discord |
+| 7KA7XP | Slack |
+| ApgMr0 | Facebook Group |
+
+### Design Rating Questions (1-7 scale)
+
+| Question ID | What's Being Rated |
+|-------------|-------------------|
+| 089k8A | Node-RED branding (logo, website, forum) |
+| GpGAdp | Overall visual design (new colors, icons) |
+| zM9dMg | UI Menus layout and navigation |
+| GpGVZZ | Editor design and layout |
+| 597V9Q | Nodes design and anatomy (node size, information, and visuals) |
+
+### Quality Comparison Rating Questions (1-7 scale)
+
+| Question ID | What's Being Rated |
+|-------------|-------------------|
+| RoNjbJ | Ease of use/Ease to learn |
+| oRPz5V | Visual appeal |
+| GpGZaj | Feature offering |
+| GpGbqo | Professional appeal |
+| OX2Eb8 | Community and ecosystem support |
+
+### Device Satisfaction Rating Questions (1-7 scale)
+
+| Question ID | Device Type |
+|-------------|-------------|
+| bepze7 | Desktop/Laptop |
+| Apg9pl | Tablet |
+| Bpyep1 | Smartphone |
+
+### Understanding Rating Questions (1-7 scale)
+
+| Question ID | What's Being Rated |
+|-------------|-------------------|
+| Apg1ge | How clear was it what the higher level use cases were |
+| bepbp1 | How clear was it what I can functionally solve with Node-RED |
+
+### General Rating Questions (various scales)
+
+| Question ID | Question | Scale |
+|-------------|----------|-------|
+| qGrzG5 | Overall satisfaction with Node-RED | 1-7 |
+| QRZ4R1 | How up-to-date does Node-RED look and feel | 1-7 |
+| RoNgoj | Does Node-RED look and feel professional | 1-7 |
+| erJzrQ | How engaging does the Node-RED community feel | 1-7 |
+| qGrzbg | How long did it take to feel comfortable with Node-RED | Time scale |
+| 2AWpaV | How often do you share flows with others | Frequency scale |
+| rO4YJv | How likely are you to recommend Node-RED (NPS) | 0-10 |
+| a4RvP9 | How would you rate this survey | 1-7 |
+
+### Matrix Questions
+
+| Question ID | Question | Format |
+|-------------|----------|--------|
+| OX2gBp | Which devices do you use for these Node-RED tasks | Nested JSON with sub-question UUIDs |
+
+Matrix sub-question UUIDs for OX2gBp:
+- `0f096ad2-1241-4657-98ac-1c721f958999` - Editing flows
+- `31f69859-8ab9-4202-8d56-143007730ee1` - Monitoring dashboards
+- `0be2d6bd-10ce-4387-ab24-9bbb64ce6b09` - Viewing logs
+- `91356092-cf0a-4bb5-b467-2c84645328aa` - Quick fixes
+
+### Multi-Select Feature Questions
+
+| Question ID | Question |
+|-------------|----------|
+| kGozGZ | What frustrates you most about Node-RED |
+| erJzEk | Have you built Node-RED dashboards with any of these solutions |
+| 089kZ6 | What customization capabilities are important to you |
+| 8LBr6x | Do you have specific accessibility requirements |
+| Dp8ax5 | What other automation tools do you use |
+| Ma4BjA | Which missing features would most improve your Node-RED experience |
+| NXjP0j | Is there anything that holds back production adoption |
+
+### Qualitative (Open-Text) Questions
+
+**Note:** Raw text responses are not in `survey.responses`. Query `survey.qualitative_themes` for pre-computed themes.
+
+| Question ID | Question |
+|-------------|----------|
+| gqlzqJ | What's the single biggest improvement Node-RED needs |
+| 6KlPdY | What would make learning Node-RED easier for newcomers |
+| joRj6E | What has made it difficult to create or use Node-RED dashboards |
+| xDqAMo | What makes sharing flows difficult for you |
+| RoNAMl | How would you wish sharing flows would work |
+| oRPqY1 | Why do you choose to use Node-RED over alternatives |
+| P9xrbb | If you could change one thing about Node-RED, what would it be |
+| oRPZqP | What aspects of Node-RED must be changed or be updated |
+| XoaQoz | What aspects of Node-RED should ideally never change |
+| JlPolX | What do you love most about Node-RED right now |
+| y4Q14d | What makes Node-RED feel like 'Node-RED' to you |
+| OX26KK | What would draw you away from Node-RED |
+| xDqzdv | What expectations do you have regarding AI for Node-RED |
+| a4LqQX | Why is that (AI follow-up) |
+| ElR6ZN | Any concerns about Node-RED's future direction |
+| 476O9O | Any final thoughts or suggestions |
+
+### Engagement Questions
+
+| Question ID | Description | Answer Format |
+|-------------|-------------|---------------|
+| joRzJE | Would you like to stay involved? | Single-select JSON: `["Yes"]` or `["No"]` |
+
+### Additional Table: survey.qualitative_themes
+
+Pre-computed themes from text analysis of open-ended responses.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| question_id | VARCHAR | Question this theme relates to |
+| theme_name | VARCHAR | Name of the identified theme |
+| description | VARCHAR | Description of the theme |
+| representative_quotes | JSON | Array of example quotes |
+| respondent_ids | JSON | Array of respondent IDs with this theme |
+
+## Learning Resources and Ratings Relationship
+
+Learning resources (NXjPAO) have corresponding follow-up rating questions. Not all resources have ratings.
+
+**Resources WITH follow-up ratings:**
+- Official Website & docs → QRZ4AX
+- Node-RED Flow library → 9Zk4d5
+- YouTube → qGr8Bk
+- Community forum → WRWqAk
+- Stack Overflow → vDZ8Xv
+- AI assistance → kGo8b1
+- GitHub → 6Kl6DP
+- Node-RED academy → erJzBl
+- Node-RED Cookbook → a4LpOv
+- Reddit → BpyJE5
+- Discord → bep1Zg
+- Slack → 7KA7XP
+- Facebook Group → ApgMr0
+
+**Resources WITHOUT follow-up ratings:**
+- Blog posts and articles
+- Home Assistant Forum
+- Colleague or mentor guidance
+- Books or formal courses
+
+## Special Data Handling
+
+### Country Data (GpGjoO)
+Country codes are stored as **plain integers** (e.g., `840` for USA), NOT wrapped in JSON arrays like other single-select questions. The dashboard converts continent names to lists of country codes for filtering.
+
+### Use Cases Abstraction (rO4YaX)
+Raw responses are abstracted into 5 categories for filtering:
+- Home/Personal
+- Industrial/Business
+- Data & Integration
+- Education & Prototyping
+- Specialized Applications
+
+### Answer Format Types
+- **Single-select**: Wrapped in JSON array: `["Selected Option"]`
+- **Multi-select**: JSON array with multiple values: `["Option1", "Option2"]`
+- **Ratings**: Plain integer strings: `"5"`
+- **Country**: Plain integer (not in array): `840`
+- **Free text**: Plain string
+- **Matrix**: Nested JSON with sub-question UUIDs as keys
+
+## Query Examples
+
+### Count total respondents
+```sql
+SELECT COUNT(DISTINCT respondent_id) as total_respondents
+FROM survey.responses;
+```
+
+### Get experience level distribution
+```sql
+SELECT
+    answer_text as experience_level,
+    COUNT(*) as count
+FROM survey.responses
+WHERE question_id = 'ElR6d2'
+GROUP BY answer_text
+ORDER BY count DESC;
+```
+
+### Find enterprise users (500+ employees) using Node-RED in production
+```sql
+SELECT DISTINCT r1.respondent_id
+FROM survey.responses r1
+JOIN survey.responses r2 ON r1.respondent_id = r2.respondent_id
+WHERE r1.question_id = 'joRz61'
+  AND r1.answer_text = '["500+ people"]'
+  AND r2.question_id = 'ZO7eJB'
+  AND r2.answer_text LIKE '%Yes%';
+```
+
+### Extract multi-select values (unnest JSON arrays)
+```sql
+SELECT
+    respondent_id,
+    TRIM(unnest(try_cast(answer_text AS JSON[]))::varchar, '"') as resource
+FROM survey.responses
+WHERE question_id = 'NXjPAO'
+  AND answer_text != '[]';
+```
+
+### Calculate average rating for documentation
+```sql
+SELECT
+    ROUND(AVG(CAST(answer_text AS INTEGER)), 2) as avg_rating,
+    COUNT(*) as responses
+FROM survey.responses
+WHERE question_id = 'QRZ4AX';
+```
+
+### Get ratings for users of a specific learning resource
+```sql
+-- Documentation rating for users who selected official documentation
+SELECT
+    AVG(CAST(r2.answer_text AS INTEGER)) as avg_rating,
+    COUNT(*) as respondents
+FROM survey.responses r1
+JOIN survey.responses r2 ON r1.respondent_id = r2.respondent_id
+WHERE r1.question_id = 'NXjPAO'
+  AND r1.answer_text LIKE '%Official Website%'
+  AND r2.question_id = 'QRZ4AX';
+```
+
+### Query qualitative themes
+```sql
+SELECT
+    theme_name,
+    description,
+    json_array_length(respondent_ids) as respondent_count
+FROM survey.qualitative_themes
+WHERE question_id = 'gqlzqJ'
+ORDER BY respondent_count DESC;
+```
+
+## Filter Categories
+
+The dashboard supports filtering by 13 categories:
+
+| Category | Question ID | Options |
+|----------|-------------|---------|
+| Continent | GpGjoO | 7 regions (mapped to country codes) |
+| Experience Level | ElR6d2 | 5 options |
+| Primary Purpose | VPeNQ6 | 10 options |
+| Organization Size | joRz61 | 5 options |
+| Industry | 2AWoaM | 10 options |
+| Decision Influence | P9xr1x | 5 options |
+| Programming Background | xDqzMk | 6 options |
+| Flow Complexity | kG2v5Z | 5 options |
+| Production Usage | ZO7eJB | 5 options |
+| Number of Instances | ZO7eO5 | 7 options |
+| Use Cases | rO4YaX | 5 abstracted categories |
+| Run Environment | 476OJ5 | 8 options |
+| Email Domain Type | 2AWolV | 2 options (Personal/Work) |
+
+## Predefined Segment Presets
+
+Four ICP-aligned segment presets are available:
+
+| Segment Key | Name | Description |
+|-------------|------|-------------|
+| manufacturing-icp | L-Size Companies | 500+ employees, professional roles |
+| m-size-comp-segment | M-Size Companies | 51-500 employees, professional roles |
+| s-size-comp-segment | S-Size Companies | 1-50 employees, professional roles |
+| hobby-segment | Hobbyists | Personal projects and home automation |
+
+## Technology Stack
+
+- **Frontend**: React 19, Vite 7, Tailwind CSS
+- **Database**: DuckDB WASM (runs in browser)
+- **Charts**: Recharts
+- **Maps**: D3-geo with TopoJSON
+
+## Security Notes
+
+All user-provided filter values are sanitized through dedicated utilities before being used in SQL queries. The application uses parameterized query building with proper escaping to prevent SQL injection.
+
+## Documentation
+
+- [Node-RED Official Website](https://nodered.org/): The main Node-RED project
+- [Survey Dashboard](https://nodered.org/community-survey/): Live dashboard for exploring results
+- [DuckDB Documentation](https://duckdb.org/docs/): DuckDB SQL reference
+- [GitHub Repository](https://github.com/node-red/node-red): Node-RED source code
+
+## Optional
+
+- [DuckDB WASM](https://duckdb.org/docs/api/wasm/overview.html): Browser-based SQL engine documentation
+- [Recharts](https://recharts.org/): Charting library used for visualizations
