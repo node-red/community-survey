@@ -167,6 +167,10 @@ function App() {
   const lastFocusedElementRef = useRef(null);
   const filterSidebarRef = useRef(null);
 
+  // Tablist refs for comparison column selector (accessibility)
+  const tabARef = useRef(null);
+  const tabBRef = useRef(null);
+
   // Toggle visibility of hero, introduction, and footer sections
   const [showHeroSection] = useState(true);
   const [showIntroductionSection] = useState(true);
@@ -1623,8 +1627,18 @@ function App() {
                   <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
                     <div role="tablist" aria-label="Comparison columns" className="flex gap-1">
                       <button
+                        ref={tabARef}
                         role="tab"
                         onClick={() => setActiveColumn('A')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            const newColumn = activeColumn === 'A' ? 'B' : 'A';
+                            setActiveColumn(newColumn);
+                            // Move focus to newly selected tab
+                            (newColumn === 'A' ? tabARef : tabBRef).current?.focus();
+                          }
+                        }}
                         aria-label={`Edit Column A filters (${countActiveFilters(filtersA)} active)`}
                         aria-selected={activeColumn === 'A'}
                         tabIndex={activeColumn === 'A' ? 0 : -1}
@@ -1639,8 +1653,18 @@ function App() {
                         <span className="truncate">({countActiveFilters(filtersA)})</span>
                       </button>
                       <button
+                        ref={tabBRef}
                         role="tab"
                         onClick={() => setActiveColumn('B')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            const newColumn = activeColumn === 'A' ? 'B' : 'A';
+                            setActiveColumn(newColumn);
+                            // Move focus to newly selected tab
+                            (newColumn === 'A' ? tabARef : tabBRef).current?.focus();
+                          }
+                        }}
                         aria-label={`Edit Column B filters (${countActiveFilters(filtersB)} active)`}
                         aria-selected={activeColumn === 'B'}
                         tabIndex={activeColumn === 'B' ? 0 : -1}
