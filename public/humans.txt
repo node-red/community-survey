@@ -1,0 +1,21 @@
+/* TEAM */
+Product Designer/Design Engineer: Dimitrie Hoekstra
+Site: https://dimitr.ie
+
+Team: FlowFuse
+Site: https://flowfuse.com
+
+/* THANKS */
+Nick O'Leary - Node-RED Creator
+Site: https://knolleary.net
+
+Node-RED Community
+Site: https://nodered.org
+
+All survey respondents who shared their experiences
+
+/* SITE */
+Last update: 2025/01/14
+Standards: HTML5, CSS3, JavaScript ES6+
+Components: React, Vite, DuckDB WASM, Recharts, Tailwind CSS
+Software: Tally (survey tool)
