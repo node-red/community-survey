@@ -2,6 +2,9 @@
 Node-RED
 Site: https://nodered.org
 
+OpenJS Foundation
+Site: https://openjsf.org
+
 Product Designer/Design Engineer: Dimitrie Hoekstra
 Site: https://dimitr.ie
 
