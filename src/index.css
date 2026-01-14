@@ -73,6 +73,7 @@ body {
 
 /* Viewport scaling for dashboard section */
 /* Using transform: scale() instead of zoom for cross-browser compatibility (iOS Safari doesn't support zoom) */
+/* Height compensation is handled via JS (ResizeObserver measures visual height and clips wrapper) */
 @media (max-width: 767px) {
   .dashboard-mobile-scale {
     transform: scale(0.7);

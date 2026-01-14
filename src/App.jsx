@@ -159,6 +159,8 @@ function App() {
   const footerSectionRef = useRef(null);
   const mainContentRef = useRef(null);
   const dashboardRef = useRef(null);
+  const scaledContentRef = useRef(null);
+  const [scaleWrapperHeight, setScaleWrapperHeight] = useState(null);
   const sidebarTooltipTimeoutRef = useRef(null);
   const tocRef = useRef(null);
 
@@ -220,6 +222,37 @@ function App() {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []); // Remove sidebarCollapsed dependency
+
+  // Compensate for CSS transform scale on dashboard content
+  // When content is scaled (e.g., 0.85x), the visual height is smaller but layout height remains full.
+  // This effect measures the visual height and sets the wrapper to clip the extra space.
+  useEffect(() => {
+    const updateScaleWrapperHeight = () => {
+      const scaledContent = scaledContentRef.current;
+      if (!scaledContent || initialLoading) {
+        setScaleWrapperHeight(null);
+        return;
+      }
+
+      // Get the visual height after transform (getBoundingClientRect accounts for transforms)
+      const visualRect = scaledContent.getBoundingClientRect();
+      setScaleWrapperHeight(visualRect.height);
+    };
+
+    updateScaleWrapperHeight();
+    window.addEventListener('resize', updateScaleWrapperHeight);
+
+    // Also update when content might have changed
+    const resizeObserver = new ResizeObserver(updateScaleWrapperHeight);
+    if (scaledContentRef.current) {
+      resizeObserver.observe(scaledContentRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateScaleWrapperHeight);
+      resizeObserver.disconnect();
+    };
+  }, [initialLoading]);
 
   // Cleanup sidebar tooltip timeout on unmount
   useEffect(() => {
@@ -2104,9 +2137,6 @@ function App() {
                 mainContent.grid,
                 "flex-1 transition-all duration-300 ease-in-out",
               )}
-              style={{
-                minHeight: "calc(100vh - 48px)",
-              }}
             >
               {initialLoading ? (
                 <div className="flex justify-center items-center min-h-[calc(100vh-48px)]">
@@ -2123,12 +2153,18 @@ function App() {
                   </div>
                 </div>
               ) : (
-                <div className={cn(
-                  "w-full mx-auto px-10 py-12 dashboard-mobile-scale",
-                  comparisonMode
-                    ? "max-w-7xl overflow-x-auto"
-                    : "lg:max-w-5xl"
-                )}>
+                <div
+                  style={scaleWrapperHeight ? { height: `${scaleWrapperHeight}px`, overflow: 'hidden' } : undefined}
+                >
+                  <div
+                    ref={scaledContentRef}
+                    className={cn(
+                      "w-full mx-auto px-10 py-12 dashboard-mobile-scale",
+                      comparisonMode
+                        ? "max-w-7xl overflow-x-auto"
+                        : "lg:max-w-5xl"
+                    )}
+                  >
                   {/* SQL Query Card */}
                   {showQuery && queryResult?.query && (
                     <div className={cn(card.base, "mb-6 max-w-4xl")}>
@@ -2678,6 +2714,7 @@ function App() {
                     )}
                   </div>
                 </div>
+              </div>
               )}
             </main>
 
