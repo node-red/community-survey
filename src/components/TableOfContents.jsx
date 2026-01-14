@@ -8,14 +8,16 @@ import {
   generateSectionId,
 } from '../utils/url-utils';
 
-const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, onFocusWithin, onItemMouseEnter, onItemMouseLeave, useOverlay }, ref) => {
+const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, _onFocusWithin, onItemMouseEnter, onItemMouseLeave, useOverlay }, ref) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [showSidebarToggle, setShowSidebarToggle] = useState(false);
   const [showSidebarTooltip, setShowSidebarTooltip] = useState(false);
   const tooltipTimeoutRef = useRef(null);
   const searchInputRef = useRef(null);
+  const listRef = useRef(null);
 
   // Expose focusSearch method to parent components
   useImperativeHandle(ref, () => ({
@@ -285,10 +287,59 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
     section.text.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Reset highlighted index when search query changes
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [searchQuery]);
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && listRef.current) {
+      const item = document.getElementById(`toc-item-${highlightedIndex}`);
+      if (item) {
+        item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [highlightedIndex]);
+
+  // Handle keyboard navigation in the list
+  const handleSearchKeyDown = useCallback((e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (searchQuery) {
+        setSearchQuery(''); // Clear search first
+      } else {
+        onToggle?.(); // Close TOC if search is already empty
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex(prev =>
+        prev < filteredSections.length - 1 ? prev + 1 : prev
+      );
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(prev => prev > 0 ? prev - 1 : prev);
+      return;
+    }
+
+    if (e.key === 'Enter' && highlightedIndex >= 0 && highlightedIndex < filteredSections.length) {
+      e.preventDefault();
+      scrollToSection(filteredSections[highlightedIndex].id);
+      return;
+    }
+  }, [searchQuery, filteredSections, highlightedIndex, scrollToSection, onToggle]);
+
   // Always render the sidebar frame, even when no sections are available yet
 
   return (
     <aside
+      id="table-of-contents"
       aria-label="Table of contents"
       className={cn(
         "bg-[#f3f3f3]",
@@ -331,44 +382,42 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         <div className="bg-[#f3f3f3] border-b border-[#ddd] px-3 py-2">
           <div className="relative">
             <input
+              id="toc-search"
               ref={searchInputRef}
               type="text"
               placeholder="Search questions"
-              aria-label="Search table of contents questions"
+              aria-label="Search table of contents questions. Use arrow keys to navigate, Enter to select."
+              aria-activedescendant={highlightedIndex >= 0 ? `toc-item-${highlightedIndex}` : undefined}
+              tabIndex={-1}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  e.preventDefault();
-                  if (searchQuery) {
-                    setSearchQuery(''); // Clear search first
-                  } else {
-                    onToggle?.(); // Close TOC if search is already empty
-                  }
-                }
-              }}
+              onKeyDown={handleSearchKeyDown}
               className="w-full px-2 py-1 text-[12px] border border-[#ccc] rounded-sm bg-white placeholder-[#999] focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:border-[#3b82f6]"
             />
           </div>
         </div>
-      
+
         {/* Expandable Sections */}
-        <div className="flex-1 overflow-y-auto bg-white">
+        <div ref={listRef} className="flex-1 overflow-y-auto bg-white">
           {/* TOC Items */}
           <nav aria-label="Document sections">
-            <ul className="space-y-0" aria-live="polite" aria-atomic="true">
-              {filteredSections.map((section) => (
-                <li key={section.id}>
+            <ul className="space-y-0" role="listbox" aria-live="polite" aria-atomic="true">
+              {filteredSections.map((section, index) => (
+                <li key={section.id} role="option" aria-selected={highlightedIndex === index}>
                   <button
+                    id={`toc-item-${index}`}
                     onClick={() => scrollToSection(section.id)}
+                    tabIndex={-1}
                     className={cn(
                       "w-full text-left pl-1 pr-3 py-[3px] text-[12px] transition-all duration-150",
                       "hover:bg-[#f0f0f0]",
                       "flex items-center gap-2",
                       "focus:outline focus:outline-2 focus:outline-[#3b82f6]",
-                      activeSection === section.id
-                        ? "bg-[#e8e8e8] text-[#333] font-medium"
-                        : "text-[#555]"
+                      highlightedIndex === index
+                        ? "bg-blue-100 text-blue-900 font-medium"
+                        : activeSection === section.id
+                          ? "bg-[#e8e8e8] text-[#333] font-medium"
+                          : "text-[#555]"
                     )}
                   >
                     <svg className="w-3 h-3 text-[#999] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -457,12 +506,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
                 : "bg-transparent border border-transparent"
             }`}
             onClick={onToggle}
-            onFocus={() => {
-              // Auto-expand sidebar when toggle button receives focus while collapsed (keyboard accessibility)
-              if (collapsed && onFocusWithin) {
-                onFocusWithin();
-              }
-            }}
+            tabIndex={-1}
             aria-label={collapsed ? "Show table of contents" : "Hide table of contents"}
             aria-expanded={!collapsed}
             style={{

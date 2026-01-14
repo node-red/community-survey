@@ -32,7 +32,7 @@ export const card = {
   base: "bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm",
   iconSection:
     "flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300",
-  content: "flex-1 flex flex-col min-w-0 overflow-hidden",
+  content: "flex-1 flex flex-col min-w-0 overflow-hidden relative",
   header: "h-1 rounded-t-nr-lg",
   body: "flex-1",
   title: "mb-2 text-nr-base font-semibold text-nodered-gray-700",

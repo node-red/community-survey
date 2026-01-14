@@ -23,24 +23,32 @@ const SkipLink = ({ label = "Skip to next section", chartId, targetId }) => {
     if (targetId) {
       targetElement = document.getElementById(targetId);
     }
-    // Otherwise, find next chart sibling using data-chart-id
+    // Otherwise, find next chart in document order using data-chart-id
     else if (chartId) {
       const allCharts = Array.from(document.querySelectorAll('[data-chart-id]'));
 
-      // Filter out nested charts (those whose parent also has data-chart-id)
-      const topLevelCharts = allCharts.filter(el => {
-        const parent = el.parentElement?.closest('[data-chart-id]');
-        return !parent;
-      });
-
-      const currentIndex = topLevelCharts.findIndex(
+      const currentIndex = allCharts.findIndex(
         el => el.getAttribute('data-chart-id') === chartId
       );
 
-      if (currentIndex >= 0 && currentIndex < topLevelCharts.length - 1) {
-        const nextChart = topLevelCharts[currentIndex + 1];
-        // Find the heading within the next chart
-        targetElement = nextChart.querySelector('h3[id], h2[id]') || nextChart;
+      if (currentIndex >= 0 && currentIndex < allCharts.length - 1) {
+        // Find the next chart that isn't a descendant of the current chart
+        const currentChart = allCharts[currentIndex];
+        let nextChart = null;
+
+        for (let i = currentIndex + 1; i < allCharts.length; i++) {
+          const candidate = allCharts[i];
+          // Skip charts that are nested inside the current chart
+          if (!currentChart.contains(candidate)) {
+            nextChart = candidate;
+            break;
+          }
+        }
+
+        if (nextChart) {
+          // Find the heading within the next chart
+          targetElement = nextChart.querySelector('h3[id], h2[id]') || nextChart;
+        }
       }
     }
 

@@ -6,7 +6,7 @@ import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 import SkipLink from './SkipLink';
 
-const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorScheme = "blue", ratingScale = 7, compact = false, wasmService }) => {
+const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorScheme = "blue", ratingScale = 7, compact = false, wasmService, skipTargetId }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -178,7 +178,7 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
             compact={compact}
           />
         </div>
-        <SkipLink chartId={questionId} />
+        <SkipLink chartId={questionId} targetId={skipTargetId} />
 
         {/* Average and Respondent Count */}
         <div className="px-4 pt-3">

@@ -1496,6 +1496,13 @@ function App() {
                 className={`${!sidebarCollapsed ? "block" : "hidden"} h-full overflow-y-auto overflow-x-hidden flex flex-col relative z-10`}
                 data-testid="filter-sidebar"
               >
+                {/* Skip link for sidebar - allows keyboard users to skip to ToC search */}
+                <a
+                  href="#toc-search"
+                  className="sr-only focus:not-sr-only focus:block focus:px-3 focus:py-2 focus:text-xs focus:bg-blue-50 focus:text-blue-700 focus:border-b focus:border-blue-200 focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-[-2px]"
+                >
+                  Skip to table of contents
+                </a>
                 <div className={sidebar.header}>
                   <div className={sidebar.filterWrapper}>
                     <svg
@@ -2551,6 +2558,7 @@ function App() {
                               filters: filters,
                               ratingScale: 5,
                               wasmService: wasmService,
+                              skipTargetId: "thank-you",
                             })}
                           </div>
                         </div>
@@ -2642,6 +2650,7 @@ function App() {
         {/* Closing Section - Full Screen Scrollable */}
         {showFooterSection && (
           <section
+            id="thank-you"
             ref={footerSectionRef}
             className="min-h-screen flex items-center bg-white border-t relative z-30"
             style={{ borderTopColor: "#bbbbbb" }}
