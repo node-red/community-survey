@@ -199,6 +199,9 @@ export function getRatingScheme(questionId) {
     
     // Survey rating
     'a4RvP9': 'warm',    // Survey rating
+
+    // Stay involved
+    'joRzJE': 'sage',    // Would you like to stay involved?
   };
   
   return ratingSchemes[questionSchemeMap[questionId]] || ratingSchemes.warm;
