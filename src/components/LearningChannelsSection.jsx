@@ -117,7 +117,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
     return (
       <div className={card.base}>
         <div className={card.iconSection}>
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5">
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" strokeWidth="1.5" aria-hidden="true">
             <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="#d1d5db" fill="white" />
           </svg>
         </div>
@@ -165,6 +165,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
           fill="none"
           stroke="#d1d5db"
           strokeWidth="1.5"
+          aria-hidden="true"
         >
           <path
             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
@@ -238,6 +239,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                 fill="none"
                 stroke="#d1d5db"
                 strokeWidth="1.5"
+                aria-hidden="true"
               >
                 <rect x="3" y="3" width="18" height="18" rx="2" fill="white" stroke="#d1d5db" />
                 <line x1="3" y1="9" x2="21" y2="9" />
@@ -405,6 +407,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                       fill="white"
                       stroke="#d1d5db"
                       strokeWidth="1.5"
+                      aria-hidden="true"
                     >
                       <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
                       <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
@@ -442,6 +445,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                       fill="white"
                       stroke="#d1d5db"
                       strokeWidth="1.5"
+                      aria-hidden="true"
                     >
                       <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
                       <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
@@ -482,6 +486,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                       fill="white"
                       stroke="#d1d5db"
                       strokeWidth="1.5"
+                      aria-hidden="true"
                     >
                       <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
                       <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />
@@ -519,6 +524,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                       fill="white"
                       stroke="#d1d5db"
                       strokeWidth="1.5"
+                      aria-hidden="true"
                     >
                       <path d="M3 13a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
                       <path d="M15 9a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z" />

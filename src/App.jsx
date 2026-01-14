@@ -162,6 +162,11 @@ function App() {
   const sidebarTooltipTimeoutRef = useRef(null);
   const tocRef = useRef(null);
 
+  // Focus trap refs for overlay sidebars (accessibility)
+  const filterToggleRef = useRef(null);
+  const lastFocusedElementRef = useRef(null);
+  const filterSidebarRef = useRef(null);
+
   // Toggle visibility of hero, introduction, and footer sections
   const [showHeroSection] = useState(true);
   const [showIntroductionSection] = useState(true);
@@ -280,6 +285,64 @@ function App() {
       setTocCollapsed(true);
     }
   }, []); // Run only once on mount
+
+  // Focus trap: track which element triggered overlay and manage focus
+  const isOverlayMode = isMobile || (comparisonMode && isNarrowForComparison);
+  const hasOpenOverlay = isOverlayMode && (!sidebarCollapsed || !tocCollapsed);
+
+  // Store the element that triggered the overlay when it opens
+  useEffect(() => {
+    if (hasOpenOverlay) {
+      // Only capture if we don't already have a stored element
+      // (prevents overwriting when switching between overlays)
+      if (!lastFocusedElementRef.current) {
+        lastFocusedElementRef.current = document.activeElement;
+      }
+    }
+  }, [hasOpenOverlay]);
+
+  // Restore focus when overlay closes
+  useEffect(() => {
+    if (!hasOpenOverlay && lastFocusedElementRef.current) {
+      // Restore focus to the element that triggered the overlay
+      const elementToFocus = lastFocusedElementRef.current;
+      lastFocusedElementRef.current = null;
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        elementToFocus?.focus?.();
+      });
+    }
+  }, [hasOpenOverlay]);
+
+  // Move initial focus into opened sidebar for keyboard accessibility
+  useEffect(() => {
+    if (hasOpenOverlay) {
+      // Focus first focusable element in the opened sidebar
+      requestAnimationFrame(() => {
+        if (!sidebarCollapsed && filterSidebarRef.current) {
+          const firstFocusable = filterSidebarRef.current.querySelector(
+            'input, button, [tabindex]:not([tabindex="-1"])'
+          );
+          firstFocusable?.focus();
+        } else if (!tocCollapsed && tocRef.current) {
+          tocRef.current.focusSearch?.();
+        }
+      });
+    }
+  }, [hasOpenOverlay, sidebarCollapsed, tocCollapsed]);
+
+  // Apply inert attribute to main content when overlay is open (focus trap)
+  // Using useEffect for reliable attribute setting across all browsers
+  useEffect(() => {
+    const mainContent = mainContentRef.current;
+    if (!mainContent) return;
+
+    if (hasOpenOverlay) {
+      mainContent.setAttribute('inert', '');
+    } else {
+      mainContent.removeAttribute('inert');
+    }
+  }, [hasOpenOverlay]);
 
   // Screen reader announcements for loading state changes
   useEffect(() => {
@@ -1234,6 +1297,7 @@ function App() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -1384,6 +1448,7 @@ function App() {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -1413,7 +1478,7 @@ function App() {
                     className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#c22e2e] text-white text-xs font-medium"
                     title="Compare two filter configurations side-by-side"
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     <span className="hidden sm:inline">Comparison mode</span>
@@ -1479,6 +1544,7 @@ function App() {
             {/* Left Sidebar - Node-RED Palette Style */}
             {/* Use fixed (overlay) positioning on mobile OR when comparison mode is active on narrow viewports */}
             <aside
+              ref={filterSidebarRef}
               aria-label="Filter options"
               className={cn(
                 "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] z-20 transition-all duration-300 ease-in-out",
@@ -1509,6 +1575,7 @@ function App() {
                       className={sidebar.filterIcon}
                       viewBox="0 0 20 20"
                       fill="currentColor"
+                      aria-hidden="true"
                     >
                       <path
                         fillRule="evenodd"
@@ -1554,11 +1621,13 @@ function App() {
                 {/* Column Selector Tabs (visible in comparison mode) */}
                 {comparisonMode && (
                   <div className="px-4 py-2 bg-gray-100 border-b border-gray-200">
-                    <div className="flex gap-1">
+                    <div role="tablist" aria-label="Comparison columns" className="flex gap-1">
                       <button
+                        role="tab"
                         onClick={() => setActiveColumn('A')}
                         aria-label={`Edit Column A filters (${countActiveFilters(filtersA)} active)`}
-                        aria-pressed={activeColumn === 'A'}
+                        aria-selected={activeColumn === 'A'}
+                        tabIndex={activeColumn === 'A' ? 0 : -1}
                         className={cn(
                           "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10",
                           activeColumn === 'A'
@@ -1570,9 +1639,11 @@ function App() {
                         <span className="truncate">({countActiveFilters(filtersA)})</span>
                       </button>
                       <button
+                        role="tab"
                         onClick={() => setActiveColumn('B')}
                         aria-label={`Edit Column B filters (${countActiveFilters(filtersB)} active)`}
-                        aria-pressed={activeColumn === 'B'}
+                        aria-selected={activeColumn === 'B'}
+                        tabIndex={activeColumn === 'B' ? 0 : -1}
                         className={cn(
                           "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10",
                           activeColumn === 'B'
@@ -1731,10 +1802,11 @@ function App() {
                             );
 
                             return (
-                              <div
+                              <fieldset
                                 key={filterKey}
-                                className={sidebar.filterCategory.base}
+                                className={cn(sidebar.filterCategory.base, "border-0 p-0 m-0")}
                               >
+                                <legend className="sr-only">Filter by {category.name}</legend>
                                 <div
                                   className={cn(
                                     "bg-[#f3f3f3] border-b border-gray-300 pl-4 pr-4 py-2 mb-2 text-xs text-left font-medium text-gray-500 uppercase flex justify-between items-center relative",
@@ -1744,6 +1816,7 @@ function App() {
                                 >
                                   <span
                                     className="truncate flex-1 min-w-0 mr-1.5"
+                                    aria-hidden="true"
                                     onMouseEnter={(e) =>
                                       handleSidebarItemMouseEnter(
                                         e,
@@ -1855,7 +1928,7 @@ function App() {
                                     );
                                   })}
                                 </div>
-                              </div>
+                              </fieldset>
                             );
                           },
                         )}
@@ -1911,6 +1984,7 @@ function App() {
               >
                 <div className="relative group">
                   <button
+                    ref={filterToggleRef}
                     className={`absolute w-6 h-12 flex items-center justify-center transition-transform duration-200 ${
                       showSidebarToggle || sidebarCollapsed || isMobile || (comparisonMode && isNarrowForComparison)
                         ? "opacity-100"
@@ -1949,6 +2023,7 @@ function App() {
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      aria-hidden="true"
                       style={{
                         transform: sidebarCollapsed
                           ? "rotate(0deg)"
@@ -1996,6 +2071,7 @@ function App() {
             )}
 
             {/* Main Content Area with Grid */}
+            {/* inert attribute is set imperatively via useEffect for focus trap when overlay sidebars are open */}
             <main
               id="main-content"
               ref={mainContentRef}
@@ -2039,6 +2115,7 @@ function App() {
                           fill="none"
                           stroke="#d1d5db"
                           strokeWidth="1.5"
+                          aria-hidden="true"
                         >
                           <rect
                             x="3"
@@ -2083,6 +2160,7 @@ function App() {
                           fill="none"
                           stroke="#dc2626"
                           strokeWidth="1.5"
+                          aria-hidden="true"
                         >
                           <circle
                             cx="12"
@@ -2118,6 +2196,7 @@ function App() {
                           fill="none"
                           stroke="#d1d5db"
                           strokeWidth="1.5"
+                          aria-hidden="true"
                         >
                           <path
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"

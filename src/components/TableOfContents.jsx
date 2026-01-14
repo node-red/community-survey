@@ -171,6 +171,16 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
       // Using 800ms to accommodate longer smooth scroll animations
       setTimeout(() => {
         isScrollingRef.current = false;
+
+        // Focus the section heading for keyboard users
+        const heading = targetElement.querySelector('h2, h3, [data-chart-id]') || element;
+        if (heading) {
+          // Make focusable if not already
+          if (!heading.hasAttribute('tabindex')) {
+            heading.setAttribute('tabindex', '-1');
+          }
+          heading.focus();
+        }
       }, 800);
     }
   }, []);
@@ -401,9 +411,9 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         <div ref={listRef} className="flex-1 overflow-y-auto bg-white">
           {/* TOC Items */}
           <nav aria-label="Document sections">
-            <ul className="space-y-0" role="listbox" aria-live="polite" aria-atomic="true">
+            <ul className="space-y-0" aria-live="polite" aria-atomic="true">
               {filteredSections.map((section, index) => (
-                <li key={section.id} role="option" aria-selected={highlightedIndex === index}>
+                <li key={section.id}>
                   <button
                     id={`toc-item-${index}`}
                     onClick={() => scrollToSection(section.id)}
@@ -523,6 +533,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
               style={{
                 transform: collapsed
                   ? "rotate(180deg)"

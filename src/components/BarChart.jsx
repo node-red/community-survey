@@ -376,6 +376,29 @@ const BarChart = ({
         })}
       </div>
 
+      {/* Screen reader data table */}
+      {chartData.length > 0 && (
+        <table className="sr-only">
+          <caption>{title || 'Bar chart'} data</caption>
+          <thead>
+            <tr>
+              <th scope="col">Category</th>
+              <th scope="col">Percentage</th>
+              <th scope="col">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chartData.map((item, index) => (
+              <tr key={index}>
+                <td>{item.resource}</td>
+                <td>{item.hasData ? item.displayValue : 'No data'}</td>
+                <td>{item.count !== undefined ? `${item.count} respondents` : 'N/A'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
       {/* Tooltip */}
       <Tooltip
         show={showTooltip}

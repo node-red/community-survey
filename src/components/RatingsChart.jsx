@@ -160,6 +160,7 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
           fill="white"
           stroke="#d1d5db"
           strokeWidth="1.5"
+          aria-hidden="true"
         >
           <path
             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
@@ -316,6 +317,29 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
       </div>
       </div>
       
+      {/* Screen reader data table */}
+      {data && data.length > 0 && (
+        <table className="sr-only">
+          <caption>{questionTitle || 'Rating chart'} data</caption>
+          <thead>
+            <tr>
+              <th scope="col">Rating</th>
+              <th scope="col">Count</th>
+              <th scope="col">Percentage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item) => (
+              <tr key={item.label}>
+                <td>Rating {item.label}</td>
+                <td>{item.count} respondents</td>
+                <td>{item.percentage.toFixed(0)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
       {/* Tooltip */}
       <Tooltip
         show={showTooltip}
