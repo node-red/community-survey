@@ -5,6 +5,7 @@ import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-uti
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 import { generateSectionId } from '../utils/url-utils';
+import SkipLink from './SkipLink';
 
 const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
   const questions = useMemo(() => [
@@ -18,6 +19,7 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [sectionId, setSectionId] = useState(null);
 
   useHideTooltipOnScroll(setShowTooltip);
 
@@ -136,7 +138,7 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
   }
 
   return (
-    <div role="region" aria-label="Initial understanding ratings grid" className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("How well did you understand Node-RED at first?")}>
+    <div role="region" aria-labelledby={sectionId} className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("How well did you understand Node-RED at first?")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
@@ -154,13 +156,14 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
             />
           </svg>
         </div>
-        
+
         {/* Content Section */}
         <div className="flex-1">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <ChartHeader title="How well did you understand Node-RED at first?" />
+            <ChartHeader title="How well did you understand Node-RED at first?" onSectionIdReady={setSectionId} />
           </div>
+          <SkipLink chartId={generateSectionId("How well did you understand Node-RED at first?")} label="Skip this section" />
 
           {/* Questions Grid */}
           <div className="divide-y divide-gray-200">
@@ -183,13 +186,13 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
 
                   {/* Horizontal Percentage Bar */}
                   <div className="mb-1">
-                    <div className="flex h-6 shadow-sm">
+                    <div className="flex h-6 shadow-sm" role="img" aria-label={`${question.name} rating distribution`}>
                       {data.data.map((item) => {
+                        const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
+                        const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
+
                         const handleBarMouseEnter = (event) => {
                           event.stopPropagation();
-
-                          const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
-                          const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
 
                           setTooltipContent(`Rating ${item.label}\n${item.count} respondents (${percentage}%)`);
                           setTooltipPosition(getTooltipPosition(event, 200, 60));
@@ -208,16 +211,33 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
                           }
                         };
 
+                        const handleBarFocus = (event) => {
+                          const currentWidth = event.currentTarget.offsetWidth;
+                          const scaleX = (currentWidth + 10) / currentWidth;
+                          event.currentTarget.style.transform = `scaleY(1.1) scaleX(${scaleX})`;
+                          event.currentTarget.style.zIndex = '10';
+                          handleBarMouseEnter(event);
+                        };
+
+                        const handleBarBlur = (event) => {
+                          event.currentTarget.style.transform = 'scale(1)';
+                          event.currentTarget.style.zIndex = '0';
+                          handleBarMouseLeave(event);
+                        };
+
                         return (
                           <div
                             key={item.label}
-                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer"
+                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6]"
                             style={{
                               width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
                               backgroundColor: item.color,
                               minWidth: '28px',
                               transition: 'width 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                             }}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`${question.name}: Rating ${item.label}, ${item.count} respondents, ${percentage}%`}
                             onMouseEnter={(e) => {
                               const currentWidth = e.currentTarget.offsetWidth;
                               const scaleX = (currentWidth + 10) / currentWidth;
@@ -231,6 +251,8 @@ const UnderstandingRatingsGrid = ({ filters = {}, wasmService }) => {
                               handleBarMouseLeave(e);
                             }}
                             onMouseMove={handleBarMouseMove}
+                            onFocus={handleBarFocus}
+                            onBlur={handleBarBlur}
                           >
                             <span className="text-white font-semibold text-xs px-1">
                               {item.label}

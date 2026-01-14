@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, memo } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import {
   serializeFiltersToURL,
   getFullURLWithFiltersState,
@@ -18,7 +18,7 @@ import { getTooltipPosition } from '../utils/tooltip-utils';
  * - Clicking anchor copies URL to clipboard and updates browser hash
  * - Brief visual feedback on copy
  */
-const ChartHeader = ({ title, compact = false, className }) => {
+const ChartHeader = ({ title, compact = false, className, onSectionIdReady }) => {
   const [copied, setCopied] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -29,6 +29,11 @@ const ChartHeader = ({ title, compact = false, className }) => {
   // Get comparison state from context
   const { comparisonMode, filtersA, filtersB } = useComparison();
   const sectionId = generateSectionId(title);
+
+  // Notify parent of the section ID for aria-labelledby connections
+  useEffect(() => {
+    onSectionIdReady?.(sectionId);
+  }, [sectionId, onSectionIdReady]);
 
   const handleAnchorClick = useCallback((e) => {
     e.preventDefault();

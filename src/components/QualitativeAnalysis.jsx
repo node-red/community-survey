@@ -3,6 +3,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import SkipLink from './SkipLink';
 
 const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '#64748b', wasmService, baselineOrder }) => {
   const [data, setData] = useState(null);
@@ -312,7 +313,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
           />
         </svg>
       </div>
-      
+
       {/* Content Section */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
@@ -348,6 +349,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
             </div>
           </div>
         </div>
+        <SkipLink chartId={questionId} />
 
         {/* Themes - Main Body */}
         <div 

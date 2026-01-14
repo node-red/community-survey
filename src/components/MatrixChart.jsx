@@ -3,6 +3,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import SkipLink from './SkipLink';
 
 // Define the sub-questions for the matrix (constant, outside component)
 const SUB_QUESTIONS = [
@@ -125,7 +126,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
           <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="#d1d5db" fill="white" />
         </svg>
       </div>
-      
+
       {/* Content Section */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
@@ -152,6 +153,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
             </div>
           </div>
         </div>
+        <SkipLink chartId={questionId} />
         
         {/* Matrix Data */}
         <div className="p-4">

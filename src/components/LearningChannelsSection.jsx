@@ -5,6 +5,7 @@ import BarChart from './BarChart';
 import ChannelRatingsGrid from './ChannelRatingsGrid';
 import ChartHeader from './ChartHeader';
 import RespondentIcon from './RespondentIcon';
+import SkipLink from './SkipLink';
 import { generateSectionId } from '../utils/url-utils';
 
 /**
@@ -21,6 +22,13 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [focusedCell, setFocusedCell] = useState(null);
   const initialLoadDone = useRef(false);
+
+  // Section IDs for aria-labelledby connections
+  const [mainSectionId, setMainSectionId] = useState(null);
+  const [qualityGapSectionId, setQualityGapSectionId] = useState(null);
+  const [qualityRankingSectionId, setQualityRankingSectionId] = useState(null);
+  const [reachGapSectionId, setReachGapSectionId] = useState(null);
+  const [reachRankingSectionId, setReachRankingSectionId] = useState(null);
 
   // Handle responsive layout
   useEffect(() => {
@@ -149,7 +157,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
   };
 
   return (
-    <div className={card.base} data-chart-id={generateSectionId("What helps you learn/troubleshoot Node-RED?")}>
+    <div role="region" aria-labelledby={mainSectionId} className={card.base} data-chart-id={generateSectionId("What helps you learn/troubleshoot Node-RED?")}>
       <div className={card.iconSection}>
         <svg
           className="w-5 h-5"
@@ -172,7 +180,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <ChartHeader title="What helps you learn/troubleshoot Node-RED?" />
+                  <ChartHeader title="What helps you learn/troubleshoot Node-RED?" onSectionIdReady={setMainSectionId} />
                 </div>
                 {/* Respondent Count Badge */}
                 {sectionCount && (
@@ -222,6 +230,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
 
           {/* Data Table */}
           <div className={cn(card.base, 'my-6')}>
+            <SkipLink label="Skip table" targetId={generateSectionId("Quality Gap Opportunities")} />
             <div className={card.iconSection}>
               <svg
                 className="w-5 h-5"
@@ -260,14 +269,39 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                               headerText = 'Quality';
                             }
 
+                            // Build aria-label for header cells
+                            let headerAriaLabel;
+                            if (headerText === 'Channel') {
+                              headerAriaLabel = 'Column: Channel name';
+                            } else if (headerText === 'Reach') {
+                              headerAriaLabel = 'Column: Reach percentage - how many respondents use this channel';
+                            } else if (headerText === 'Quality') {
+                              headerAriaLabel = 'Column: Quality percentage - average helpfulness rating';
+                            } else if (headerText === 'Quality Gap Opp') {
+                              headerAriaLabel = 'Column: Quality Gap Opportunity - where quality improvements would create most value';
+                            } else if (headerText === 'Reach Gap Opp') {
+                              headerAriaLabel = 'Column: Reach Gap Opportunity - where expanding reach would create most value';
+                            } else {
+                              headerAriaLabel = `Column: ${headerText}`;
+                            }
+
+                            const headerCellId = `header-${index}`;
+                            const isHeaderFocused = focusedCell === headerCellId;
+
                             return (
                               <th
                                 key={col}
                                 scope="col"
+                                tabIndex={0}
+                                aria-label={headerAriaLabel}
+                                onFocus={() => setFocusedCell(headerCellId)}
+                                onBlur={() => setFocusedCell(null)}
                                 className={cn(
                                   index === 0
                                     ? table.headerCellFirst
-                                    : table.headerCellNumeric
+                                    : table.headerCellNumeric,
+                                  'focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-[-2px]',
+                                  isHeaderFocused && 'outline outline-2 outline-[#3b82f6] outline-offset-[-2px]'
                                 )}
                               >
                                 {headerText}
@@ -363,7 +397,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
               {/* Left Column - Quality Charts */}
               <div className="space-y-6">
                 {/* Quality Gap Chart */}
-                <div className={card.base} data-chart-id={generateSectionId("Quality Gap Opportunities")}>
+                <div role="region" aria-labelledby={qualityGapSectionId} className={card.base} data-chart-id={generateSectionId("Quality Gap Opportunities")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -379,8 +413,9 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                   </div>
                   <div className={card.content}>
                     <div className="px-4 py-3 border-b border-gray-200 bg-white">
-                      <ChartHeader title="Quality Gap Opportunities" compact={true} />
+                      <ChartHeader title="Quality Gap Opportunities" compact={true} onSectionIdReady={setQualityGapSectionId} />
                     </div>
+                    <SkipLink label="Skip to next section" chartId={generateSectionId("Quality Gap Opportunities")} />
                     <div className={cn(card.body, 'bg-white')}>
                       <div className="min-h-[300px]">
                         <BarChart
@@ -399,7 +434,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                 </div>
 
                 {/* Quality Ranking Chart */}
-                <div className={card.base} data-chart-id={generateSectionId("Quality Ranking")}>
+                <div role="region" aria-labelledby={qualityRankingSectionId} className={card.base} data-chart-id={generateSectionId("Quality Ranking")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -415,8 +450,9 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                   </div>
                   <div className={card.content}>
                     <div className="px-4 py-3 border-b border-gray-200 bg-white">
-                      <ChartHeader title="Quality Ranking" compact={true} />
+                      <ChartHeader title="Quality Ranking" compact={true} onSectionIdReady={setQualityRankingSectionId} />
                     </div>
+                    <SkipLink label="Skip to next section" chartId={generateSectionId("Quality Ranking")} />
                     <div className={cn(card.body, 'bg-white')}>
                       <div className="min-h-[300px]">
                         <BarChart
@@ -438,7 +474,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
               {/* Right Column - Reach Charts (Mirrored) */}
               <div className="space-y-6">
                 {/* Reach Gap Chart */}
-                <div className={card.base} data-chart-id={generateSectionId("Reach Gap Opportunities")}>
+                <div role="region" aria-labelledby={reachGapSectionId} className={card.base} data-chart-id={generateSectionId("Reach Gap Opportunities")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -454,8 +490,9 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                   </div>
                   <div className={card.content}>
                     <div className="px-4 py-3 border-b border-gray-200 bg-white">
-                      <ChartHeader title="Reach Gap Opportunities" compact={true} />
+                      <ChartHeader title="Reach Gap Opportunities" compact={true} onSectionIdReady={setReachGapSectionId} />
                     </div>
+                    <SkipLink label="Skip to next section" chartId={generateSectionId("Reach Gap Opportunities")} />
                     <div className={cn(card.body, 'bg-white')}>
                       <div className="min-h-[300px]">
                         <BarChart
@@ -474,7 +511,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                 </div>
 
                 {/* Reach Ranking Chart */}
-                <div className={card.base} data-chart-id={generateSectionId("Reach Ranking")}>
+                <div role="region" aria-labelledby={reachRankingSectionId} className={card.base} data-chart-id={generateSectionId("Reach Ranking")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -490,8 +527,9 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                   </div>
                   <div className={card.content}>
                     <div className="px-4 py-3 border-b border-gray-200 bg-white">
-                      <ChartHeader title="Reach Ranking" compact={true} />
+                      <ChartHeader title="Reach Ranking" compact={true} onSectionIdReady={setReachRankingSectionId} />
                     </div>
+                    <SkipLink label="Skip to next section" chartId={generateSectionId("Reach Ranking")} />
                     <div className={cn(card.body, 'bg-white')}>
                       <div className="min-h-[300px]">
                         <BarChart

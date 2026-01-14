@@ -5,6 +5,7 @@ import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-uti
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 import { generateSectionId } from '../utils/url-utils';
+import SkipLink from './SkipLink';
 
 const DESIGN_CHANGE_QUESTIONS = [
   { id: '089k8A', name: 'Node-RED branding (logo, website, forum)' },
@@ -18,6 +19,7 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [sectionId, setSectionId] = useState(null);
 
   useHideTooltipOnScroll(setShowTooltip);
 
@@ -141,7 +143,7 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
   }
 
   return (
-    <div role="region" aria-label="Design changes satisfaction ratings grid" className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm" data-chart-id={generateSectionId("How would you feel about potential changes to?")}>
+    <div role="region" aria-labelledby={sectionId} className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm" data-chart-id={generateSectionId("How would you feel about potential changes to?")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
@@ -159,13 +161,14 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
             />
           </svg>
         </div>
-        
+
         {/* Content Section */}
         <div className="flex-1">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <ChartHeader title="How would you feel about potential changes to?" />
+            <ChartHeader title="How would you feel about potential changes to?" onSectionIdReady={setSectionId} />
           </div>
+          <SkipLink chartId={generateSectionId("How would you feel about potential changes to?")} label="Skip this section" />
 
           {/* Questions Grid */}
           <div className="divide-y divide-gray-200">
@@ -192,18 +195,17 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                   <div className="mb-1">
                     <div className="flex h-6 shadow-sm">
                       {data.data.map((item) => {
-                        const handleBarMouseEnter = (event) => {
+                        const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
+                        const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
+
+                        const showTooltipForItem = (event) => {
                           event.stopPropagation();
-
-                          const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
-                          const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
-
                           setTooltipContent(`Rating ${item.label}\n${item.count} respondents (${percentage}%)`);
                           setTooltipPosition(getTooltipPosition(event, 200, 60));
                           setShowTooltip(true);
                         };
 
-                        const handleBarMouseLeave = (event) => {
+                        const hideTooltipForItem = (event) => {
                           event.stopPropagation();
                           setShowTooltip(false);
                         };
@@ -218,7 +220,10 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                         return (
                           <div
                             key={item.label}
-                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer"
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`${question.name}: Rating ${item.label}, ${item.count} respondents, ${percentage}%`}
+                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6]"
                             style={{
                               width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
                               backgroundColor: item.color,
@@ -230,14 +235,26 @@ const DesignChangesRatingsGrid = ({ filters = {}, wasmService }) => {
                               const scaleX = (currentWidth + 10) / currentWidth;
                               e.currentTarget.style.transform = `scaleY(1.1) scaleX(${scaleX})`;
                               e.currentTarget.style.zIndex = '10';
-                              handleBarMouseEnter(e);
+                              showTooltipForItem(e);
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.transform = 'scale(1)';
                               e.currentTarget.style.zIndex = '0';
-                              handleBarMouseLeave(e);
+                              hideTooltipForItem(e);
                             }}
                             onMouseMove={handleBarMouseMove}
+                            onFocus={(e) => {
+                              const currentWidth = e.currentTarget.offsetWidth;
+                              const scaleX = (currentWidth + 10) / currentWidth;
+                              e.currentTarget.style.transform = `scaleY(1.1) scaleX(${scaleX})`;
+                              e.currentTarget.style.zIndex = '10';
+                              showTooltipForItem(e);
+                            }}
+                            onBlur={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.zIndex = '0';
+                              hideTooltipForItem(e);
+                            }}
                           >
                             <span className="text-white font-semibold text-[10px] px-1">
                               {item.label}

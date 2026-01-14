@@ -6,6 +6,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import SkipLink from './SkipLink';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -232,7 +233,7 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
           />
         </svg>
       </div>
-      
+
       {/* Content Section */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
@@ -259,6 +260,7 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
             </div>
           </div>
         </div>
+        <SkipLink chartId={actualQuestionId} />
 
         {/* Chart Content */}
         <div className="flex-1 p-4" role="img" aria-label={`Bar chart: ${actualQuestionTitle}`}>

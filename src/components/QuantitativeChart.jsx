@@ -5,6 +5,7 @@ import { getChartColor, defaultChartColor } from '../utils/colorPalette';
 import { applyBaselineOrder } from '../utils/ordinalOrdering';
 import RespondentIcon from './RespondentIcon';
 import ChartHeader from './ChartHeader';
+import SkipLink from './SkipLink';
 
 // Map filter questions to their display titles
 const FILTER_QUESTION_TITLES = {
@@ -172,7 +173,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm" data-chart-id={actualQuestionId}>
+    <div className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm relative" data-chart-id={actualQuestionId}>
       {/* Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
         <svg
@@ -189,7 +190,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
           />
         </svg>
       </div>
-      
+
       {/* Content Section */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
@@ -216,6 +217,7 @@ const QuantitativeChart = ({ questionId, questionTitle, filterType, filters = {}
             </div>
           </div>
         </div>
+        <SkipLink chartId={actualQuestionId} />
 
         {/* Chart Content */}
         <div className="flex-1">

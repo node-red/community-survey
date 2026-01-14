@@ -3,7 +3,6 @@ import { chart, cn } from '../styles/classNames';
 import { defaultChartColor } from '../utils/colorPalette';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
-
 const BarChart = ({
   data,
   title,

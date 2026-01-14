@@ -1271,6 +1271,9 @@ function App() {
                   the future of Node-RED. This report focuses on objectivity and
                   clarity through verified survey data and rigorous analysis.
                 </p>
+                <p className="text-sm text-nodered-gray-500 mt-2">
+                  This site is optimised for keyboard navigation and screen readers.
+                </p>
               </div>
 
               {/* Two Column Layout */}

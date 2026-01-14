@@ -5,6 +5,7 @@ import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-uti
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 import { generateSectionId } from '../utils/url-utils';
+import SkipLink from './SkipLink';
 
 const DEVICE_QUESTIONS = [
   { id: 'bepze7', name: 'Desktop/Laptop', colorScheme: 'yellow' },
@@ -20,6 +21,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [sectionId, setSectionId] = useState(null);
 
   useHideTooltipOnScroll(setShowTooltip);
 
@@ -141,7 +143,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
   }
 
   return (
-    <div role="region" aria-label="Device satisfaction ratings grid" className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("Satisfaction ratings by device type?")}>
+    <div role="region" aria-labelledby={sectionId} className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("Satisfaction ratings by device type?")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
@@ -159,13 +161,14 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
             />
           </svg>
         </div>
-        
+
         {/* Content Section */}
         <div className="flex-1">
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
-            <ChartHeader title="Satisfaction ratings by device type?" />
+            <ChartHeader title="Satisfaction ratings by device type?" onSectionIdReady={setSectionId} />
           </div>
+          <SkipLink chartId={generateSectionId("Satisfaction ratings by device type?")} label="Skip this section" />
 
           {/* Questions Grid */}
           <div className="divide-y divide-gray-200">
@@ -197,11 +200,11 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                       className="flex h-6 shadow-sm"
                     >
                       {data.data.map((item) => {
+                        const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
+                        const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
+
                         const handleBarMouseEnter = (event) => {
                           event.stopPropagation();
-
-                          const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
-                          const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
 
                           setTooltipContent(`Rating ${item.label}\n${item.count} respondents (${percentage}%)`);
                           setTooltipPosition(getTooltipPosition(event, 200, 60));
@@ -220,10 +223,27 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                           }
                         };
 
+                        const handleBarFocus = (event) => {
+                          const rect = event.currentTarget.getBoundingClientRect();
+                          setTooltipContent(`Rating ${item.label}\n${item.count} respondents (${percentage}%)`);
+                          setTooltipPosition({
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          });
+                          setShowTooltip(true);
+                        };
+
+                        const handleBarBlur = () => {
+                          setShowTooltip(false);
+                        };
+
                         return (
                           <div
                             key={item.label}
-                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer transition-transform duration-200"
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`${question.name}: Rating ${item.label} of 7, ${item.count} respondents, ${percentage}%`}
+                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer transition-transform duration-200 focus:outline focus:outline-2 focus:outline-[#3b82f6]"
                             style={{
                               width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
                               backgroundColor: item.color,
@@ -243,6 +263,8 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
                               handleBarMouseLeave(e);
                             }}
                             onMouseMove={handleBarMouseMove}
+                            onFocus={handleBarFocus}
+                            onBlur={handleBarBlur}
                           >
                             <span className="text-white font-semibold text-xs px-1">
                               {item.label}

@@ -5,6 +5,7 @@ import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-uti
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
 import { generateSectionId } from '../utils/url-utils';
+import SkipLink from './SkipLink';
 
 const CHANNELS = [
   { id: 'QRZ4AX', name: 'Official Website & Node-RED documentation' },
@@ -173,6 +174,7 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
           <div className="px-4 py-3 border-b border-gray-200 bg-white">
             <ChartHeader title="Channel Ratings Overview" compact={compact} />
           </div>
+          <SkipLink chartId={generateSectionId("Channel Ratings Overview")} label="Skip this section" />
 
           {/* Channels Grid */}
           <div className="divide-y divide-gray-200">

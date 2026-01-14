@@ -4,6 +4,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import SkipLink from './SkipLink';
 
 const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorScheme = "blue", ratingScale = 7, compact = false, wasmService }) => {
   const [data, setData] = useState(null);
@@ -167,7 +168,7 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
           />
         </svg>
       </div>
-      
+
       {/* Content Section */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
@@ -177,6 +178,7 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
             compact={compact}
           />
         </div>
+        <SkipLink chartId={questionId} />
 
         {/* Average and Respondent Count */}
         <div className="px-4 pt-3">

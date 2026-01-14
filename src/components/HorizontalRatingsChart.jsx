@@ -5,6 +5,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import SkipLink from './SkipLink';
 
 const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _showRatingScale = false, _ratingScale = 7, wasmService }) => {
   const [data, setData] = useState(null);
@@ -356,7 +357,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
           />
         </svg>
       </div>
-      
+
       {/* Content Section */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -383,6 +384,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
             </div>
           </div>
         </div>
+        <SkipLink chartId={questionId} />
 
         {/* Staircase/Waterfall Bars */}
         <div className="p-4">

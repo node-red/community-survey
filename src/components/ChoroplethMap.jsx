@@ -5,6 +5,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import SkipLink from './SkipLink';
 
 const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService }) => {
   if (import.meta.env.DEV) console.log('=== ChoroplethMap RENDER ===', { questionId, hasWasmService: !!wasmService });
@@ -293,6 +294,7 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
             </div>
           </div>
         </div>
+        <SkipLink label="Skip map" chartId={questionId} />
 
         {/* World Map */}
         <div className="p-4 relative overflow-hidden">
