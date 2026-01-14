@@ -18,19 +18,10 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
 
   useHideTooltipOnScroll(setShowTooltip);
 
-  // Convert hex color to lighter background version
+  // Convert hex color to very light background version (matching QuantitativeChart style)
   const getBackgroundColor = (hexColor) => {
-    // Remove # if present
-    const hex = hexColor.replace('#', '');
-    // Convert to RGB
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    // Create lighter version (add 40% to each channel, max 255)
-    const lightR = Math.min(255, Math.round(r + (255 - r) * 0.7));
-    const lightG = Math.min(255, Math.round(g + (255 - g) * 0.7));
-    const lightB = Math.min(255, Math.round(b + (255 - b) * 0.7));
-    return `rgb(${lightR}, ${lightG}, ${lightB})`;
+    // Use hex with low opacity for consistency with QuantitativeChart's ${color}28 approach
+    return `${hexColor}28`;
   };
 
   // Fetch base qualitative data (unfiltered)
@@ -450,10 +441,11 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                 >
                   {/* Percentage Bar Fill - with minimum 46px width */}
                   <div
-                    className="absolute inset-y-0 right-0 opacity-80"
+                    className="absolute inset-y-0 right-0"
                     style={{
                       width: `max(${percentValue}%, 46px)`,
                       backgroundColor: color,
+                      boxShadow: count > 0 ? 'var(--nr-shadow)' : 'none',
                       transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   />
