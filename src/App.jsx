@@ -1818,6 +1818,15 @@ function App() {
                       if ((isMobile || (comparisonMode && isNarrowForComparison)) && sidebarCollapsed) setTocCollapsed(true);
                       setSidebarCollapsed(!sidebarCollapsed);
                     }}
+                    onFocus={() => {
+                      // Auto-expand sidebar when toggle button receives focus while collapsed (keyboard accessibility)
+                      if (sidebarCollapsed) {
+                        if (isMobile || (comparisonMode && isNarrowForComparison)) setTocCollapsed(true);
+                        setSidebarCollapsed(false);
+                      }
+                    }}
+                    aria-label={sidebarCollapsed ? "Show filters palette" : "Hide filters palette"}
+                    aria-expanded={!sidebarCollapsed}
                     style={{
                       left: "7px",
                       top: "16px",
@@ -2461,6 +2470,13 @@ function App() {
               onToggle={() => {
                 if ((isMobile || (comparisonMode && isNarrowForToc)) && tocCollapsed) setSidebarCollapsed(true);
                 setTocCollapsed(!tocCollapsed);
+              }}
+              onFocusWithin={() => {
+                // Auto-expand ToC when keyboard focus moves inside (accessibility)
+                if (tocCollapsed) {
+                  if (isMobile || (comparisonMode && isNarrowForToc)) setSidebarCollapsed(true);
+                  setTocCollapsed(false);
+                }
               }}
               onItemMouseEnter={handleTocItemMouseEnter}
               onItemMouseLeave={handleTocItemMouseLeave}

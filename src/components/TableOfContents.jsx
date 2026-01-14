@@ -8,7 +8,7 @@ import {
   generateSectionId,
 } from '../utils/url-utils';
 
-const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, onItemMouseEnter, onItemMouseLeave, useOverlay }, ref) => {
+const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, onFocusWithin, onItemMouseEnter, onItemMouseLeave, useOverlay }, ref) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -456,6 +456,14 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
                 : "bg-transparent border border-transparent"
             }`}
             onClick={onToggle}
+            onFocus={() => {
+              // Auto-expand sidebar when toggle button receives focus while collapsed (keyboard accessibility)
+              if (collapsed && onFocusWithin) {
+                onFocusWithin();
+              }
+            }}
+            aria-label={collapsed ? "Show table of contents" : "Hide table of contents"}
+            aria-expanded={!collapsed}
             style={{
               right: "0px",
               top: "16px",
