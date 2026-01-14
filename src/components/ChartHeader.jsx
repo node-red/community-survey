@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, useRef, memo } from 'react';
 import {
   serializeFiltersToURL,
   getFullURLWithFiltersState,
@@ -22,6 +22,7 @@ const ChartHeader = ({ title, compact = false, className }) => {
   const [copied, setCopied] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const anchorRef = useRef(null);
 
   // Get filters from context - this is the source of truth
   const filters = useFilters();
@@ -77,6 +78,31 @@ const ChartHeader = ({ title, compact = false, className }) => {
     setShowTooltip(false);
   }, []);
 
+  // Find the chart container to highlight
+  // Priority: data-chart-wrapper (comparison mode row) > data-chart-id (individual chart)
+  const findChartContainer = useCallback(() => {
+    // First check for comparison wrapper (highlights entire row with both columns)
+    const wrapper = anchorRef.current?.closest('[data-chart-wrapper]');
+    if (wrapper) return wrapper;
+    // Fall back to closest chart container (highlights individual chart)
+    return anchorRef.current?.closest('[data-chart-id]');
+  }, []);
+
+  // Highlight parent chart container when anchor receives focus
+  const handleFocus = useCallback(() => {
+    const chartContainer = findChartContainer();
+    if (chartContainer) {
+      chartContainer.classList.add('ring-2', 'ring-[#3b82f6]', 'ring-offset-2');
+    }
+  }, [findChartContainer]);
+
+  const handleBlur = useCallback(() => {
+    const chartContainer = findChartContainer();
+    if (chartContainer) {
+      chartContainer.classList.remove('ring-2', 'ring-[#3b82f6]', 'ring-offset-2');
+    }
+  }, [findChartContainer]);
+
   // Determine header classes based on compact mode or custom className
   const headerClasses = className || (compact
     ? "text-sm font-medium text-nodered-gray-700"
@@ -93,13 +119,16 @@ const ChartHeader = ({ title, compact = false, className }) => {
 
       {/* Anchor link - positioned after the heading, visible on hover (desktop) or always (mobile) */}
       <a
+        ref={anchorRef}
         href={`#${sectionId}`}
         onClick={handleAnchorClick}
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity duration-150 text-gray-400 hover:text-nodered-red"
-        aria-label={`Link to ${title}`}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        className="opacity-100 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-150 text-gray-400 hover:text-nodered-red focus:outline-none rounded-sm"
+        aria-label={copied ? `Link copied to clipboard` : `Copy link to ${title}`}
       >
         <span className={copied ? 'text-[#c12120]' : ''}>{copied ? '✓' : '#'}</span>
       </a>

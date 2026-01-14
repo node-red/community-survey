@@ -237,8 +237,9 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
   };
 
   return (
-    <div 
+    <div
       className="bg-white rounded-[5px] shadow-sm border border-gray-300 flex overflow-hidden"
+      data-chart-id={questionId}
       data-testid="choropleth-chart"
       data-test-choropleth-data={JSON.stringify({
         data: data,

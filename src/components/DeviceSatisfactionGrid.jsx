@@ -4,6 +4,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import { generateSectionId } from '../utils/url-utils';
 
 const DEVICE_QUESTIONS = [
   { id: 'bepze7', name: 'Desktop/Laptop', colorScheme: 'yellow' },
@@ -140,7 +141,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative">
+    <div className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("Satisfaction ratings by device type?")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">

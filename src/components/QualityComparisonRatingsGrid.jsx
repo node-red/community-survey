@@ -4,6 +4,7 @@ import RespondentIcon from './RespondentIcon';
 import { getTooltipPosition, useHideTooltipOnScroll } from '../utils/tooltip-utils';
 import Tooltip from './Tooltip';
 import ChartHeader from './ChartHeader';
+import { generateSectionId } from '../utils/url-utils';
 
 const QUALITY_COMPARISON_QUESTIONS = [
   { id: 'RoNjbJ', name: 'Ease of use/Ease to learn' },
@@ -140,7 +141,7 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm">
+    <div className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm" data-chart-id={generateSectionId("Compared to alternatives, Node-RED's quality is ...")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">

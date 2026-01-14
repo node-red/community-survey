@@ -5,6 +5,7 @@ import BarChart from './BarChart';
 import ChannelRatingsGrid from './ChannelRatingsGrid';
 import ChartHeader from './ChartHeader';
 import RespondentIcon from './RespondentIcon';
+import { generateSectionId } from '../utils/url-utils';
 
 /**
  * Learning Channels Section Component
@@ -147,7 +148,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
   };
 
   return (
-    <div className={card.base}>
+    <div className={card.base} data-chart-id={generateSectionId("What helps you learn/troubleshoot Node-RED?")}>
       <div className={card.iconSection}>
         <svg
           className="w-5 h-5"
@@ -303,7 +304,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
               {/* Left Column - Quality Charts */}
               <div className="space-y-6">
                 {/* Quality Gap Chart */}
-                <div className={card.base}>
+                <div className={card.base} data-chart-id={generateSectionId("Quality Gap Opportunities")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -318,12 +319,13 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                     </svg>
                   </div>
                   <div className={card.content}>
+                    <div className="px-4 py-3 border-b border-gray-200 bg-white">
+                      <ChartHeader title="Quality Gap Opportunities" compact={true} />
+                    </div>
                     <div className={cn(card.body, 'bg-white')}>
-                      <h3 className={cn(card.title, 'hidden')}>Quality Gap Opportunities</h3>
                       <div className="min-h-[300px]">
                         <BarChart
                           data={dashboardData.data}
-                          title="Quality Gap Opportunities"
                           subtitle="Where would a quality increase create the most value because of already existing reach"
                           valueColumn="Quality Gap Opp"
                           color={corePalette.amber}
@@ -338,7 +340,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                 </div>
 
                 {/* Quality Ranking Chart */}
-                <div className={card.base}>
+                <div className={card.base} data-chart-id={generateSectionId("Quality Ranking")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -353,12 +355,13 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                     </svg>
                   </div>
                   <div className={card.content}>
+                    <div className="px-4 py-3 border-b border-gray-200 bg-white">
+                      <ChartHeader title="Quality Ranking" compact={true} />
+                    </div>
                     <div className={cn(card.body, 'bg-white')}>
-                      <h3 className={cn(card.title, 'hidden')}>Quality Ranking</h3>
                       <div className="min-h-[300px]">
                         <BarChart
                           data={sortByBaseline(dashboardData.data, 'qualityRanking')}
-                          title="Quality Ranking"
                           subtitle="Ratt of channel depicted in percentage"
                           valueColumn="Quality %"
                           color={corePalette.terracotta}
@@ -376,7 +379,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
               {/* Right Column - Reach Charts (Mirrored) */}
               <div className="space-y-6">
                 {/* Reach Gap Chart */}
-                <div className={card.base}>
+                <div className={card.base} data-chart-id={generateSectionId("Reach Gap Opportunities")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -391,12 +394,13 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                     </svg>
                   </div>
                   <div className={card.content}>
+                    <div className="px-4 py-3 border-b border-gray-200 bg-white">
+                      <ChartHeader title="Reach Gap Opportunities" compact={true} />
+                    </div>
                     <div className={cn(card.body, 'bg-white')}>
-                      <h3 className={cn(card.title, 'hidden')}>Reach Gap Opportunities</h3>
                       <div className="min-h-[300px]">
                         <BarChart
                           data={sortByBaseline(dashboardData.data, 'reachGapOpp')}
-                          title="Reach Gap Opportunities"
                           subtitle="Where would a reach increase create the most value because of already existing quality"
                           valueColumn="Reach Gap Opp"
                           color={corePalette.bronze}
@@ -411,7 +415,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                 </div>
 
                 {/* Reach Ranking Chart */}
-                <div className={card.base}>
+                <div className={card.base} data-chart-id={generateSectionId("Reach Ranking")}>
                   <div className={card.iconSection}>
                     <svg
                       className="w-5 h-5"
@@ -426,12 +430,13 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                     </svg>
                   </div>
                   <div className={card.content}>
+                    <div className="px-4 py-3 border-b border-gray-200 bg-white">
+                      <ChartHeader title="Reach Ranking" compact={true} />
+                    </div>
                     <div className={cn(card.body, 'bg-white')}>
-                      <h3 className={cn(card.title, 'hidden')}>Reach Ranking</h3>
                       <div className="min-h-[300px]">
                         <BarChart
                           data={sortByBaseline(dashboardData.data, 'reachRanking')}
-                          title="Reach Ranking"
                           subtitle="Percentage of people that have stated that the channel is helpful to them"
                           valueColumn="Reach %"
                           color={corePalette.slate}

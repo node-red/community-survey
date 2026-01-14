@@ -113,7 +113,7 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
   // Render the matrix as multiple horizontal segmented bars similar to RatingsChart
   return (
-    <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex">
+    <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex" data-chart-id={questionId}>
       {/* Left Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">

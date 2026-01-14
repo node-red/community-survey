@@ -27,10 +27,16 @@ const UnifiedChartWrapper = (props) => {
   } = props;
 
   return (
-    <div className={cn(
-      "flex flex-col lg:flex-row gap-4",
-      !comparisonMode && "justify-center"
-    )}>
+    <div
+      className={cn(
+        "flex flex-col lg:flex-row gap-4",
+        !comparisonMode && "justify-center"
+      )}
+      // Add data-chart-wrapper for comparison mode row highlighting
+      // This allows the entire row (both columns) to highlight when focusing any anchor
+      // Individual chart components still have their own data-chart-id for navigation
+      {...(chartProps.questionId && { 'data-chart-wrapper': chartProps.questionId })}
+    >
       {/* Column A - Always visible */}
       <div className={cn(
         comparisonMode ? "flex-1 lg:min-w-[450px]" : "w-full"
