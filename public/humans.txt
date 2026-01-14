@@ -20,8 +20,9 @@ Site: https://discourse.nodered.org/
 
 All survey respondents who shared their experiences
 
+Node-RED is grateful to FlowFuse for actively sponsoring the project.
+
 /* SITE */
-Last update: 2025/01/14
 Standards: HTML5, CSS3, JavaScript ES6+
 Components: React, Vite, DuckDB WASM, Recharts, Tailwind CSS
 Software: Tally (survey tool)

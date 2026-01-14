@@ -2877,7 +2877,14 @@ function App() {
                       >
                         FlowFuse
                       </a>{" "}
-                      for actively sponsoring the project.
+                      for actively sponsoring the project. See{" "}
+                      <a
+                        href="humans.txt"
+                        className="text-nodered-red-500 hover:text-nodered-red-700 underline"
+                      >
+                        humans.txt
+                      </a>{" "}
+                      for full credits.
                     </p>
                   </div>
 
