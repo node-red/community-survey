@@ -141,7 +141,7 @@ const DeviceSatisfactionGrid = ({ filters = {}, wasmService }) => {
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("Satisfaction ratings by device type?")}>
+    <div role="region" aria-label="Device satisfaction ratings grid" className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("Satisfaction ratings by device type?")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">

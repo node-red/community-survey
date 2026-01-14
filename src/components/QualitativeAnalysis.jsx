@@ -157,6 +157,84 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
     }
   };
 
+  // Handle keyboard focus for accessibility
+  const handleFocus = (theme, event) => {
+    // Clear any pending hide timeout
+    if (hideTooltipTimeout) {
+      clearTimeout(hideTooltipTimeout);
+      setHideTooltipTimeout(null);
+    }
+
+    event.currentTarget.style.transform = 'scale(1.015)';
+
+    if (theme.representative_quotes) {
+      // Parse the quotes - same logic as handleMouseEnter
+      let quotes;
+      try {
+        const rawQuotes = theme.representative_quotes;
+
+        if (typeof rawQuotes === 'string') {
+          quotes = JSON.parse(rawQuotes);
+        } else if (rawQuotes && typeof rawQuotes === 'object' && typeof rawQuotes.get === 'function') {
+          const length = rawQuotes.length || 0;
+          quotes = [];
+          for (let i = 0; i < length; i++) {
+            const value = rawQuotes.get(i);
+            if (value !== null && value !== undefined) {
+              quotes.push(value);
+            }
+          }
+        } else if (rawQuotes && typeof rawQuotes.toArray === 'function') {
+          quotes = rawQuotes.toArray();
+        } else if (Array.isArray(rawQuotes)) {
+          quotes = rawQuotes;
+        } else {
+          quotes = [rawQuotes];
+        }
+      } catch (error) {
+        console.error('Error parsing quotes:', error);
+        quotes = [theme.representative_quotes];
+      }
+
+      const quotesToShow = Array.isArray(quotes) ? quotes : [quotes];
+      const formattedQuotes = quotesToShow
+        .filter(q => q && String(q).trim())
+        .map(q => truncateToLines(String(q), 150))
+        .join('\n\n');
+
+      const count = theme.frequency || theme.count || 0;
+      const percentValue = typeof theme.percentage === 'string' ?
+        parseFloat(theme.percentage.replace('%', '')) :
+        parseFloat(theme.percentage) || 0;
+      const percentage = `${Math.round(percentValue)}%`;
+
+      setTooltipContent(
+        `${count} respondents (${percentage})\n\n${formattedQuotes}`
+      );
+      // Position tooltip near the element for keyboard users
+      const rect = event.currentTarget.getBoundingClientRect();
+      setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top - 10 });
+      setShowTooltip(true);
+    }
+  };
+
+  const handleBlur = (event) => {
+    event.currentTarget.style.transform = 'scale(1)';
+    setShowTooltip(false);
+  };
+
+  const handleKeyDown = (theme, event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      // Toggle tooltip on keyboard activation
+      if (showTooltip) {
+        setShowTooltip(false);
+      } else {
+        handleFocus(theme, event);
+      }
+    }
+  };
+
   // Only show skeleton during initial load (no data yet)
   // Once we have data, keep showing it while loading new filtered data
   if (loading && !data) {
@@ -212,7 +290,12 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm relative" data-chart-id={questionId}>
+    <div
+      className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm relative"
+      data-chart-id={questionId}
+      role="img"
+      aria-label={`Qualitative analysis chart: ${questionText || 'Qualitative Analysis'}`}
+    >
       {/* Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
         <svg
@@ -331,17 +414,25 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
               displayPercentage = `${Math.round(percentValue)}%`;
             }
 
+            // Build aria-label for accessibility
+            const ariaLabel = count > 0
+              ? `${theme.theme_name}: ${displayPercentage}, ${count} respondents`
+              : `${theme.theme_name}: No data`;
+
             return (
               <div key={theme.theme_name}>
                 {/* Colored Bar with percentage inside */}
                 <div
-                  className={`flex-1 px-2 py-1 relative transition-all duration-200 ${
+                  className={`flex-1 px-2 py-1 relative transition-all duration-200 focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-1 ${
                     theme.representative_quotes ? 'cursor-pointer hover:opacity-90' : ''
                   }`}
                   style={{
                     backgroundColor: getBackgroundColor(color),
                     transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
+                  tabIndex={0}
+                  role="listitem"
+                  aria-label={ariaLabel}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'scale(1.015)';
                     handleMouseEnter(theme, e);
@@ -350,6 +441,9 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                     e.currentTarget.style.transform = 'scale(1)';
                     handleMouseLeave(e);
                   }}
+                  onFocus={(e) => handleFocus(theme, e)}
+                  onBlur={handleBlur}
+                  onKeyDown={(e) => handleKeyDown(theme, e)}
                 >
                   {/* Percentage Bar Fill - with minimum 46px width */}
                   <div

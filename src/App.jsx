@@ -55,6 +55,9 @@ function App() {
   const [activeColumn, setActiveColumn] = useState('A');
   const [hasEverEnabledComparison, setHasEverEnabledComparison] = useState(false);
 
+  // Screen reader announcements for dynamic updates
+  const [statusAnnouncement, setStatusAnnouncement] = useState('');
+
   // Callback to restore filters from URL on page load
   // Supports both normal mode (urlFilters) and comparison mode (comparisonState)
   const handleFiltersRestoredFromURL = useCallback(
@@ -219,8 +222,23 @@ function App() {
   }, []);
 
   // Keyboard shortcut: Cmd+F (Mac) or Ctrl+F (Windows/Linux) to open TOC and focus search
+  // Keyboard shortcut: Escape to close sidebar overlay when in overlay mode
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Check for Escape key to close sidebar overlay
+      if (e.key === 'Escape') {
+        // Only handle Escape when sidebar is in overlay mode
+        const isOverlayMode = isMobile || (comparisonMode && isNarrowForComparison);
+        const hasOpenSidebar = !sidebarCollapsed || !tocCollapsed;
+
+        if (isOverlayMode && hasOpenSidebar) {
+          e.preventDefault();
+          setSidebarCollapsed(true);
+          setTocCollapsed(true);
+          return;
+        }
+      }
+
       // Check for Cmd+F (Mac) or Ctrl+F (Windows/Linux)
       if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
         // Don't intercept if user is typing in an input/textarea (except TOC search)
@@ -252,7 +270,7 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tocCollapsed]);
+  }, [tocCollapsed, isMobile, comparisonMode, isNarrowForComparison, sidebarCollapsed]);
 
   // Auto-collapse sidebars on initial narrow viewport
   useEffect(() => {
@@ -262,6 +280,42 @@ function App() {
       setTocCollapsed(true);
     }
   }, []); // Run only once on mount
+
+  // Screen reader announcements for loading state changes
+  useEffect(() => {
+    if (initialLoading) {
+      setStatusAnnouncement('Loading data...');
+    } else if (filteredUserCount > 0) {
+      setStatusAnnouncement(`Data loaded, showing ${filteredUserCount} respondents`);
+    }
+  }, [initialLoading, filteredUserCount]);
+
+  // Screen reader announcements for filter loading
+  useEffect(() => {
+    if (filterLoading) {
+      setStatusAnnouncement('Loading data...');
+    } else if (!initialLoading && filteredUserCount > 0) {
+      setStatusAnnouncement(`Filters updated, showing ${filteredUserCount} respondents`);
+    }
+    // Clear announcement after delay to allow repeated announcements
+    const clearTimer = setTimeout(() => {
+      setStatusAnnouncement('');
+    }, 1000);
+    return () => clearTimeout(clearTimer);
+  }, [filterLoading, filteredUserCount, initialLoading]);
+
+  // Screen reader announcements for comparison mode toggle
+  useEffect(() => {
+    if (hasEverEnabledComparison) {
+      // Only announce after initial load, not on first mount
+      setStatusAnnouncement(comparisonMode ? 'Comparison mode enabled' : 'Comparison mode disabled');
+      // Clear announcement after delay
+      const clearTimer = setTimeout(() => {
+        setStatusAnnouncement('');
+      }, 1000);
+      return () => clearTimeout(clearTimer);
+    }
+  }, [comparisonMode, hasEverEnabledComparison]);
 
   // Total respondent count will be fetched via WASM service in the main initialization
   // No separate API call needed
@@ -1087,6 +1141,22 @@ function App() {
       <ComparisonProvider value={{ comparisonMode, filtersA, filtersB, activeColumn }}>
       <ErrorBoundary showDetails={import.meta.env.DEV}>
         <div className="min-h-screen bg-nodered-gray-100 font-sans">
+        {/* Skip link for keyboard users */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-nodered-red-500 focus:text-white focus:rounded focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-white"
+        >
+          Skip to main content
+        </a>
+        {/* Screen reader announcements for dynamic updates */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {statusAnnouncement}
+        </div>
         {/* Landing Page Hero Section */}
         {showHeroSection && (
           <section className="min-h-screen flex items-start pt-24 relative bg-[#8f0000] overflow-hidden z-30">
@@ -1385,17 +1455,28 @@ function App() {
             {/* Backdrop Overlay - shows when sidebars overlay content (mobile or comparison mode on narrow viewports) */}
             {(isMobile || (comparisonMode && isNarrowForComparison)) && (!sidebarCollapsed || !tocCollapsed) && (
               <div
+                role="button"
+                tabIndex={0}
+                aria-label="Close sidebar overlay"
                 className="fixed inset-0 bg-black/50 z-10 transition-opacity duration-300"
                 style={{ top: "48px" }}
                 onClick={() => {
                   setSidebarCollapsed(true);
                   setTocCollapsed(true);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSidebarCollapsed(true);
+                    setTocCollapsed(true);
+                  }
+                }}
               />
             )}
             {/* Left Sidebar - Node-RED Palette Style */}
             {/* Use fixed (overlay) positioning on mobile OR when comparison mode is active on narrow viewports */}
             <aside
+              aria-label="Filter options"
               className={cn(
                 "bg-[#f3f3f3] overflow-visible flex flex-col border-r border-[#bbbbbb] z-20 transition-all duration-300 ease-in-out",
                 (isMobile || (comparisonMode && isNarrowForComparison)) ? "fixed left-0" : "sticky self-start",
@@ -1428,9 +1509,20 @@ function App() {
                     <input
                       type="text"
                       placeholder="filter"
+                      aria-label="Search filters"
                       className={sidebar.filter}
                       value={filterSearchTerm}
                       onChange={(e) => setFilterSearchTerm(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          e.preventDefault();
+                          if (filterSearchTerm) {
+                            setFilterSearchTerm(''); // Clear search first
+                          } else {
+                            setSidebarCollapsed(true); // Close sidebar if search is already empty
+                          }
+                        }
+                      }}
                     />
                   </div>
                 </div>
@@ -1455,6 +1547,8 @@ function App() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => setActiveColumn('A')}
+                        aria-label={`Edit Column A filters (${countActiveFilters(filtersA)} active)`}
+                        aria-pressed={activeColumn === 'A'}
                         className={cn(
                           "flex-1 px-2 py-1.5 text-xs font-medium rounded-l border transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10",
                           activeColumn === 'A'
@@ -1462,11 +1556,13 @@ function App() {
                             : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
                         )}
                       >
-                        <span className="w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white">A</span>
+                        <span className="w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white" aria-hidden="true">A</span>
                         <span className="truncate">({countActiveFilters(filtersA)})</span>
                       </button>
                       <button
                         onClick={() => setActiveColumn('B')}
+                        aria-label={`Edit Column B filters (${countActiveFilters(filtersB)} active)`}
+                        aria-pressed={activeColumn === 'B'}
                         className={cn(
                           "flex-1 px-2 py-1.5 text-xs font-medium rounded-r border transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10",
                           activeColumn === 'B'
@@ -1474,7 +1570,7 @@ function App() {
                             : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
                         )}
                       >
-                        <span className="w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white">B</span>
+                        <span className="w-4 h-4 rounded-full bg-orange-500 text-white text-[10px] flex items-center justify-center font-bold ring-2 ring-white" aria-hidden="true">B</span>
                         <span className="truncate">({countActiveFilters(filtersB)})</span>
                       </button>
                     </div>
@@ -1891,6 +1987,7 @@ function App() {
 
             {/* Main Content Area with Grid */}
             <main
+              id="main-content"
               ref={mainContentRef}
               className={cn(
                 mainContent.base,
@@ -1966,6 +2063,7 @@ function App() {
                   {/* Error Card */}
                   {queryResult?.error && (
                     <div
+                      role="alert"
                       className={cn(card.base, "mb-6 max-w-4xl", error.card)}
                     >
                       <div className={card.iconSection}>

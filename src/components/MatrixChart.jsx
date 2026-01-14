@@ -113,7 +113,12 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
 
   // Render the matrix as multiple horizontal segmented bars similar to RatingsChart
   return (
-    <div className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex" data-chart-id={questionId}>
+    <div
+      className="bg-white rounded-[5px] overflow-hidden shadow-sm border border-gray-300 flex"
+      data-chart-id={questionId}
+      role="img"
+      aria-label={`${questionTitle} - Device usage matrix chart showing Desktop/Laptop, Tablet, and Phone usage for different tasks`}
+    >
       {/* Left Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="white" stroke="#d1d5db" strokeWidth="1.5">
@@ -215,16 +220,22 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                         }
                       };
 
+                      const displayPercentage = device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`);
+                      const ariaLabel = `${subQ.label} - ${device.label}: ${device.count} respondents (${displayPercentage})`;
+
                       return (
                         <div
                           key={device.label}
-                          className={`relative flex items-center ${justifyClass} border-r border-white/20 last:border-r-0 cursor-pointer`}
+                          className={`relative flex items-center ${justifyClass} border-r border-white/20 last:border-r-0 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-20`}
                           style={{
                             width: device.percentage > 0 ? `${device.percentage}%` : `${100 / deviceData.length}%`,
                             backgroundColor: device.color,
                             minWidth: '35px',
                             transition: 'width 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                           }}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={ariaLabel}
                           onMouseEnter={(e) => {
                             const currentWidth = e.currentTarget.offsetWidth;
                             const scaleX = (currentWidth + 10) / currentWidth;
@@ -238,9 +249,27 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             handleBarMouseLeave(e);
                           }}
                           onMouseMove={handleBarMouseMove}
+                          onFocus={(e) => {
+                            // For keyboard focus, calculate position from element bounds
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            // Guard against NaN values from elements not yet laid out
+                            if (rect && !isNaN(rect.left) && !isNaN(rect.top) && device.count > 0) {
+                              const syntheticEvent = {
+                                clientX: rect.left + rect.width / 2,
+                                clientY: rect.top,
+                                stopPropagation: () => {}
+                              };
+                              setTooltipContent(`${device.label}\n${device.count} respondents (${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)})`);
+                              setTooltipPosition(getTooltipPosition(syntheticEvent, 200, 60));
+                              setShowTooltip(true);
+                            }
+                          }}
+                          onBlur={(e) => {
+                            handleBarMouseLeave(e);
+                          }}
                         >
                           <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
-                            {device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}
+                            {displayPercentage}
                           </span>
                         </div>
                       );
@@ -335,16 +364,22 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                             }
                           };
 
+                          const displayPercentage = device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`);
+                          const ariaLabel = `Average across all tasks - ${device.label}: ${displayPercentage}`;
+
                           return (
                             <div
                               key={device.label}
-                              className={`relative flex items-center ${justifyClass} border-r border-white/20 last:border-r-0 cursor-pointer`}
+                              className={`relative flex items-center ${justifyClass} border-r border-white/20 last:border-r-0 cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-20`}
                               style={{
                                 width: device.percentage > 0 ? `${device.percentage}%` : `${100 / averages.length}%`,
                                 backgroundColor: device.color,
                                 minWidth: '35px',
                                 transition: 'width 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                               }}
+                              tabIndex={0}
+                              role="button"
+                              aria-label={ariaLabel}
                               onMouseEnter={(e) => {
                                 const currentWidth = e.currentTarget.offsetWidth;
                                 const scaleX = (currentWidth + 10) / currentWidth;
@@ -358,9 +393,27 @@ const MatrixChart = ({ questionId, questionTitle, filters, _color, wasmService }
                                 handleBarMouseLeave(e);
                               }}
                               onMouseMove={handleBarMouseMove}
+                              onFocus={(e) => {
+                                // For keyboard focus, calculate position from element bounds
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                // Guard against NaN values from elements not yet laid out
+                                if (rect && !isNaN(rect.left) && !isNaN(rect.top) && device.count > 0) {
+                                  const syntheticEvent = {
+                                    clientX: rect.left + rect.width / 2,
+                                    clientY: rect.top,
+                                    stopPropagation: () => {}
+                                  };
+                                  setTooltipContent(`${device.label}\n${device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}`);
+                                  setTooltipPosition(getTooltipPosition(syntheticEvent, 200, 60));
+                                  setShowTooltip(true);
+                                }
+                              }}
+                              onBlur={(e) => {
+                                handleBarMouseLeave(e);
+                              }}
                             >
                               <span className={`text-white font-semibold text-xs ${idx === 0 ? 'pl-2 pr-1' : idx === 2 ? 'pl-1 pr-2' : 'px-1'}`}>
-                                {device.count === 0 ? '-' : (Math.round(device.percentage) === 0 ? '<1%' : `${Math.round(device.percentage)}%`)}
+                                {displayPercentage}
                               </span>
                             </div>
                           );

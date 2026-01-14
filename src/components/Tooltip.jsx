@@ -10,6 +10,8 @@ const Tooltip = ({ show, position, content, maxWidth = '300px' }) => {
 
   return createPortal(
     <div
+      role="tooltip"
+      aria-hidden={!show}
       className="fixed z-50 bg-gray-900 text-white px-3 py-2 rounded-lg shadow-xl pointer-events-none text-sm whitespace-pre-line border border-gray-600"
       style={{
         left: position.x,

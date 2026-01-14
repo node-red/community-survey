@@ -261,8 +261,8 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
         </div>
 
         {/* Chart Content */}
-        <div className="flex-1 p-4">
-          <div className="flex items-end justify-between h-96 gap-2">
+        <div className="flex-1 p-4" role="img" aria-label={`Bar chart: ${actualQuestionTitle}`}>
+          <div className="flex items-end justify-between h-96 gap-2" role="list">
             {data.map((item, index) => {
               // Calculate if text fits inside bar (needs at least 60px height for text)
               const barHeightPercent = item.percentage * scaleFactor;
@@ -293,13 +293,54 @@ const VerticalBarChart = ({ questionId, questionTitle, filterType, filters = {},
                 }
               };
 
+              const handleFocus = (event) => {
+                event.currentTarget.style.transform = 'scale(1.03)';
+                if (item.count) {
+                  const totalResponses = data.reduce((sum, d) => sum + (d.count || 0), 0);
+                  const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
+                  setTooltipContent(`${item.category}\n${item.count} respondents (${percentage}%)`);
+                  // Position tooltip near the element for keyboard users
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top - 10 });
+                  setShowTooltip(true);
+                }
+              };
+
+              const handleBlur = (event) => {
+                event.currentTarget.style.transform = 'scale(1)';
+                setShowTooltip(false);
+              };
+
+              const handleKeyDown = (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  // Toggle tooltip on keyboard activation
+                  if (showTooltip) {
+                    setShowTooltip(false);
+                  } else {
+                    handleFocus(event);
+                  }
+                }
+              };
+
+              // Build aria-label for the bar
+              const ariaLabel = item.hasData
+                ? `${item.category}: ${item.displayPercentage}, ${item.count} respondents`
+                : `${item.category}: No data`;
+
               return (
                 <div
                   key={index}
-                  className="relative flex-1 h-full flex flex-col justify-end transform-gpu transition-transform duration-200"
+                  className="relative flex-1 h-full flex flex-col justify-end transform-gpu transition-transform duration-200 focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-1"
+                  tabIndex={0}
+                  role="listitem"
+                  aria-label={ariaLabel}
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
                   onMouseMove={handleMouseMove}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
+                  onKeyDown={handleKeyDown}
                 >
                   {/* Light background for full range */}
                   <div className="absolute inset-0 bg-gray-100"></div>

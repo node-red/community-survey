@@ -148,7 +148,7 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("Channel Ratings Overview")}>
+    <div role="region" aria-label="Channel ratings grid" className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm relative" data-chart-id={generateSectionId("Channel Ratings Overview")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
@@ -222,10 +222,17 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
                           }
                         };
 
+                        const totalResponses = data.data.reduce((sum, d) => sum + d.count, 0);
+                        const percentage = totalResponses > 0 ? ((item.count / totalResponses) * 100).toFixed(0) : 0;
+                        const ariaLabel = `${channel.name}: Rating ${item.label}, ${item.count} respondents, ${percentage} percent`;
+
                         return (
                           <div
                             key={item.label}
-                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer transition-transform duration-200"
+                            role="img"
+                            aria-label={ariaLabel}
+                            tabIndex={0}
+                            className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer transition-transform duration-200 focus:outline focus:outline-2 focus:outline-[#3b82f6]"
                             style={{
                               width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
                               backgroundColor: item.color,
@@ -245,6 +252,18 @@ const ChannelRatingsGrid = ({ filters = {}, compact = true, wasmService }) => {
                               handleBarMouseLeave(e);
                             }}
                             onMouseMove={handleBarMouseMove}
+                            onFocus={(e) => {
+                              const currentWidth = e.currentTarget.offsetWidth;
+                              const scaleX = (currentWidth + 10) / currentWidth;
+                              e.currentTarget.style.transform = `scaleY(1.1) scaleX(${scaleX})`;
+                              e.currentTarget.style.zIndex = '10';
+                              handleBarMouseEnter(e);
+                            }}
+                            onBlur={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.zIndex = '0';
+                              handleBarMouseLeave(e);
+                            }}
                           >
                             <span className="text-white font-semibold text-xs px-1">
                               {item.label}

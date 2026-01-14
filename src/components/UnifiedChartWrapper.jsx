@@ -55,10 +55,14 @@ const UnifiedChartWrapper = (props) => {
       </div>
 
       {/* Column B - Animates in/out with width + opacity transition */}
-      <div className={cn(
-        "flex-1 lg:min-w-[450px] transition-all duration-300 ease-out",
-        !comparisonMode && "!flex-none !w-0 !min-w-0 !h-0 opacity-0 overflow-hidden"
-      )}>
+      {/* inert attribute prevents keyboard focus and screen reader access when hidden */}
+      <div
+        className={cn(
+          "flex-1 lg:min-w-[450px] transition-all duration-300 ease-out",
+          !comparisonMode && "!flex-none !w-0 !min-w-0 !h-0 opacity-0 overflow-hidden"
+        )}
+        inert={!comparisonMode ? "" : undefined}
+      >
         {hasEverEnabledComparison && (
           <div className="border-l-2 border-orange-500 pl-3 relative">
             <span className="absolute -top-5 -left-px -translate-x-1/2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold">

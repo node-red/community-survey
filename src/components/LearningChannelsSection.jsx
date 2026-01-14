@@ -19,6 +19,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
   const [sectionCount, setSectionCount] = useState(null);
   const [baselineOrders, setBaselineOrders] = useState({});
   const [isSingleColumn, setIsSingleColumn] = useState(false);
+  const [focusedCell, setFocusedCell] = useState(null);
   const initialLoadDone = useRef(false);
 
   // Handle responsive layout
@@ -240,7 +241,10 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
               <div className={cn(card.body, 'bg-white p-0 overflow-hidden')}>
                 {hasData ? (
                   <div className={table.wrapper}>
-                    <table className={table.base}>
+                    <table className={table.base} aria-label="Learning channels reach and quality metrics">
+                      <caption className="sr-only">
+                        Learning channels showing reach percentage, quality percentage, and opportunity metrics for each channel
+                      </caption>
                       <thead className="bg-[#f3f3f3] border-b border-gray-300">
                         <tr>
                           {columns.map((col, index) => {
@@ -259,6 +263,7 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                             return (
                               <th
                                 key={col}
+                                scope="col"
                                 className={cn(
                                   index === 0
                                     ? table.headerCellFirst
@@ -274,16 +279,70 @@ const LearningChannelsSection = ({ filters = {}, wasmService }) => {
                       <tbody className={table.body}>
                         {dashboardData.data.map((row, rowIndex) => (
                           <tr key={rowIndex} className={table.row}>
-                            {columns.map((col, colIndex) => (
-                              <td
-                                key={col}
-                                className={cn(
-                                  colIndex === 0 ? table.cellFirst : table.cell
-                                )}
-                              >
-                                {formatCellValue(row[col])}
-                              </td>
-                            ))}
+                            {columns.map((col, colIndex) => {
+                              const cellValue = formatCellValue(row[col]);
+                              const isRowHeader = colIndex === 0;
+                              const cellId = `${rowIndex}-${colIndex}`;
+                              const isFocused = focusedCell === cellId;
+
+                              // Build aria-label for data cells
+                              let ariaLabel;
+                              if (isRowHeader) {
+                                ariaLabel = `Channel: ${cellValue}`;
+                              } else {
+                                const headerText = columns[colIndex]
+                                  .replace(/_/g, ' ')
+                                  .replace(/\b\w/g, c => c.toUpperCase())
+                                  .replace('Reach %', 'Reach')
+                                  .replace('Quality %', 'Quality');
+                                ariaLabel = `${row[columns[0]]} ${headerText}: ${cellValue}`;
+                              }
+
+                              const handleCellFocus = () => {
+                                setFocusedCell(cellId);
+                              };
+
+                              const handleCellBlur = () => {
+                                setFocusedCell(null);
+                              };
+
+                              if (isRowHeader) {
+                                return (
+                                  <th
+                                    key={col}
+                                    scope="row"
+                                    tabIndex={0}
+                                    aria-label={ariaLabel}
+                                    onFocus={handleCellFocus}
+                                    onBlur={handleCellBlur}
+                                    className={cn(
+                                      table.cellFirst,
+                                      'focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-[-2px]',
+                                      isFocused && 'outline outline-2 outline-[#3b82f6] outline-offset-[-2px]'
+                                    )}
+                                  >
+                                    {cellValue}
+                                  </th>
+                                );
+                              }
+
+                              return (
+                                <td
+                                  key={col}
+                                  tabIndex={0}
+                                  aria-label={ariaLabel}
+                                  onFocus={handleCellFocus}
+                                  onBlur={handleCellBlur}
+                                  className={cn(
+                                    table.cell,
+                                    'focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-[-2px]',
+                                    isFocused && 'outline outline-2 outline-[#3b82f6] outline-offset-[-2px]'
+                                  )}
+                                >
+                                  {cellValue}
+                                </td>
+                              );
+                            })}
                           </tr>
                         ))}
                       </tbody>

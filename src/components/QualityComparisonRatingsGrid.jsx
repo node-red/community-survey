@@ -141,7 +141,7 @@ const QualityComparisonRatingsGrid = ({ filters = {}, wasmService }) => {
   }
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm" data-chart-id={generateSectionId("Compared to alternatives, Node-RED's quality is ...")}>
+    <div role="region" aria-label="Quality comparison ratings grid" className="w-full bg-white border border-gray-300 rounded-[5px] overflow-hidden shadow-sm" data-chart-id={generateSectionId("Compared to alternatives, Node-RED's quality is ...")}>
       {/* Icon Section */}
       <div className="flex">
         <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">

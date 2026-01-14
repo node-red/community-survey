@@ -307,6 +307,8 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
                 width: '100%',
                 height: 'auto'
               }}
+              role="img"
+              aria-label="Geographic distribution map showing survey respondents by country"
             >
               {geographies.map((geo, i) => {
                 // geo.id is the ISO 3166-1 numeric country code from TopoJSON
@@ -314,6 +316,17 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
                 const countryCode = String(geo.id);
                 const countryData = dataMap[countryCode];
                 const pathData = pathGenerator(geo);
+                const countryName = geo.properties?.name || 'Unknown';
+
+                // Build aria-label for accessibility
+                let ariaLabel;
+                if (countryData) {
+                  const percentage = (countryData.count / totalResponses) * 100;
+                  const displayPercentage = countryData.count === 0 ? '0%' : (Math.round(percentage) === 0 ? '<1%' : `${Math.round(percentage)}%`);
+                  ariaLabel = `${countryName}: ${countryData.count} respondents (${displayPercentage})`;
+                } else {
+                  ariaLabel = `${countryName}: No responses`;
+                }
 
                 // Debug first few countries
                 if (import.meta.env.DEV && i < 3) {
@@ -327,14 +340,30 @@ const ChoroplethMap = ({ questionId, questionTitle, filters, _color, wasmService
                     fill={getCountryColor(countryCode)}
                     stroke="#EAEAEC"
                     strokeWidth={0.5}
+                    tabIndex={0}
+                    aria-label={ariaLabel}
                     style={{
                       cursor: countryData ? 'pointer' : 'default',
-                      transition: 'fill 0.2s'
+                      transition: 'fill 0.2s',
+                      outline: 'none'
                     }}
                     onMouseEnter={(e) => handleMouseEnter(geo, e)}
                     onMouseLeave={handleMouseLeave}
                     onMouseMove={handleMouseMove}
-                    className="hover:opacity-80"
+                    onFocus={(e) => {
+                      // For keyboard focus, calculate position from element bounds
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      // Guard against NaN values from elements not yet laid out
+                      if (rect && !isNaN(rect.left) && !isNaN(rect.top)) {
+                        const syntheticEvent = {
+                          clientX: rect.left + rect.width / 2,
+                          clientY: rect.top + rect.height / 2
+                        };
+                        handleMouseEnter(geo, syntheticEvent);
+                      }
+                    }}
+                    onBlur={() => setShowTooltip(false)}
+                    className="hover:opacity-80 focus:outline focus:outline-2 focus:outline-[#3b82f6]"
                   />
                 );
               })}

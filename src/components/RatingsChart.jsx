@@ -148,6 +148,8 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
       <div
         className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm"
         data-chart-id={questionId}
+        role="img"
+        aria-label={`Rating chart: ${questionTitle || 'Rating Analysis'}`}
       >
       {/* Icon Section */}
       <div className="flex items-center justify-center w-8 min-w-[32px] text-sm text-gray-600 bg-gray-100 border-r border-gray-300">
@@ -225,13 +227,15 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                 return (
                   <div
                     key={item.label}
-                    className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer transition-transform duration-200"
+                    className="relative flex items-center justify-center border-r border-white/20 last:border-r-0 cursor-pointer transition-transform duration-200 focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10"
                     style={{
                       width: item.percentage > 0 ? `${item.percentage}%` : 'auto',
                       backgroundColor: item.color,
                       minWidth: '35px', // Always show minimum width for visibility
                       transition: 'width 0.3s ease-in-out'
                     }}
+                    tabIndex={0}
+                    aria-label={`Rating ${item.label}: ${item.percentage.toFixed(0)}% (${item.count} respondents)`}
                     onMouseEnter={(e) => {
                       const currentWidth = e.currentTarget.offsetWidth;
                       const scaleX = (currentWidth + 10) / currentWidth;
@@ -245,6 +249,24 @@ const RatingsChart = ({ questionId, questionTitle, filters = {}, _color, _colorS
                       handleBarMouseLeave(e);
                     }}
                     onMouseMove={handleBarMouseMove}
+                    onFocus={(e) => {
+                      const currentWidth = e.currentTarget.offsetWidth;
+                      const scaleX = (currentWidth + 10) / currentWidth;
+                      e.currentTarget.style.transform = `scaleY(1.1) scaleX(${scaleX})`;
+                      e.currentTarget.style.zIndex = '10';
+                      handleBarMouseEnter(e);
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.zIndex = '0';
+                      handleBarMouseLeave(e);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleBarMouseEnter(e);
+                      }
+                    }}
                   >
                     {/* Rating scale number inside bar */}
                     <span className="text-white font-semibold text-xs px-1">

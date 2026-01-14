@@ -331,9 +331,11 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
 
   return (
     <div className="relative overflow-x-hidden">
-      <div 
-        className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm" 
+      <div
+        className="w-full bg-white border border-gray-300 rounded-[5px] flex overflow-hidden transition-all duration-200 shadow-sm"
         data-chart-id={questionId}
+        role="img"
+        aria-label={`Rating chart: ${questionTitle || 'Rating Analysis'}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
@@ -420,7 +422,7 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
                   {/* Bar with color */}
                   <div
                     data-testid={`bar-${index}`}
-                    className="absolute flex items-center cursor-pointer"
+                    className="absolute flex items-center cursor-pointer focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:z-10"
                     style={{
                       left: `${cumulativePercentage}%`,
                       width: barWidth === 0 ? '4px' : `${barWidth}%`,
@@ -429,6 +431,8 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
                       opacity: barWidth === 0 ? 0.6 : 1,
                       transition: 'width 0.3s ease-in-out, left 0.3s ease-in-out, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
+                    tabIndex={0}
+                    aria-label={`${/^\d+$/.test(item.label) ? 'Rating ' : ''}${item.label}: ${item.percentage.toFixed(0)}% (${item.count} respondents)`}
                     onMouseEnter={(e) => {
                       const currentWidth = e.currentTarget.offsetWidth;
                       const scaleX = (currentWidth + 10) / currentWidth;
@@ -442,6 +446,24 @@ const HorizontalRatingsChart = ({ questionId, questionTitle, filters = {}, _show
                       handleBarMouseLeave();
                     }}
                     onMouseMove={handleBarMouseMove}
+                    onFocus={(e) => {
+                      const currentWidth = e.currentTarget.offsetWidth;
+                      const scaleX = (currentWidth + 10) / currentWidth;
+                      e.currentTarget.style.transform = `scaleY(1.1) scaleX(${scaleX})`;
+                      e.currentTarget.style.zIndex = '10';
+                      handleBarMouseEnter(e, item);
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.zIndex = '0';
+                      handleBarMouseLeave();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleBarMouseEnter(e, item);
+                      }
+                    }}
                   >
                     {/* Percentage inside the bar on the left (only if it fits) */}
                     {percentageFitsInside && (

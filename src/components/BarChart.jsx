@@ -146,10 +146,15 @@ const BarChart = ({
   }
 
   return (
-    <div className={cn(chart.container, containerClassName)} ref={containerRef}>
+    <div
+      className={cn(chart.container, containerClassName)}
+      ref={containerRef}
+      role="img"
+      aria-label={`Bar chart: ${title || 'Data visualization'}`}
+    >
       {title && <h3 className={chart.title}>{title}</h3>}
       {subtitle && <p className={chart.subtitle}>{subtitle}</p>}
-      <div className={chart.bars}>
+      <div className={chart.bars} role="list">
         {chartData.map((item, index) => {
           const barWidth = item.hasData && maxValue > 0 ? (item.value / maxValue) * 100 : 0;
           const displayText = item.hasData ? item.displayValue : '-';
@@ -215,14 +220,57 @@ const BarChart = ({
             }
           };
 
+          const handleFocus = (event) => {
+            event.currentTarget.style.transform = `scale(${animationScale})`;
+            if (item.hasData) {
+              let tooltipText = `${item.resource}\n${displayText}`;
+              if (showRespondentsInTooltip && item.count !== undefined) {
+                tooltipText += `\n${item.count} respondents`;
+              }
+              setTooltipContent(tooltipText);
+              // Position tooltip near the element for keyboard users
+              const rect = event.currentTarget.getBoundingClientRect();
+              setTooltipPosition({ x: rect.left + rect.width / 2, y: rect.top - 10 });
+              setShowTooltip(true);
+            }
+          };
+
+          const handleBlur = (event) => {
+            event.currentTarget.style.transform = 'scale(1)';
+            setShowTooltip(false);
+          };
+
+          const handleKeyDown = (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              // Toggle tooltip on keyboard activation
+              if (showTooltip) {
+                setShowTooltip(false);
+              } else {
+                handleFocus(event);
+              }
+            }
+          };
+
+          // Build aria-label for the bar
+          const ariaLabel = item.hasData
+            ? `${item.resource}: ${displayText}${showRespondentsInTooltip && item.count !== undefined ? `, ${item.count} respondents` : ''}`
+            : `${item.resource}: No data`;
+
           return (
             <div
               key={index}
-              className={`${rowClass} transform-gpu transition-transform duration-200`}
+              className={`${rowClass} transform-gpu transition-transform duration-200 focus:outline focus:outline-2 focus:outline-[#3b82f6] focus:outline-offset-1`}
               style={{ backgroundColor: `${color}28` }}
+              tabIndex={0}
+              role="listitem"
+              aria-label={ariaLabel}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               onMouseMove={handleMouseMove}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
             >
               {isMirrored ? (
                 <div className={wrapperClass}>

@@ -288,7 +288,8 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
   // Always render the sidebar frame, even when no sections are available yet
 
   return (
-    <div
+    <aside
+      aria-label="Table of contents"
       className={cn(
         "bg-[#f3f3f3]",
         "z-20",
@@ -354,7 +355,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         {/* Expandable Sections */}
         <div className="flex-1 overflow-y-auto bg-white">
           {/* TOC Items */}
-          <nav>
+          <nav aria-label="Document sections">
             <ul className="space-y-0" aria-live="polite" aria-atomic="true">
               {filteredSections.map((section) => (
                 <li key={section.id}>
@@ -508,7 +509,7 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
           )}
         </div>
       </div>
-    </div>
+    </aside>
   );
 });
 
