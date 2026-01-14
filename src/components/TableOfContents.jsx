@@ -33,6 +33,9 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
     return getCurrentSectionFromURL();
   });
   const isScrollingRef = useRef(false);
+  // Refs to avoid re-attaching scroll listener when these values change
+  const activeSectionRef = useRef('');
+  const pendingHashRef = useRef(pendingHash);
 
   // Cleanup tooltip timeout on unmount
   useEffect(() => {
@@ -42,23 +45,6 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
       }
     };
   }, []);
-
-  // When loading with a hash, immediately scroll past hero/intro to reduce wait time
-  useEffect(() => {
-    // Read initial hash directly to avoid stale closure warning
-    const initialHash = getCurrentSectionFromURL();
-    if (initialHash) {
-      // Find the dashboard section start (after intro) and scroll there instantly
-      const dashboardStart = document.getElementById('introduction-section');
-      if (dashboardStart) {
-        // Instant scroll to just past the intro, then smooth scroll to target will happen later
-        window.scrollTo({
-          top: dashboardStart.offsetTop + dashboardStart.offsetHeight,
-          behavior: 'instant'
-        });
-      }
-    }
-  }, []); // Only run once on mount
 
   // Extract headings from chart components and direct h3 headings
   useEffect(() => {
@@ -140,20 +126,6 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
   const scrollToSection = useCallback((sectionId, updateHistory = true) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      // Try to find the associated chart container for better scrolling
-      let targetElement = element;
-      const chartContainer = element.closest('[data-chart-id]');
-      if (chartContainer) {
-        targetElement = chartContainer;
-      }
-
-      // Get the element's position relative to the viewport
-      const elementRect = targetElement.getBoundingClientRect();
-
-      // Calculate scroll position (current scroll + element position - offset for sticky header)
-      const headerOffset = 60; // Account for sticky header (48px) + small buffer
-      const targetScrollPosition = window.scrollY + elementRect.top - headerOffset;
-
       // Mark that we're programmatically scrolling to prevent URL spam
       isScrollingRef.current = true;
 
@@ -163,8 +135,14 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         window.history.pushState(null, '', newHash);
       }
 
+      // Calculate explicit scroll position (header 48px + 12px buffer = 60px offset)
+      // Using explicit calculation instead of scrollIntoView for cross-browser consistency
+      const headerOffset = 60;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = window.scrollY + elementPosition - headerOffset;
+
       window.scrollTo({
-        top: targetScrollPosition,
+        top: offsetPosition,
         behavior: 'smooth'
       });
 
@@ -174,19 +152,26 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         isScrollingRef.current = false;
 
         // Focus the section heading for keyboard users
-        const heading = targetElement.querySelector('h2, h3, [data-chart-id]') || element;
-        if (heading) {
-          // Make focusable if not already
-          if (!heading.hasAttribute('tabindex')) {
-            heading.setAttribute('tabindex', '-1');
-          }
-          heading.focus();
+        // Make focusable if not already
+        if (!element.hasAttribute('tabindex')) {
+          element.setAttribute('tabindex', '-1');
         }
+        element.focus();
       }, 800);
     }
   }, []);
 
+  // Keep refs in sync with state (to avoid re-attaching scroll listener)
+  useEffect(() => {
+    activeSectionRef.current = activeSection;
+  }, [activeSection]);
+
+  useEffect(() => {
+    pendingHashRef.current = pendingHash;
+  }, [pendingHash]);
+
   // Simple scroll-based active section tracking
+  // Uses refs instead of state in callback to avoid re-attaching listener on state changes
   useEffect(() => {
     if (!containerRef?.current || sections.length === 0) return;
 
@@ -227,19 +212,20 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         }
 
         // Only update if we found a clearly active section, or if we don't have any active section yet
+        // Use refs to read current values without causing effect re-runs
         if (activeId) {
           // Clear active section found
-          if (activeId !== activeSection) {
+          if (activeId !== activeSectionRef.current) {
             setActiveSection(activeId);
             // Update URL hash without triggering scroll (only when not programmatically scrolling
             // or when we have a pending hash from URL navigation that hasn't been processed yet)
             // Preserve any filter params in the URL
-            if (!isScrollingRef.current && !pendingHash) {
+            if (!isScrollingRef.current && !pendingHashRef.current) {
               const newHash = buildHashPreservingFilters(activeId);
               window.history.replaceState(null, '', newHash);
             }
           }
-        } else if (!activeSection && fallbackId) {
+        } else if (!activeSectionRef.current && fallbackId) {
           // Only use fallback if we don't have any active section yet (initial load)
           setActiveSection(fallbackId);
         }
@@ -259,25 +245,45 @@ const TableOfContents = forwardRef(({ containerRef, width, collapsed, onToggle, 
         cancelAnimationFrame(rafId);
       }
     };
-  }, [containerRef, sections, activeSection, pendingHash]);
+  }, [containerRef, sections]); // Removed activeSection and pendingHash - using refs instead
 
-  // Handle initial page load with hash - wait for section to be discovered
+  // Handle initial page load with hash - wait for layout to stabilize
   useEffect(() => {
     if (!pendingHash || sections.length === 0) return;
 
     const targetSection = sections.find(s => s.id === pendingHash);
     if (targetSection) {
-      // Small delay to ensure layout is stable after charts load
-      setTimeout(() => {
-        scrollToSection(pendingHash, false);
-        // Delay clearing pendingHash until scroll animation completes
-        // This prevents URL updates during the smooth scroll animation
-        setTimeout(() => {
-          setPendingHash(null);
-        }, 800); // Allow time for smooth scroll to complete
-      }, 100);
+      // Single delayed scroll - wait for content to render
+      const timeoutId = setTimeout(() => {
+        const element = document.getElementById(pendingHash);
+        if (element) {
+          // Prevent URL updates during scroll animation
+          isScrollingRef.current = true;
+
+          const headerOffset = 60;
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition = window.scrollY + elementPosition - headerOffset;
+
+          // Use INSTANT for initial page load - smooth scroll gets interrupted by React renders
+          // SMOOTH scrolling is used for TOC clicks (scrollToSection) where it works reliably
+          window.scrollTo({ top: offsetPosition, behavior: 'instant' });
+
+          // Reset scrolling flag and focus after animation completes
+          setTimeout(() => {
+            isScrollingRef.current = false;
+            // Focus for accessibility
+            if (!element.hasAttribute('tabindex')) {
+              element.setAttribute('tabindex', '-1');
+            }
+            element.focus();
+          }, 800);
+        }
+        setPendingHash(null);
+      }, 800); // Wait 800ms for charts to render
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [sections, pendingHash, scrollToSection]);
+  }, [sections, pendingHash]);
 
   // Handle browser back/forward navigation
   useEffect(() => {

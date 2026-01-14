@@ -42,6 +42,17 @@
   --nr-gray-700: #374151;
 }
 
+/* Scroll padding on html element - accounts for sticky header (48px + 12px buffer) */
+/* This ensures all anchor/scrollIntoView navigation respects the sticky header */
+html {
+  scroll-padding-top: 60px;
+}
+
+/* Also apply scroll-margin to headings for redundancy */
+h3[id^="section-"] {
+  scroll-margin-top: 60px;
+}
+
 /* Node-RED Grid Background - Cannot be replicated with Tailwind */
 .nr-editor-grid {
   background-color: #ffffff;
