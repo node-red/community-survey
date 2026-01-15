@@ -355,24 +355,29 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
             const themeMap = new Map(themes.map(theme => [theme.theme_name, theme]));
 
             // Create ordered list from baseline, including missing items with count: 0
-            const baselineThemes = baselineOrder.map(themeName => {
+            const baselineThemes = baselineOrder.map(baselineItem => {
+              // Handle both string (legacy) and object formats
+              const themeName = typeof baselineItem === 'string' ? baselineItem : baselineItem.theme_name;
+              const baselineDescription = typeof baselineItem === 'object' ? baselineItem.description : null;
+
               if (themeMap.has(themeName)) {
                 return themeMap.get(themeName);
               } else {
-                // Create placeholder for missing baseline item
+                // Create placeholder for missing baseline item, preserving original description
                 return {
                   theme_name: themeName,
                   percentage: 0,
                   frequency: 0,
                   count: 0,
                   representative_quotes: null,
-                  description: '-'
+                  description: baselineDescription || ''
                 };
               }
             });
 
             // Find any new themes not in baseline
-            const newThemes = themes.filter(theme => !baselineOrder.includes(theme.theme_name));
+            const baselineThemeNames = baselineOrder.map(b => typeof b === 'string' ? b : b.theme_name);
+            const newThemes = themes.filter(theme => !baselineThemeNames.includes(theme.theme_name));
             // Sort new themes by percentage descending
             newThemes.sort((a, b) => {
               const percentA = typeof a.percentage === 'string' ? parseFloat(a.percentage.replace('%', '')) : parseFloat(a.percentage) || 0;
@@ -464,7 +469,7 @@ const QualitativeAnalysis = ({ questionId, questionText, filters = {}, color = '
                 
                 {/* Description Below */}
                 <p className="mt-1 text-[10px] text-nodered-gray-500 font-normal leading-tight px-2">
-                  {theme.description || (count === 0 ? '-' : '')}
+                  {theme.description || ''}
                 </p>
               </div>
             );

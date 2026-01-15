@@ -539,9 +539,10 @@ function App() {
                         : parseFloat(b.percentage) || 0;
                     return percentB - percentA;
                   });
-                  baselineOrdersMap[questionId] = sorted.map(
-                    (item) => item.theme_name,
-                  );
+                  baselineOrdersMap[questionId] = sorted.map((item) => ({
+                    theme_name: item.theme_name,
+                    description: item.description,
+                  }));
                   if (import.meta.env.DEV)
                     console.log(
                       `Baseline order for qualitative ${questionId}:`,
