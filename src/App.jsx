@@ -168,6 +168,7 @@ function App() {
   const filterToggleRef = useRef(null);
   const lastFocusedElementRef = useRef(null);
   const filterSidebarRef = useRef(null);
+  const previousWidthRef = useRef(window.innerWidth);
 
   // Tablist refs for comparison column selector (accessibility)
   const tabARef = useRef(null);
@@ -201,20 +202,26 @@ function App() {
   // Effect to handle responsive layout
   useEffect(() => {
     const handleResize = () => {
-      const isNarrow = window.innerWidth < 1024; // lg breakpoint
-      const isMobileViewport = window.innerWidth < 768; // Mobile breakpoint
-      const isNarrowForComparisonViewport = window.innerWidth < 1280; // xl breakpoint - left sidebar can push
-      const isNarrowForTocViewport = window.innerWidth < 1600; // TOC needs more room (both sidebars + content)
+      const currentWidth = window.innerWidth;
+      const widthChanged = currentWidth !== previousWidthRef.current;
+
+      const isNarrow = currentWidth < 1024; // lg breakpoint
+      const isMobileViewport = currentWidth < 768; // Mobile breakpoint
+      const isNarrowForComparisonViewport = currentWidth < 1280; // xl breakpoint - left sidebar can push
+      const isNarrowForTocViewport = currentWidth < 1600; // TOC needs more room (both sidebars + content)
       setIsSingleColumn(isNarrow);
       setIsMobile(isMobileViewport);
       setIsNarrowForComparison(isNarrowForComparisonViewport);
       setIsNarrowForToc(isNarrowForTocViewport);
 
-      // Auto-collapse both sidebars on any resize while in mobile viewport
-      if (isMobileViewport) {
+      // Auto-collapse both sidebars only when WIDTH changes in mobile viewport
+      // This prevents keyboard appearing/disappearing from closing sidebars
+      if (isMobileViewport && widthChanged) {
         setSidebarCollapsed(true);
         setTocCollapsed(true);
       }
+
+      previousWidthRef.current = currentWidth;
     };
 
     handleResize(); // Set initial state
@@ -352,8 +359,9 @@ function App() {
   }, [hasOpenOverlay]);
 
   // Move initial focus into opened sidebar for keyboard accessibility
+  // Skip on mobile to prevent virtual keyboard from appearing
   useEffect(() => {
-    if (hasOpenOverlay) {
+    if (hasOpenOverlay && !isMobile) {
       // Focus first focusable element in the opened sidebar
       requestAnimationFrame(() => {
         if (!sidebarCollapsed && filterSidebarRef.current) {
@@ -366,7 +374,7 @@ function App() {
         }
       });
     }
-  }, [hasOpenOverlay, sidebarCollapsed, tocCollapsed]);
+  }, [hasOpenOverlay, sidebarCollapsed, tocCollapsed, isMobile]);
 
   // Apply inert attribute to main content when overlay is open (focus trap)
   // Using useEffect for reliable attribute setting across all browsers
